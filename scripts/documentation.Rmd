@@ -68,10 +68,13 @@ ggplot(schreck_locations, aes(E, N)) +
 
 <!-- the following is just a placeholder text, remove it!-->
 
+Text
+
 # Results
 
 <!-- the following is just a placeholder text, remove it!-->
 
+Text
 
 # Discussion
 
@@ -81,11 +84,13 @@ Text
 
 # References
 
+Text
+
 # Annex
 
-```{r source code}
+```{r source code, echo=FALSE}
 
-# source("path for complete analysis r-file")
+# source("scripts/analysis.r")
 
 ```
 
