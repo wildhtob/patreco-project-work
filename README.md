@@ -28,6 +28,14 @@ initial group (Martys 1982, Teillaud 1986). Most births take place around March 
 * Aus Suter et al. 2018:  Neben Frassschäden entstehen dabei auch Schäden an jenen Orten, an denen die Tiere ihre Schlafnester bauen. Beliebte Einstände 
 bieten Raps, Weizen und Mais. In Jahr 2016 verblieben auch einige besenderte Individuen tagsüber in den Feldern.
 
+# Schlussbericht Wildschweinprojekt (Suter 2010):
+* Zwischen 8:00 und 17:00 ruhen Bachen in ihrem Tagesnest.
+* Ab 70cm Vegetationshöhe (ab Mai) auch Tagesnest in einem Feld möglich (Raps- Mais- Getreide)
+* Aufenthaltsort vs. Feldhöhe nach Monat -> Abb. 11
+* bis zu achtmal wird derselbe Einstand genutzt, im Schnitt 1.4 mal (aufeinanderfolgend).
+* Distanz zwischen zwei Feldern über mehrere Tage: max. 900m, durchschnittlich 417m.
+* Des Weiteren geht aus den Daten hervor, dass die untersuchten Wildschweine eine sogenannte alternierende Nutzung von Tageseinständen aufweisen. Dabei wird für den Tageseinstand, über mehrere Tage, jeweils täglich zwischen zwei verschiedenen Feldern, die sich bis zu 900m voneinander entfernt befinden können, hin und her gewechselt. 
+* Präferenz für Uferwälder
 
 # Interessante Papers für Movement patterns:
 * Dissertation von Keuling 2009: Managing wild boar-Considerations for wild boar management based on game biology data
