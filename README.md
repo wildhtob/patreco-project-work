@@ -40,3 +40,17 @@ bieten Raps, Weizen und Mais. In Jahr 2016 verblieben auch einige besenderte Ind
 # Interessante Papers für Movement patterns:
 * Dissertation von Keuling 2009: Managing wild boar-Considerations for wild boar management based on game biology data
 * Methodisches Paper zu Homerange und KDE: LoCoH: Nonparameteric Kernel Methods for Constructing Home Ranges and Utilization Distributions
+
+# Vorgehen
+
+* Schritt 0 Sample 1 Tier, begrenter Zeitraum
+* Schritt 1: Segementierung
+* Schritt 2: Steplength und Speed berechnen
+* Schritt 3: Verteilung anschauen
+* Schritt 4: Schwellenwert definieren und resting / moving festlegen
+* Schritt 5: Nur resting Data weiterverarbeiten
+* Schritt 6: Heatmap erstellen mit zu definierender Rastergrösse
+* Schritt 7: Kriterien für Nester und Suhlen definieren 
+* Schritt 8: Rasterfelder zuweisen, Context herstellen
+* Schritt 9: Prozess mit Gesamtdaten testen
+* Schritt 10: Profit 
