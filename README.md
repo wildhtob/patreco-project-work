@@ -4,7 +4,9 @@ editor_options:
     wrap: 72
 ---
 
-# Suhlen (Aus Keuling und Stier, 2009):
+# Recherche
+
+## Suhlen (Aus Keuling und Stier, 2009):
 
 -   Keine vorhanden im Februar und März NÁNDEZ-LLARIO (2005)
 -   Suhlen in der warmen Jahreszeit MEYNHARDT (1990)
@@ -30,7 +32,7 @@ editor_options:
     SAEBEL 2007)
 -   Kirren: Angewöhnen von Futterstellen, Anfütterung.
 
-# Reproduktive Nester:
+## Reproduktive Nester:
 
 -   Aus Schlageter 2015: Group composition is a function of life cycle
     and seasonal changes. Reproductive females separate from the group
@@ -40,7 +42,7 @@ editor_options:
     Teillaud 1986). Most births take place around March – April but
     reproduction can occur all year round.
 
-# Schlafnester:
+## Schlafnester:
 
 -   Aus Suter et al. 2018: Neben Frassschäden entstehen dabei auch
     Schäden an jenen Orten, an denen die Tiere ihre Schlafnester bauen.
@@ -48,7 +50,7 @@ editor_options:
     verblieben auch einige besenderte Individuen tagsüber in den
     Feldern.
 
-# Schlussbericht Wildschweinprojekt (Suter 2010):
+## Schlussbericht Wildschweinprojekt (Suter 2010):
 
 -   Zwischen 8:00 und 17:00 ruhen Bachen in ihrem Tagesnest.
 -   Ab 70cm Vegetationshöhe (ab Mai) auch Tagesnest in einem Feld
@@ -66,13 +68,14 @@ editor_options:
     her gewechselt.
 -   Präferenz für Uferwälder
 
-# Interessante Papers für Movement patterns:
+## Interessante Quellen für Movement patterns:
 
 -   Dissertation von Keuling 2009: Managing wild boar-Considerations for
     wild boar management based on game biology data
 -   Methodisches Paper zu Homerange und KDE: LoCoH: Nonparameteric
     Kernel Methods for Constructing Home Ranges and Utilization
     Distributions
+-   [Geocomputation with R](https://geocompr.robinlovelace.net/)
 
 # Vorgehen
 
@@ -82,7 +85,7 @@ editor_options:
 -   Schritt 3: Verteilung anschauen
 -   Schritt 4: Schwellenwert definieren und resting / moving festlegen
 -   Schritt 5: Nur resting Data weiterverarbeiten
--   Schritt 6: Heatmap erstellen mit zu definierender Rastergrösse   
+-   Schritt 6: Heatmap erstellen mit zu definierender Rastergrösse  
     \>\> Vorschlag: 100m da Arealstatistik dieses Mass aufweist
 -   Schritt 7: Kriterien für Nester und Suhlen definieren
 -   Schritt 8: Rasterfelder zuweisen, Context herstellen
@@ -99,10 +102,10 @@ editor_options:
 
 -   bodennutzung == wald \| feld
 
--   wenn bodennutzung == feld:   
+-   wenn bodennutzung == feld:  
     vegetationshöhe \>= 70cm & \# Höhe in den Luftbildern statisch,
     daher für Felder besser nicht berücksichtigen  
-    month (mai - oktober) &   
+    month (mai - oktober) &  
     feldaufnahmen == raps \| mais \| getreide
 
 -   wenn vegetationstyp == feld , dann anbau == raps \| mais \| getreide
@@ -123,10 +126,21 @@ editor_options:
     entsprechenden Daten so, dass sie in R importiert werden können?
     Portale lassen Download eines csv-Files der Gesamtschweiz zu.
     Scheint aber mega umständlich. Was ist sein Vorschlag für den Bezug?
-    Oder hätte er die Daten schon?  
-      
+    Oder hätte er die Daten schon?
+
     [Bodennutzung /
-    Arealstatistik](https://www.bfs.admin.ch/bfs/de/home/dienstleistungen/geostat/geodaten-bundesstatistik/boden-nutzung-bedeckung-eignung/arealstatistik-schweiz/bodennutzung.html)  
-      
+    Arealstatistik](https://www.bfs.admin.ch/bfs/de/home/dienstleistungen/geostat/geodaten-bundesstatistik/boden-nutzung-bedeckung-eignung/arealstatistik-schweiz/bodennutzung.html)
+
     [Vereinfachte
-    Bodennutzung](https://map.geo.admin.ch/?topic=ech&lang=de&bgLayer=ch.swisstopo.pixelkarte-grau&layers=ch.bfs.gebaeude_wohnungs_register,ch.bfs.arealstatistik-hintergrund&layers_visibility=false,true&catalogNodes=457,532,477,599&layers_opacity=1,0.65&zoom=2&E=2704737.50&N=1230875.00)  
+    Bodennutzung](https://map.geo.admin.ch/?topic=ech&lang=de&bgLayer=ch.swisstopo.pixelkarte-grau&layers=ch.bfs.gebaeude_wohnungs_register,ch.bfs.arealstatistik-hintergrund&layers_visibility=false,true&catalogNodes=457,532,477,599&layers_opacity=1,0.65&zoom=2&E=2704737.50&N=1230875.00)
+
+-   Evtl. geplantes Vorgehen kurz durchsprechen für Feedback oder
+    Ergänzungen seinerseits
+
+# Issues
+
+-   Timelag der gefilterten Sample-Daten: Berechnung fehlerhat. Trotz
+    Angabe von Sekunden werden Minuten angegeben. Problem tritt nur auf,
+    wenn nach Datum gefiltert wird (mit Convenience-Variablen oder auch
+    ohne). Code hat in Übungen funktioniert. Codezeile in \#analysis
+    markiert und kommentiert
