@@ -172,6 +172,9 @@ wildboar_9 <- wildboar_lags %>% slice(seq9)
 
 # sample code for different intervals (to be discussed)
 
+wildboar_3 <- wildboar_3 %>% 
+  mutate(timelag = as.integer(difftime(lead(DatetimeUTC), DatetimeUTC), units = "secs"))
+
 wildboar_3$steplength <- wildboar_3 %>%
   {
     (.$E - lead(.$E))^2 + (.$N - lead(.$N))^2
@@ -183,3 +186,94 @@ wildboar_3$speed <- wildboar_3 %>% {
 }
 
 
+# Sample data -------------------------------------------------------------
+
+# step0 : select caroline and two weeks ####
+
+wildboar_sf <- wildboar_sf %>% 
+  mutate(
+    month = month(DatetimeUTC),
+    year = year(DatetimeUTC)
+         )
+
+
+caro <- wildboar_sf %>% 
+  filter(
+    year == 2015,
+    month == 5,
+    TierName == "Caroline"
+  )
+
+# step 1: sequence data (resolution to be discussed) ####
+
+seq3 <- seq(from = 1, to = nrow(caro), by = 3)
+
+
+caro_3 <- caro %>% slice(seq3)
+
+# step 3a: timelag for segmented data ####
+
+# problem mit code: es werden minuten berechnet, obschon sekunden angegeben werden. evtl
+# ein problem mit dem filter in zeile 191f?
+caro_3 <- caro_3 %>% 
+mutate(timelag = as.integer(difftime(lead(DatetimeUTC), DatetimeUTC), units = "secs"))
+
+caro <- caro %>% 
+mutate(timelag = as.integer(difftime(lead(DatetimeUTC), DatetimeUTC), units = "secs"))
+
+
+# stept 3b: steplength and speed for segmented data ####
+
+caro_3$steplength <- caro_3 %>%
+  {
+    (.$E - lead(.$E))^2 + (.$N - lead(.$N))^2
+  } %>%
+  sqrt()
+
+caro_3$speed <- caro_3 %>% {
+  .$steplength / .$timelag
+}
+
+
+caro$steplength <- caro %>%
+  {
+    (.$E - lead(.$E))^2 + (.$N - lead(.$N))^2
+  } %>%
+  sqrt()
+
+caro$speed <- caro %>% {
+  .$steplength / .$timelag
+}
+
+# plot trajectories ####
+
+
+caro_3 %>%
+  ggplot(aes(E, N)) +
+  geom_path(alpha = 0.5) +
+  geom_point(alpha = 0.5) +
+  theme_bw() +
+  theme(panel.border = element_blank())
+
+caro %>%
+  ggplot(aes(E, N)) +
+  geom_path(alpha = 0.5) +
+  geom_point(alpha = 0.5) +
+  theme_bw() +
+  theme(panel.border = element_blank())
+
+
+# convex hull ####
+
+mcp_caro <- caro %>%
+  group_by(TierID, TierName, CollarID) %>%
+  summarise() %>%
+  st_convex_hull()
+
+# plot convex hull ####
+
+tmap_mode("view") +
+  tm_shape(mcp_caro) +
+  tm_fill("TierName", alpha = 0.5) +
+  tm_borders(col = "red", lwd = 1) +
+  tm_layout(legend.bg.color = "white")
