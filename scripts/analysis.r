@@ -120,6 +120,7 @@ wildboar_sf <- st_as_sf(wildboar_raw, coords = c("E", "N"), crs = 2056, remove =
 #   tm_borders(col = "red", lwd = 1) +
 #   tm_layout(legend.bg.color = "white")
 
+
 # time lags ####
 
 wildboar_lags <- wildboar_raw %>%
@@ -137,28 +138,69 @@ wildboar_lag_cat <- wildboar_lags %>%
 
 
 # viualise change in lag over time ####
-wildboar_lags %>%
-  filter(timelag < 30000 & timelag > 0) %>%
-  ggplot(., aes(DatetimeUTC, timelag, col = TierName)) +
-  geom_point() +
-  geom_line(size = 0.1)
+# takes a while for plotting..
+# wildboar_lags %>%
+#   filter(timelag < 30000 & timelag > 0) %>%
+#   ggplot(., aes(DatetimeUTC, timelag, col = TierName)) +
+#   geom_point() +
+#   geom_line(size = 0.1)
 
 # calculating steplength ####
 
-wildboar_lags$steplength <- wildboar_raw %>%
-  {
-    (.$E - lead(.$E))^2 + (.$N - lead(.$N))^2
-  } %>%
-  sqrt()
+# wildboar_lags$steplength <- wildboar_raw %>%
+#   {
+#     (.$E - lead(.$E))^2 + (.$N - lead(.$N))^2
+#   } %>%
+#   sqrt()
 
 # calculating speed based on timelag (t) in secs and steplength (s) in meter ####
 
-wildboar_lags$speed <- wildboar_lags %>% {
-  .$steplength / .$timelag
+# wildboar_lags$speed <- wildboar_lags %>% {
+#   .$steplength / .$timelag
+# }
+
+
+# sample code for different intervals (to be discussed)
+# wildboar_3 <- wildboar_3 %>% 
+#   mutate(timelag = as.integer(difftime(lead(DatetimeUTC), DatetimeUTC), units = "secs"))
+# 
+# wildboar_3$steplength <- wildboar_3 %>%
+#   {
+#     (.$E - lead(.$E))^2 + (.$N - lead(.$N))^2
+#   } %>%
+#   sqrt()
+# 
+# wildboar_3$speed <- wildboar_3 %>% {
+#   .$steplength / .$timelag
+# }
+
+# preprocessing ####
+calc_movement_param <- function(boar_dt) {
+  boar_dt <- boar_dt %>% 
+    mutate(timelag = as.integer(difftime(lead(DatetimeUTC), DatetimeUTC, units = "secs")),
+           steplength = sqrt(((E-lead(E,1))^2+(N-lead(N,1))^2)),
+           speed = steplength/timelag,
+           nMinus3 = sqrt((lag(E, 3) - E)^2 + (lag(N, 3) - N)^2),
+           nMinus2 = sqrt((lag(E, 2) - E)^2 + (lag(N, 2) - N)^2),
+           nMinus1 = sqrt((lag(E, 1) - E)^2 + (lag(N, 1) - N)^2),
+           nPlus1 = sqrt((E - lead(E, 1))^2 + (N - lead(N, 1))^2),
+           nPlus2 = sqrt((E - lead(E, 2))^2 + (N - lead(N, 2))^2),
+           nPlus3 = sqrt((E - lead(E, 3))^2 + (N - lead(N, 3))^2)
+    ) %>% 
+    rowwise() %>%
+    mutate(
+      stepmean = mean(c(nMinus3, nMinus2, nMinus1,nPlus1,nPlus2, nPlus3))
+    ) %>%
+    ungroup()
+  boar_dt
 }
+# select only rows with an certain timelag
+# if no filter is applied, sequencing creates misleading results
+wildboar_lags <- wildboar_lags %>% 
+  filter(timelag_rounded == 900)
+wildboar_lags <- calc_movement_param(wildboar_lags)
 
 # cross-scale movement analysis ####
-
 seq3 <- seq(from = 1, to = nrow(wildboar_raw), by = 3)
 seq6 <- seq(from = 1, to = nrow(wildboar_raw), by = 6)
 seq9 <- seq(from = 1, to = nrow(wildboar_raw), by = 9)
@@ -166,21 +208,6 @@ seq9 <- seq(from = 1, to = nrow(wildboar_raw), by = 9)
 wildboar_3 <- wildboar_lags %>% slice(seq3)
 wildboar_6 <- wildboar_lags %>% slice(seq6)
 wildboar_9 <- wildboar_lags %>% slice(seq9)
-
-# sample code for different intervals (to be discussed)
-
-wildboar_3 <- wildboar_3 %>% 
-  mutate(timelag = as.integer(difftime(lead(DatetimeUTC), DatetimeUTC), units = "secs"))
-
-wildboar_3$steplength <- wildboar_3 %>%
-  {
-    (.$E - lead(.$E))^2 + (.$N - lead(.$N))^2
-  } %>%
-  sqrt()
-
-wildboar_3$speed <- wildboar_3 %>% {
-  .$steplength / .$timelag
-}
 
 
 # Sample data -------------------------------------------------------------
@@ -218,136 +245,31 @@ ueli <- wildboar_sf %>%
   )
 
 # step 1: sequence data (resolution to be discussed) ####
-
+# for sample data, for wildboar_lags its already done
 caro_seq3 <- seq(from = 1, to = nrow(caro), by = 3)
 caro_seq6 <- seq(from = 1, to = nrow(caro), by = 6)
 frida_seq3 <- seq(from = 1, to = nrow(frida), by = 3)
 frida_seq6 <- seq(from = 1, to = nrow(frida), by = 6)
 ueli_seq3 <- seq(from = 1, to = nrow(ueli), by = 3)
+ueli_seq6 <- seq(from = 1, to = nrow(ueli), by = 6)
 caro_3 <- caro %>% slice(caro_seq3)
 caro_6 <- caro %>% slice(caro_seq6)
 frida_3 <- frida %>% slice(frida_seq3)
 frida_6 <- frida %>% slice(frida_seq6)
 ueli_3 <- ueli %>% slice(ueli_seq3)
+ueli_6 <- ueli %>% slice(ueli_seq6)
 
 # step 2: calculate speed, steplength and timelag for segmented data ####
-calc_movement_param <- function(boar_dt) {
-  boar_dt %>% 
-    mutate(timelag = as.integer(difftime(lead(DatetimeUTC), DatetimeUTC, units = "secs")),
-           steplength = sqrt(((E-lead(E,1))^2+(N-lead(N,1))^2)),
-           speed = steplength/timelag,
-           nMinus3 = sqrt((lag(E, 3) - E)^2 + (lag(N, 3) - N)^2),
-           nMinus2 = sqrt((lag(E, 2) - E)^2 + (lag(N, 2) - N)^2),
-           nMinus1 = sqrt((lag(E, 1) - E)^2 + (lag(N, 1) - N)^2),
-           nPlus1 = sqrt((E - lead(E, 1))^2 + (N - lead(N, 1))^2),
-           nPlus2 = sqrt((E - lead(E, 2))^2 + (N - lead(N, 2))^2),
-           nPlus3 = sqrt((E - lead(E, 3))^2 + (N - lead(N, 3))^2)
-    ) %>% 
-    rowwise() %>%
-    mutate(
-      stepmean = mean(c(nMinus3, nMinus2, nMinus1,nPlus1,nPlus2, nPlus3))
-    ) %>%
-    ungroup()
-  boar_dt
-}
-
+# for sample data, for wildboar_lags its already done
 caro <- calc_movement_param(caro)
 caro_3 <- calc_movement_param(caro_3)
-
-caro_3 <- caro_3 %>% 
-mutate(timelag = as.integer(difftime(lead(DatetimeUTC), DatetimeUTC, units = "secs")),
-       steplength = sqrt(((E-lead(E,1))^2+(N-lead(N,1))^2)),
-       speed = steplength/timelag,
-       nMinus3 = sqrt((lag(E, 3) - E)^2 + (lag(N, 3) - N)^2),
-       nMinus2 = sqrt((lag(E, 2) - E)^2 + (lag(N, 2) - N)^2),
-       nMinus1 = sqrt((lag(E, 1) - E)^2 + (lag(N, 1) - N)^2),
-       nPlus1 = sqrt((E - lead(E, 1))^2 + (N - lead(N, 1))^2),
-       nPlus2 = sqrt((E - lead(E, 2))^2 + (N - lead(N, 2))^2),
-       nPlus3 = sqrt((E - lead(E, 3))^2 + (N - lead(N, 3))^2)
-) %>% 
-  rowwise() %>%
-  mutate(
-    stepmean = mean(c(nMinus3, nMinus2, nMinus1,nPlus1,nPlus2, nPlus3))
-  ) %>%
-  ungroup()
-
-caro_6 <- caro_6 %>% 
-  mutate(timelag = as.integer(difftime(lead(DatetimeUTC), DatetimeUTC, units = "secs")),
-         steplength = sqrt(((E-lead(E,1))^2+(N-lead(N,1))^2)),
-         speed = steplength/timelag,
-         nMinus3 = sqrt((lag(E, 3) - E)^2 + (lag(N, 3) - N)^2),
-         nMinus2 = sqrt((lag(E, 2) - E)^2 + (lag(N, 2) - N)^2),
-         nMinus1 = sqrt((lag(E, 1) - E)^2 + (lag(N, 1) - N)^2),
-         nPlus1 = sqrt((E - lead(E, 1))^2 + (N - lead(N, 1))^2),
-         nPlus2 = sqrt((E - lead(E, 2))^2 + (N - lead(N, 2))^2),
-         nPlus3 = sqrt((E - lead(E, 3))^2 + (N - lead(N, 3))^2)
-  ) %>% 
-  rowwise() %>%
-  mutate(
-    stepmean = mean(c(nMinus3, nMinus2, nMinus1,nPlus1,nPlus2, nPlus3))
-  ) %>%
-  ungroup()
-
-frida <- frida %>% 
-  mutate(timelag = as.integer(difftime(lead(DatetimeUTC), DatetimeUTC, units = "secs")),
-         steplength = sqrt(((E-lead(E,1))^2+(N-lead(N,1))^2)),
-         speed = steplength/timelag,
-         nMinus3 = sqrt((lag(E, 3) - E)^2 + (lag(N, 3) - N)^2),
-         nMinus2 = sqrt((lag(E, 2) - E)^2 + (lag(N, 2) - N)^2),
-         nMinus1 = sqrt((lag(E, 1) - E)^2 + (lag(N, 1) - N)^2),
-         nPlus1 = sqrt((E - lead(E, 1))^2 + (N - lead(N, 1))^2),
-         nPlus2 = sqrt((E - lead(E, 2))^2 + (N - lead(N, 2))^2),
-         nPlus3 = sqrt((E - lead(E, 3))^2 + (N - lead(N, 3))^2)
-  ) %>% 
-  rowwise() %>%
-  mutate(
-    stepmean = mean(c(nMinus3, nMinus2, nMinus1,nPlus1,nPlus2, nPlus3))
-  ) %>%
-  ungroup()
-
-frida_3 <- frida_3 %>% 
-  mutate(timelag = as.integer(difftime(lead(DatetimeUTC), DatetimeUTC, units = "secs")),
-         steplength = sqrt(((E-lead(E,1))^2+(N-lead(N,1))^2)),
-         speed = steplength/timelag,
-         nMinus3 = sqrt((lag(E, 3) - E)^2 + (lag(N, 3) - N)^2),
-         nMinus2 = sqrt((lag(E, 2) - E)^2 + (lag(N, 2) - N)^2),
-         nMinus1 = sqrt((lag(E, 1) - E)^2 + (lag(N, 1) - N)^2),
-         nPlus1 = sqrt((E - lead(E, 1))^2 + (N - lead(N, 1))^2),
-         nPlus2 = sqrt((E - lead(E, 2))^2 + (N - lead(N, 2))^2),
-         nPlus3 = sqrt((E - lead(E, 3))^2 + (N - lead(N, 3))^2)
-  ) %>% 
-  rowwise() %>%
-  mutate(
-    stepmean = mean(c(nMinus3, nMinus2, nMinus1,nPlus1,nPlus2, nPlus3))
-  ) %>%
-  ungroup()
-
-frida_6 <- frida_6 %>% 
-  mutate(timelag = as.integer(difftime(lead(DatetimeUTC), DatetimeUTC, units = "secs")),
-         steplength = sqrt(((E-lead(E,1))^2+(N-lead(N,1))^2)),
-         speed = steplength/timelag,
-         nMinus3 = sqrt((lag(E, 3) - E)^2 + (lag(N, 3) - N)^2),
-         nMinus2 = sqrt((lag(E, 2) - E)^2 + (lag(N, 2) - N)^2),
-         nMinus1 = sqrt((lag(E, 1) - E)^2 + (lag(N, 1) - N)^2),
-         nPlus1 = sqrt((E - lead(E, 1))^2 + (N - lead(N, 1))^2),
-         nPlus2 = sqrt((E - lead(E, 2))^2 + (N - lead(N, 2))^2),
-         nPlus3 = sqrt((E - lead(E, 3))^2 + (N - lead(N, 3))^2)
-  ) %>% 
-  rowwise() %>%
-  mutate(
-    stepmean = mean(c(nMinus3, nMinus2, nMinus1,nPlus1,nPlus2, nPlus3))
-  ) %>%
-  ungroup()
-
-ueli <- ueli %>% 
-  mutate(timelag = as.integer(difftime(lead(DatetimeUTC), DatetimeUTC, units = "secs")),
-         steplength = sqrt(((E-lead(E,1))^2+(N-lead(N,1))^2)),
-         speed = steplength/timelag)
-
-ueli_3 <- ueli_3 %>% 
-  mutate(timelag = as.integer(difftime(lead(DatetimeUTC), DatetimeUTC, units = "secs")),
-         steplength = sqrt(((E-lead(E,1))^2+(N-lead(N,1))^2)),
-         speed = steplength/timelag)
+caro_6 <- calc_movement_param(caro_6)
+frida <- calc_movement_param(frida)
+frida_3 <- calc_movement_param(frida_3)
+frida_6 <- calc_movement_param(frida_6)
+ueli <- calc_movement_param(ueli)
+ueli_3 <- calc_movement_param(ueli_3)
+ueli_6 <- calc_movement_param(ueli_6)
 
 # Gibt es einen Grund speed so zu berechnen? Alternativ habe ich es oben implementiert
 # caro_3$steplength <- caro_3 %>%
@@ -372,14 +294,26 @@ ueli_3 <- ueli_3 %>%
 # }
 
 # step 3: plot histogram and movement trajectories ####
-# plot histogram of steplength
-
-hist_steplength <- ggplot(frida_6, aes(x = stepmean))
-hist_steplength + geom_histogram(binwidth = 10) + 
-  scale_x_continuous(limits = c(0,800)) + 
+# plot histogram of steplmean
+# mit einem stepmean von 6 Datenpunkten im Intervall von 15 Minuten wird
+# meiner Meinung nach gut ersichtlich wann die Wildschweine pausieren.
+# Hier einsetzen und vergleichen: caro_6, frida_6, ueli_6
+# Mein Vorschlag fuer threshold: 40 bis 50 Meter, GPS genauigkeit bedenken.
+hist_steplength <- ggplot(caro_6, aes(x = stepmean))
+hist_steplength + geom_histogram(binwidth = 5) + 
+  scale_x_continuous(limits = c(0,100)) + 
   geom_vline(xintercept = 0, lty = 2, alpha = 0.5) +
   theme_bw() +
   theme(panel.border = element_blank())
+
+# step 4: define threshold and assign movement status ####
+# for sample data
+threshold <- as.numeric(40)
+caro_6 <- caro_6 %>% 
+  mutate (mov_status = if_else(stepmean <= threshold, "resting", "moving"))
+# for all data
+wildboar_6 <- wildboar_6 %>% 
+  mutate (mov_status = if_else(stepmean <= threshold, "resting", "moving"))
 
 # plot trajectories ####
 
@@ -424,9 +358,6 @@ ueli_3 %>%
   geom_point(alpha = 0.5) +
   theme_bw() +
   theme(panel.border = element_blank())
-
-# step 4: define threshold and assing movement status ####
-
 
 # convex hull ####
 
