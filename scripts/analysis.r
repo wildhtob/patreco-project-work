@@ -204,11 +204,15 @@ calc_movement_param <- function(boar_dt) {
 # assign convenience variables for step 6
 wildboar_lags <- wildboar_lags %>% 
 # add wallow and nest criterias according to literature
+    # enable line below if you want to filter all NAs in Frucht
+    # filter(!is.na(Frucht)) %>% 
     mutate(
     month = month(DatetimeUTC),
     wallow_month = if_else(month > 4 & month < 10, TRUE, FALSE),
     wallow_day = case_when(
       day == "Abenddaemmerung"~FALSE,
+      day == "Morgendaemmerung"~FALSE,
+      day == "Nacht"~FALSE,
       day == "1Nachtviertel"~FALSE,
       day == "2Nachtviertel"~FALSE,
       day == "3Nachtviertel"~FALSE,
@@ -221,7 +225,7 @@ wildboar_lags <- wildboar_lags %>%
       Frucht == "Wald"~TRUE,
       Frucht == "Weizen"~FALSE,
       Frucht == "Gerste"~FALSE,
-      Frucht == "Zwiebel"~FALSE,
+      Frucht == "Zwiebeln"~FALSE,
       Frucht == "Bohnen"~FALSE,
       Frucht == "Kartoffeln"~FALSE,
       Frucht == "Rueben"~FALSE,
@@ -229,12 +233,40 @@ wildboar_lags <- wildboar_lags %>%
       Frucht == "Mangold"~FALSE,
       Frucht == "Wiese"~FALSE,
       Frucht == "Kohlrabi"~FALSE,
+      Frucht == "Weide"~FALSE,
+      Frucht == "Lupinen"~FALSE,
+      Frucht == "Flugplatz"~FALSE,
+      Frucht == "Flugplatz"~FALSE,
+      Frucht == "Mais"~FALSE,
+      Frucht == "Raps"~FALSE,
+      Frucht == "Karotten"~FALSE,
+      Frucht == "Acker"~FALSE,
+      Frucht == "Sonnenblumen"~FALSE,
+      Frucht == "Erbsen"~FALSE,
+      Frucht == "Kohl"~FALSE,
+      Frucht == "Hafer"~FALSE,
+      Frucht == "Roggen"~FALSE,
+      Frucht == "Salat"~FALSE,
+      Frucht == "Rhabarber"~FALSE,
+      Frucht == "Sellerie"~FALSE,
+      Frucht == "Brache"~FALSE,
+      Frucht == "Spargel"~FALSE,
+      Frucht == "Obstplantage"~FALSE,
+      Frucht == "Fenchel"~FALSE,
+      Frucht == "Gemuese"~FALSE,
+      Frucht == "Gewaechshaus"~FALSE,
+      Frucht == "Zuchetti"~FALSE,
+      Frucht == "Zucchetti"~FALSE,
+      Frucht == "Flachs"~FALSE,
+      Frucht == "Kuerbis"~FALSE,
       TRUE~NA #Default case
     ),
     nest_day = wallow_day,
     nest_month = if_else(month >= 5 & month <= 10, TRUE, FALSE)
   )
-
+# This checks a certain variable for NAs
+# na_check <- wildboar_lags %>% 
+#   filter(is.na(wallow_area))
 
 # select only rows with an certain timelag
 # if no filter is applied, sequencing creates misleading results
