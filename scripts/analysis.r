@@ -220,9 +220,11 @@ ueli <- wildboar_sf %>%
 # step 1: sequence data (resolution to be discussed) ####
 
 caro_seq3 <- seq(from = 1, to = nrow(caro), by = 3)
+caro_seq6 <- seq(from = 1, to = nrow(caro), by = 6)
 frida_seq3 <- seq(from = 1, to = nrow(frida), by = 3)
 ueli_seq3 <- seq(from = 1, to = nrow(ueli), by = 3)
 caro_3 <- caro %>% slice(caro_seq3)
+caro_6 <- caro %>% slice(caro_seq6)
 frida_3 <- frida %>% slice(frida_seq3)
 ueli_3 <- ueli %>% slice(ueli_seq3)
 
@@ -230,12 +232,53 @@ ueli_3 <- ueli %>% slice(ueli_seq3)
 caro <- caro %>% 
   mutate(timelag = as.integer(difftime(lead(DatetimeUTC), DatetimeUTC, units = "secs")),
          steplength = sqrt(((E-lead(E,1))^2+(N-lead(N,1))^2)),
-         speed = steplength/timelag)
+         speed = steplength/timelag,
+         nMinus3 = sqrt((lag(E, 3) - E)^2 + (lag(N, 3) - N)^2),
+         nMinus2 = sqrt((lag(E, 2) - E)^2 + (lag(N, 2) - N)^2),
+         nMinus1 = sqrt((lag(E, 1) - E)^2 + (lag(N, 1) - N)^2),
+         nPlus1 = sqrt((E - lead(E, 1))^2 + (N - lead(N, 1))^2),
+         nPlus2 = sqrt((E - lead(E, 2))^2 + (N - lead(N, 2))^2),
+         nPlus3 = sqrt((E - lead(E, 3))^2 + (N - lead(N, 3))^2)
+          ) %>% 
+  rowwise() %>%
+  mutate(
+    stepmean = mean(c(nMinus3, nMinus2, nMinus1,nPlus1,nPlus2, nPlus3))
+  ) %>%
+  ungroup()
 
 caro_3 <- caro_3 %>% 
 mutate(timelag = as.integer(difftime(lead(DatetimeUTC), DatetimeUTC, units = "secs")),
        steplength = sqrt(((E-lead(E,1))^2+(N-lead(N,1))^2)),
-       speed = steplength/timelag)
+       speed = steplength/timelag,
+       nMinus3 = sqrt((lag(E, 3) - E)^2 + (lag(N, 3) - N)^2),
+       nMinus2 = sqrt((lag(E, 2) - E)^2 + (lag(N, 2) - N)^2),
+       nMinus1 = sqrt((lag(E, 1) - E)^2 + (lag(N, 1) - N)^2),
+       nPlus1 = sqrt((E - lead(E, 1))^2 + (N - lead(N, 1))^2),
+       nPlus2 = sqrt((E - lead(E, 2))^2 + (N - lead(N, 2))^2),
+       nPlus3 = sqrt((E - lead(E, 3))^2 + (N - lead(N, 3))^2)
+) %>% 
+  rowwise() %>%
+  mutate(
+    stepmean = mean(c(nMinus3, nMinus2, nMinus1,nPlus1,nPlus2, nPlus3))
+  ) %>%
+  ungroup()
+
+caro_6 <- caro_6 %>% 
+  mutate(timelag = as.integer(difftime(lead(DatetimeUTC), DatetimeUTC, units = "secs")),
+         steplength = sqrt(((E-lead(E,1))^2+(N-lead(N,1))^2)),
+         speed = steplength/timelag,
+         nMinus3 = sqrt((lag(E, 3) - E)^2 + (lag(N, 3) - N)^2),
+         nMinus2 = sqrt((lag(E, 2) - E)^2 + (lag(N, 2) - N)^2),
+         nMinus1 = sqrt((lag(E, 1) - E)^2 + (lag(N, 1) - N)^2),
+         nPlus1 = sqrt((E - lead(E, 1))^2 + (N - lead(N, 1))^2),
+         nPlus2 = sqrt((E - lead(E, 2))^2 + (N - lead(N, 2))^2),
+         nPlus3 = sqrt((E - lead(E, 3))^2 + (N - lead(N, 3))^2)
+  ) %>% 
+  rowwise() %>%
+  mutate(
+    stepmean = mean(c(nMinus3, nMinus2, nMinus1,nPlus1,nPlus2, nPlus3))
+  ) %>%
+  ungroup()
 
 frida <- frida %>% 
   mutate(timelag = as.integer(difftime(lead(DatetimeUTC), DatetimeUTC, units = "secs")),
@@ -280,10 +323,9 @@ ueli_3 <- ueli_3 %>%
 # }
 
 # step 3: plot histogram and movement trajectories ####
-
 # plot histogram of steplength
 
-hist_steplength <- ggplot(ueli_3, aes(x = steplength))
+hist_steplength <- ggplot(caro_6, aes(x = stepmean))
 hist_steplength + geom_histogram(binwidth = 10) + 
   scale_x_continuous(limits = c(0,800)) + 
   geom_vline(xintercept = 0, lty = 2, alpha = 0.5) +
@@ -292,13 +334,6 @@ hist_steplength + geom_histogram(binwidth = 10) +
 
 # plot trajectories ####
 
-caro_3 %>%
-  ggplot(aes(E, N)) +
-  geom_path(alpha = 0.5) +
-  geom_point(alpha = 0.5) +
-  theme_bw() +
-  theme(panel.border = element_blank())
-
 caro %>%
   ggplot(aes(E, N)) +
   geom_path(alpha = 0.5) +
@@ -306,6 +341,42 @@ caro %>%
   theme_bw() +
   theme(panel.border = element_blank())
 
+caro_3 %>%
+  ggplot(aes(E, N)) +
+  geom_path(alpha = 0.5) +
+  geom_point(alpha = 0.5) +
+  theme_bw() +
+  theme(panel.border = element_blank())
+
+frida %>%
+  ggplot(aes(E, N)) +
+  geom_path(alpha = 0.5) +
+  geom_point(alpha = 0.5) +
+  theme_bw() +
+  theme(panel.border = element_blank())
+
+frida_3 %>%
+  ggplot(aes(E, N)) +
+  geom_path(alpha = 0.5) +
+  geom_point(alpha = 0.5) +
+  theme_bw() +
+  theme(panel.border = element_blank())
+
+ueli %>%
+  ggplot(aes(E, N)) +
+  geom_path(alpha = 0.5) +
+  geom_point(alpha = 0.5) +
+  theme_bw() +
+  theme(panel.border = element_blank())
+
+ueli_3 %>%
+  ggplot(aes(E, N)) +
+  geom_path(alpha = 0.5) +
+  geom_point(alpha = 0.5) +
+  theme_bw() +
+  theme(panel.border = element_blank())
+
+# step 4: define threshold and assing movement status ####
 
 
 # convex hull ####
