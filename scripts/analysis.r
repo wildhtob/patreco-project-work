@@ -30,9 +30,14 @@ wildboar_overlap <- wildschwein_overlap_temp
 head(wildboar_overlap)
 ?wildschwein_overlap_temp
 
+# import feldaufnahmen
+feldaufnahmen <- read_sf("data/Feldaufnahmen_Fanel.gpkg")
+
 # add geometry ------------------------------------------------------------
 # argument remove = False keeps the coordinates E and N 
 wildboar_sf <- st_as_sf(wildboar_raw, coords = c("E", "N"), crs = 2056, remove = FALSE)
+# join feldaufnahmen with wildboar data
+wildboar_sf <- st_join(x=wildboar_sf, y=feldaufnahmen)
 
 # data exploration --------------------------------------------------------
 
@@ -123,6 +128,7 @@ wildboar_sf <- st_as_sf(wildboar_raw, coords = c("E", "N"), crs = 2056, remove =
 
 # time lags ####
 
+# replace wildboar_raw by wildboar_sf for spatial information
 wildboar_lags <- wildboar_raw %>%
   group_by(TierID) %>% 
   mutate(timelag = as.integer(difftime(lead(DatetimeUTC), DatetimeUTC), units = "secs"))
