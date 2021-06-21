@@ -193,7 +193,7 @@ wildboar_sf <- wildboar_sf %>%
     year = year(DatetimeUTC)
          )
 
-
+# create a sample of caroline
 caro <- wildboar_sf %>% 
   filter(
     year == 2015,
@@ -201,29 +201,63 @@ caro <- wildboar_sf %>%
     TierName == "Caroline"
   )
 
+# create a sample of Frida
+frida <- wildboar_sf %>% 
+  filter(
+    year == 2016,
+    month == 5,
+    TierName == "Frida"
+  )
+
+# create a sample of Ueli
+ueli <- wildboar_sf %>% 
+  filter(
+    year == 2016,
+    month == 5,
+    TierName == "Ueli"
+  )
+
 # step 1: sequence data (resolution to be discussed) ####
 
-seq3 <- seq(from = 1, to = nrow(caro), by = 3)
+caro_seq3 <- seq(from = 1, to = nrow(caro), by = 3)
+frida_seq3 <- seq(from = 1, to = nrow(frida), by = 3)
+ueli_seq3 <- seq(from = 1, to = nrow(ueli), by = 3)
+caro_3 <- caro %>% slice(caro_seq3)
+frida_3 <- frida %>% slice(frida_seq3)
+ueli_3 <- ueli %>% slice(ueli_seq3)
 
-
-caro_3 <- caro %>% slice(seq3)
-
-# step 3a: timelag for segmented data ####
-
-# problem mit code: es werden minuten berechnet, obschon sekunden angegeben werden. evtl
-# ein problem mit dem filter in zeile 191f?
-caro_3 <- caro_3 %>% 
-mutate(timelag = as.integer(difftime(lead(DatetimeUTC), DatetimeUTC, units = "secs")),
-       steplength = sqrt(((E-lead(E,1))^2+(N-lead(N,1))^2)),
-       speed = steplength/timelag)
-
+# step 2: calculate speed, steplength and timelag for segmented data ####
 caro <- caro %>% 
   mutate(timelag = as.integer(difftime(lead(DatetimeUTC), DatetimeUTC, units = "secs")),
          steplength = sqrt(((E-lead(E,1))^2+(N-lead(N,1))^2)),
          speed = steplength/timelag)
 
-# stept 3b: steplength and speed for segmented data ####
-# Gibt es einen Grund speed so zu berechnen? Alternativ habe ich es in Zeile 217 und 218 implementiert
+caro_3 <- caro_3 %>% 
+mutate(timelag = as.integer(difftime(lead(DatetimeUTC), DatetimeUTC, units = "secs")),
+       steplength = sqrt(((E-lead(E,1))^2+(N-lead(N,1))^2)),
+       speed = steplength/timelag)
+
+frida <- frida %>% 
+  mutate(timelag = as.integer(difftime(lead(DatetimeUTC), DatetimeUTC, units = "secs")),
+         steplength = sqrt(((E-lead(E,1))^2+(N-lead(N,1))^2)),
+         speed = steplength/timelag)
+
+frida_3 <- frida_3 %>% 
+  mutate(timelag = as.integer(difftime(lead(DatetimeUTC), DatetimeUTC, units = "secs")),
+         steplength = sqrt(((E-lead(E,1))^2+(N-lead(N,1))^2)),
+         speed = steplength/timelag)
+
+ueli <- ueli %>% 
+  mutate(timelag = as.integer(difftime(lead(DatetimeUTC), DatetimeUTC, units = "secs")),
+         steplength = sqrt(((E-lead(E,1))^2+(N-lead(N,1))^2)),
+         speed = steplength/timelag)
+
+ueli_3 <- ueli_3 %>% 
+  mutate(timelag = as.integer(difftime(lead(DatetimeUTC), DatetimeUTC, units = "secs")),
+         steplength = sqrt(((E-lead(E,1))^2+(N-lead(N,1))^2)),
+         speed = steplength/timelag)
+
+# Gibt es einen Grund speed so zu berechnen? Alternativ habe ich es oben implementiert
 # caro_3$steplength <- caro_3 %>%
 #   {
 #     (.$E - lead(.$E))^2 + (.$N - lead(.$N))^2
@@ -245,6 +279,17 @@ caro <- caro %>%
 #   .$steplength / .$timelag
 # }
 
+# step 3: plot histogram and movement trajectories ####
+
+# plot histogram of steplength
+
+hist_steplength <- ggplot(ueli_3, aes(x = steplength))
+hist_steplength + geom_histogram(binwidth = 10) + 
+  scale_x_continuous(limits = c(0,800)) + 
+  geom_vline(xintercept = 0, lty = 2, alpha = 0.5) +
+  theme_bw() +
+  theme(panel.border = element_blank())
+
 # plot trajectories ####
 
 caro_3 %>%
@@ -260,6 +305,7 @@ caro %>%
   geom_point(alpha = 0.5) +
   theme_bw() +
   theme(panel.border = element_blank())
+
 
 
 # convex hull ####
