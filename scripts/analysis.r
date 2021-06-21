@@ -129,7 +129,7 @@ wildboar_sf <- st_join(x=wildboar_sf, y=feldaufnahmen)
 # time lags ####
 
 # replace wildboar_raw by wildboar_sf for spatial information
-wildboar_lags <- wildboar_raw %>%
+wildboar_lags <- wildboar_sf %>%
   group_by(TierID) %>% 
   mutate(timelag = as.integer(difftime(lead(DatetimeUTC), DatetimeUTC), units = "secs"))
 
@@ -200,6 +200,42 @@ calc_movement_param <- function(boar_dt) {
     ungroup()
   boar_dt
 }
+
+# assign convenience variables for step 6
+wildboar_lags <- wildboar_lags %>% 
+# add wallow and nest criterias according to literature
+    mutate(
+    month = month(DatetimeUTC),
+    wallow_month = if_else(month > 4 & month < 10, TRUE, FALSE),
+    wallow_day = case_when(
+      day == "Abenddaemmerung"~FALSE,
+      day == "1Nachtviertel"~FALSE,
+      day == "2Nachtviertel"~FALSE,
+      day == "3Nachtviertel"~FALSE,
+      day == "4Nachtviertel"~FALSE,
+      day == "Tag"~TRUE,
+      TRUE~NA #Default case
+    ),
+    wallow_area = case_when(
+      Frucht == "Feuchtgebiet"~TRUE, # Literature says so?
+      Frucht == "Wald"~TRUE,
+      Frucht == "Weizen"~FALSE,
+      Frucht == "Gerste"~FALSE,
+      Frucht == "Zwiebel"~FALSE,
+      Frucht == "Bohnen"~FALSE,
+      Frucht == "Kartoffeln"~FALSE,
+      Frucht == "Rueben"~FALSE,
+      Frucht == "Chinaschilf"~FALSE,
+      Frucht == "Mangold"~FALSE,
+      Frucht == "Wiese"~FALSE,
+      Frucht == "Kohlrabi"~FALSE,
+      TRUE~NA #Default case
+    ),
+    nest_day = wallow_day,
+    nest_month = if_else(month >= 5 & month <= 10, TRUE, FALSE)
+  )
+
+
 # select only rows with an certain timelag
 # if no filter is applied, sequencing creates misleading results
 wildboar_lags <- wildboar_lags %>% 
@@ -312,14 +348,23 @@ hist_steplength + geom_histogram(binwidth = 5) +
   theme_bw() +
   theme(panel.border = element_blank())
 
-# step 4: define threshold and assign movement status ####
+# step 4 and 5: define threshold and assign movement status ####
 # for sample data
 threshold <- as.numeric(40)
 caro_6 <- caro_6 %>% 
-  mutate (mov_status = if_else(stepmean <= threshold, "resting", "moving"))
+  mutate (mov_status = if_else(stepmean <= threshold, "resting", "moving")) %>% 
+  filter(mov_status == "resting")
+
 # for all data
 wildboar_6 <- wildboar_6 %>% 
-  mutate (mov_status = if_else(stepmean <= threshold, "resting", "moving"))
+  mutate (mov_status = if_else(stepmean <= threshold, "resting", "moving")) %>% 
+  filter(mov_status == "resting") %>% 
+  mutate (wallow = if_else(wallow_month & 
+                             wallow_day & 
+                             wallow_area,
+                           TRUE, FALSE))
+# check the number of wallows  
+summary(wildboar_6)
 
 # plot trajectories ####
 
