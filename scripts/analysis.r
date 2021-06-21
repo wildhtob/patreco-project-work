@@ -31,97 +31,94 @@ head(wildboar_overlap)
 ?wildschwein_overlap_temp
 
 # add geometry ------------------------------------------------------------
-
-wildboar_sf <-st_as_sf(wildboar_raw, coords = c("E", "N"), crs = 2056)
-
+# argument remove = False keeps the coordinates E and N 
+wildboar_sf <- st_as_sf(wildboar_raw, coords = c("E", "N"), crs = 2056, remove = FALSE)
 
 # data exploration --------------------------------------------------------
 
 # plotting data points ####
-
-ggplot(wildboar_sf, aes(color = TierName)) +
-  geom_sf(alpha = 0.4) +
-  coord_sf(datum = 2056)
-
-ggplot(wildboar_sf, aes(color = as.factor(TierID))) +
-  geom_sf(alpha = 0.4) +
-  coord_sf(datum = 2056) +
-  scale_color_discrete(name = "AnimalID")
+# 
+# ggplot(wildboar_sf, aes(color = TierName)) +
+#   geom_sf(alpha = 0.4) +
+#   coord_sf(datum = 2056)
+# 
+# ggplot(wildboar_sf, aes(color = as.factor(TierID))) +
+#   geom_sf(alpha = 0.4) +
+#   coord_sf(datum = 2056) +
+#   scale_color_discrete(name = "AnimalID")
 
 # sampling regime ####
-
-limits <- c(0,200)
-breaks = seq(0,200,50)
-labels = paste(c(rep("",length(breaks)-1),">"), breaks)
-
-wildboar_raw %>%
-  mutate(TierName = fct_reorder(TierName, DatetimeUTC,min, .desc = TRUE)) %>%
-  group_by(TierID, TierName, CollarID) %>%
-  mutate(
-    timelag = as.numeric(difftime(lead(DatetimeUTC),DatetimeUTC, units = "mins")),
-  ) %>%
-  ggplot(aes(DatetimeUTC, TierName, colour = timelag)) +
-  geom_line(lwd = 10) +
-  scale_color_gradientn(name = "Sampling interval", colours = RColorBrewer::brewer.pal(11, "Spectral"), limits = limits, na.value = NA, oob = scales::squish, breaks = seq(0,200,50), labels = labels) +
-  theme_minimal() +
-  theme(legend.position = "top") +
-  guides(color = guide_colorbar(title.position = "top", title.hjust = .5, barwidth = unit(20, "lines"), barheight = unit(.5, "lines")))
+# 
+# limits <- c(0,200)
+# breaks = seq(0,200,50)
+# labels = paste(c(rep("",length(breaks)-1),">"), breaks)
+# 
+# wildboar_raw %>%
+#   mutate(TierName = fct_reorder(TierName, DatetimeUTC,min, .desc = TRUE)) %>%
+#   group_by(TierID, TierName, CollarID) %>%
+#   mutate(
+#     timelag = as.numeric(difftime(lead(DatetimeUTC),DatetimeUTC, units = "mins")),
+#   ) %>%
+#   ggplot(aes(DatetimeUTC, TierName, colour = timelag)) +
+#   geom_line(lwd = 10) +
+#   scale_color_gradientn(name = "Sampling interval", colours = RColorBrewer::brewer.pal(11, "Spectral"), limits = limits, na.value = NA, oob = scales::squish, breaks = seq(0,200,50), labels = labels) +
+#   theme_minimal() +
+#   theme(legend.position = "top") +
+#   guides(color = guide_colorbar(title.position = "top", title.hjust = .5, barwidth = unit(20, "lines"), barheight = unit(.5, "lines")))
 
 # temporal overlap ####
 
-?wildschwein_overlap_temp
-
-sampling_periods <- wildboar_raw %>%
-  group_by(TierID, TierName, CollarID) %>%
-  summarise(
-    min = min(DatetimeUTC),
-    max = max(DatetimeUTC)
-  )
-
-wildboar_overlap <- wildboar_overlap %>%
-  left_join(sampling_periods, by = c("TierID", "TierName", "CollarID"))
-
-wildboar_overlap %>%
-  mutate(TierCollar = paste(TierName, CollarID)) %>%
-  ggplot(aes(xmin = min, xmax = max, y = TierCollar)) +
-  geom_errorbarh() +
-  facet_grid(Groups~., scales = "free_y", space = "free_y")
-
-ggplot(wildboar_sf, aes(x = DatetimeUTC, y = TierName)) +
-  geom_point() +
-  scale_x_datetime(breaks = "1 month") +
-  theme_grey()
+# ?wildschwein_overlap_temp
+# 
+# sampling_periods <- wildboar_raw %>%
+#   group_by(TierID, TierName, CollarID) %>%
+#   summarise(
+#     min = min(DatetimeUTC),
+#     max = max(DatetimeUTC)
+#   )
+# 
+# wildboar_overlap <- wildboar_overlap %>%
+#   left_join(sampling_periods, by = c("TierID", "TierName", "CollarID"))
+# 
+# wildboar_overlap %>%
+#   mutate(TierCollar = paste(TierName, CollarID)) %>%
+#   ggplot(aes(xmin = min, xmax = max, y = TierCollar)) +
+#   geom_errorbarh() +
+#   facet_grid(Groups~., scales = "free_y", space = "free_y")
+# 
+# ggplot(wildboar_sf, aes(x = DatetimeUTC, y = TierName)) +
+#   geom_point() +
+#   scale_x_datetime(breaks = "1 month") +
+#   theme_grey()
 
 
 # spatial overlap ####
 
 # convex hull ####
-
-wildboar_sf <- wildboar_sf %>%
-  mutate(tiercollar = paste(TierID, TierName, CollarID)) 
-
-mcp <- wildboar_sf %>%
-  group_by(TierID, TierName, CollarID) %>%
-  summarise() %>%
-  st_convex_hull()
+# 
+# wildboar_sf <- wildboar_sf %>%
+#   mutate(tiercollar = paste(TierID, TierName, CollarID)) 
+# 
+# mcp <- wildboar_sf %>%
+#   group_by(TierID, TierName, CollarID) %>%
+#   summarise() %>%
+#   st_convex_hull()
 
 # plot convex hull ####
-
-mcp %>%
-  mutate(tiercollar = paste(TierID, TierName, CollarID)) %>%
-  ggplot(aes(fill = factor(TierID))) + geom_sf(alpha = 0.1) +
-  coord_sf(datum = 2056) +
-  facet_wrap(~tiercollar) +
-  theme(legend.position = "none")
-
-
-tmap_mode("view") +
-  tm_shape(mcp) +
-  tm_fill("TierName", alpha = 0.5) +
-  tm_borders(col = "red", lwd = 1) +
-  tm_layout(legend.bg.color = "white")
-
-
+# 
+# mcp %>%
+#   mutate(tiercollar = paste(TierID, TierName, CollarID)) %>%
+#   ggplot(aes(fill = factor(TierID))) + geom_sf(alpha = 0.1) +
+#   coord_sf(datum = 2056) +
+#   facet_wrap(~tiercollar) +
+#   theme(legend.position = "none")
+# 
+# 
+# tmap_mode("view") +
+#   tm_shape(mcp) +
+#   tm_fill("TierName", alpha = 0.5) +
+#   tm_borders(col = "red", lwd = 1) +
+#   tm_layout(legend.bg.color = "white")
 
 # time lags ####
 
@@ -156,7 +153,7 @@ wildboar_lags$steplength <- wildboar_raw %>%
 
 # calculating speed based on timelag (t) in secs and steplength (s) in meter ####
 
-wildboar_lags$speed <- wildboar_raw %>% {
+wildboar_lags$speed <- wildboar_lags %>% {
   .$steplength / .$timelag
 }
 
@@ -216,37 +213,39 @@ caro_3 <- caro %>% slice(seq3)
 # problem mit code: es werden minuten berechnet, obschon sekunden angegeben werden. evtl
 # ein problem mit dem filter in zeile 191f?
 caro_3 <- caro_3 %>% 
-mutate(timelag = as.integer(difftime(lead(DatetimeUTC), DatetimeUTC), units = "secs"))
+mutate(timelag = as.integer(difftime(lead(DatetimeUTC), DatetimeUTC, units = "secs")),
+       steplength = sqrt(((E-lead(E,1))^2+(N-lead(N,1))^2)),
+       speed = steplength/timelag)
 
 caro <- caro %>% 
-mutate(timelag = as.integer(difftime(lead(DatetimeUTC), DatetimeUTC), units = "secs"))
-
+  mutate(timelag = as.integer(difftime(lead(DatetimeUTC), DatetimeUTC, units = "secs")),
+         steplength = sqrt(((E-lead(E,1))^2+(N-lead(N,1))^2)),
+         speed = steplength/timelag)
 
 # stept 3b: steplength and speed for segmented data ####
-
-caro_3$steplength <- caro_3 %>%
-  {
-    (.$E - lead(.$E))^2 + (.$N - lead(.$N))^2
-  } %>%
-  sqrt()
-
-caro_3$speed <- caro_3 %>% {
-  .$steplength / .$timelag
-}
-
-
-caro$steplength <- caro %>%
-  {
-    (.$E - lead(.$E))^2 + (.$N - lead(.$N))^2
-  } %>%
-  sqrt()
-
-caro$speed <- caro %>% {
-  .$steplength / .$timelag
-}
+# Gibt es einen Grund speed so zu berechnen? Alternativ habe ich es in Zeile 217 und 218 implementiert
+# caro_3$steplength <- caro_3 %>%
+#   {
+#     (.$E - lead(.$E))^2 + (.$N - lead(.$N))^2
+#   } %>%
+#   sqrt()
+# 
+# caro_3$speed <- caro_3 %>% {
+#   .$steplength / .$timelag
+# }
+# 
+# 
+# caro$steplength <- caro %>%
+#   {
+#     (.$E - lead(.$E))^2 + (.$N - lead(.$N))^2
+#   } %>%
+#   sqrt()
+# 
+# caro$speed <- caro %>% {
+#   .$steplength / .$timelag
+# }
 
 # plot trajectories ####
-
 
 caro_3 %>%
   ggplot(aes(E, N)) +
@@ -277,3 +276,4 @@ tmap_mode("view") +
   tm_fill("TierName", alpha = 0.5) +
   tm_borders(col = "red", lwd = 1) +
   tm_layout(legend.bg.color = "white")
+
