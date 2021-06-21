@@ -231,22 +231,28 @@ frida_6 <- frida %>% slice(frida_seq6)
 ueli_3 <- ueli %>% slice(ueli_seq3)
 
 # step 2: calculate speed, steplength and timelag for segmented data ####
-caro <- caro %>% 
-  mutate(timelag = as.integer(difftime(lead(DatetimeUTC), DatetimeUTC, units = "secs")),
-         steplength = sqrt(((E-lead(E,1))^2+(N-lead(N,1))^2)),
-         speed = steplength/timelag,
-         nMinus3 = sqrt((lag(E, 3) - E)^2 + (lag(N, 3) - N)^2),
-         nMinus2 = sqrt((lag(E, 2) - E)^2 + (lag(N, 2) - N)^2),
-         nMinus1 = sqrt((lag(E, 1) - E)^2 + (lag(N, 1) - N)^2),
-         nPlus1 = sqrt((E - lead(E, 1))^2 + (N - lead(N, 1))^2),
-         nPlus2 = sqrt((E - lead(E, 2))^2 + (N - lead(N, 2))^2),
-         nPlus3 = sqrt((E - lead(E, 3))^2 + (N - lead(N, 3))^2)
-          ) %>% 
-  rowwise() %>%
-  mutate(
-    stepmean = mean(c(nMinus3, nMinus2, nMinus1,nPlus1,nPlus2, nPlus3))
-  ) %>%
-  ungroup()
+calc_movement_param <- function(boar_dt) {
+  boar_dt %>% 
+    mutate(timelag = as.integer(difftime(lead(DatetimeUTC), DatetimeUTC, units = "secs")),
+           steplength = sqrt(((E-lead(E,1))^2+(N-lead(N,1))^2)),
+           speed = steplength/timelag,
+           nMinus3 = sqrt((lag(E, 3) - E)^2 + (lag(N, 3) - N)^2),
+           nMinus2 = sqrt((lag(E, 2) - E)^2 + (lag(N, 2) - N)^2),
+           nMinus1 = sqrt((lag(E, 1) - E)^2 + (lag(N, 1) - N)^2),
+           nPlus1 = sqrt((E - lead(E, 1))^2 + (N - lead(N, 1))^2),
+           nPlus2 = sqrt((E - lead(E, 2))^2 + (N - lead(N, 2))^2),
+           nPlus3 = sqrt((E - lead(E, 3))^2 + (N - lead(N, 3))^2)
+    ) %>% 
+    rowwise() %>%
+    mutate(
+      stepmean = mean(c(nMinus3, nMinus2, nMinus1,nPlus1,nPlus2, nPlus3))
+    ) %>%
+    ungroup()
+  boar_dt
+}
+
+caro <- calc_movement_param(caro)
+caro_3 <- calc_movement_param(caro_3)
 
 caro_3 <- caro_3 %>% 
 mutate(timelag = as.integer(difftime(lead(DatetimeUTC), DatetimeUTC, units = "secs")),

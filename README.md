@@ -85,12 +85,14 @@ editor_options:
 -   Schritt 3: Verteilung anschauen
 -   Schritt 4: Schwellenwert definieren und resting / moving festlegen
 -   Schritt 5: Nur resting Data weiterverarbeiten
--   Schritt 6: Heatmap erstellen mit zu definierender Rastergrösse  
+-   Schritt 6: Kriterien für Nester und Suhlen definieren und anwenden
+-	Schritt 7: mit rle_id die einzelnen suhlen und Nester voneinander trennen
+-	Schritt 8: Convex hull der getrennten Elemente berechnen
+-   Schritt 9: Heatmap erstellen mit zu definierender Rastergrösse  
     \>\> Vorschlag: 100m da Arealstatistik dieses Mass aufweist
--   Schritt 7: Kriterien für Nester und Suhlen definieren
--   Schritt 8: Rasterfelder zuweisen, Context herstellen
--   Schritt 9: Prozess mit Gesamtdaten testen
--   Schritt 10: Profit
+-   Schritt 10: Rasterfelder zuweisen, Context herstellen
+-   Schritt 11: Prozess mit Gesamtdaten testen
+-   Schritt 12: Profit
 
 # Definitionen
 
@@ -122,11 +124,12 @@ editor_options:
 
 # Fragen an Nils
 
--   Datenbezug Arealstatistik/Bodennutzung: Wie bekommt man die
-    entsprechenden Daten so, dass sie in R importiert werden können?
-    Portale lassen Download eines csv-Files der Gesamtschweiz zu.
-    Scheint aber mega umständlich. Was ist sein Vorschlag für den Bezug?
+-   Datenbezug Arealstatistik/Bodennutzung: Wie bekommt man die entsprechenden Daten so, dass sie in R importiert werden können?
+    Portale lassen Download eines csv-Files der Gesamtschweiz zu. Scheint aber mega umständlich. Was ist sein Vorschlag für den Bezug?
     Oder hätte er die Daten schon?
+	
+- Antwort von Nils: mycsv <- read_csv("arealstat.csv")
+ mycsv %>% select(x, y, meinespalte) %>% raster::rasterFromXYZ()
 
     [Bodennutzung /
     Arealstatistik](https://www.bfs.admin.ch/bfs/de/home/dienstleistungen/geostat/geodaten-bundesstatistik/boden-nutzung-bedeckung-eignung/arealstatistik-schweiz/bodennutzung.html)
@@ -137,10 +140,14 @@ editor_options:
 -   Evtl. geplantes Vorgehen kurz durchsprechen für Feedback oder
     Ergänzungen seinerseits
 
-# Issues
-
--   Timelag der gefilterten Sample-Daten: Berechnung fehlerhat. Trotz
-    Angabe von Sekunden werden Minuten angegeben. Problem tritt nur auf,
-    wenn nach Datum gefiltert wird (mit Convenience-Variablen oder auch
-    ohne). Code hat in Übungen funktioniert. Codezeile in \#analysis
-    markiert und kommentiert
+# Tipps von Nils
+- Passt auf, die Daten haben eine Vignette (nicht alle sind im viertelstundentakt)
+- Nach dem alle Daten enriched wurden müssen diese auf einzelne Suhlen und Nester aufgetrennt werden. dafür rle_id verwenden (cma-week3).
+- Wichtige Funktion:
+rle_id <- function(vec){
+  x <- rle(vec)$lengths
+  as.factor(rep(seq_along(x), times=x))
+  }
+  Task 4: Segment-based analysis
+caro <- caro %>%
+  mutate(segment_id = rle_id(static))
