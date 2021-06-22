@@ -3,7 +3,6 @@
 # install package with wildobar data:
 # devtools::install_github("ComputationalMovementAnalysis/ComputationalMovementAnalysisData")
 
-
 library(tidyverse) # tidy essentials (ggplot, purr, tidyr, readr, dplyr)
 library(lubridate) # handling dates and time
 library(tmap) # map visualization
@@ -14,6 +13,10 @@ library(sf) # handling spatial data
 library(janitor) # clean and consistent naming
 library(zoo) # moving window function
 library(forcats) # handling factor levels
+
+# globals ----------------------------------------------------------------------
+# threshold that triggers the segmentation of the movement trajectory
+segment_trigger <- as.numeric(30)
 
 # functions ---------------------------------------------------------------
 calc_movement_param <- function(boar_dt) {
@@ -33,7 +36,10 @@ calc_movement_param <- function(boar_dt) {
       stepmean = mean(c(nMinus3, nMinus2, nMinus1,nPlus1,nPlus2, nPlus3)),
     ) %>%
     ungroup() %>% 
-    mutate(static = stepmean < mean(stepmean, na.rm = TRUE))
+    mutate (
+      mov_static = if_else(stepmean < segment_trigger, TRUE, FALSE),
+      mov_status = if_else(stepmean < segment_trigger, "resting", "moving"),
+      cma_static = stepmean < mean(stepmean, na.rm = TRUE))
   boar_dt
 }
 
@@ -319,8 +325,9 @@ wildboar_lags <- wildboar_lags %>%
 
 wildboar_lags <- calc_movement_param(wildboar_lags)
 wildboar_lags <- wildboar_lags %>% 
-  # run segment-based analysis with rle_id
-  mutate(segment_id = rle_id(static)) %>% 
+  # run segment-based analysis with rle_id. copied from cma_week 3
+  # choose between: own threshold (mov_static) or from cma_week 3 (cma_static)
+  mutate(segment_id = rle_id(mov_static)) %>% 
   # select only rows with an certain timelag
   # if no filter is applied, sequencing creates misleading results
   # fraglich, ob der filter hier angewendet werden soll oder nach Sample data
@@ -334,7 +341,6 @@ seq9 <- seq(from = 1, to = nrow(wildboar_raw), by = 9)
 wildboar_3 <- wildboar_lags %>% slice(seq3)
 wildboar_6 <- wildboar_lags %>% slice(seq6)
 wildboar_9 <- wildboar_lags %>% slice(seq9)
-
 
 # Sample data -------------------------------------------------------------
 
@@ -419,7 +425,7 @@ ueli_6 <- calc_movement_param(ueli_6)
 # mit einem stepmean von 6 Datenpunkten im Intervall von 15 Minuten wird
 # meiner Meinung nach gut ersichtlich wann die Wildschweine pausieren.
 # Hier einsetzen und vergleichen: caro_6, frida_6, ueli_6
-# Mein Vorschlag fuer threshold: 40 bis 50 Meter, GPS genauigkeit bedenken.
+# Mein Vorschlag fuer segment_trigger: 30 bis 50 Meter, GPS genauigkeit bedenken.
 hist_steplength <- ggplot(caro_6, aes(x = stepmean))
 hist_steplength + geom_histogram(binwidth = 5) + 
   scale_x_continuous(limits = c(0,100)) + 
@@ -428,21 +434,8 @@ hist_steplength + geom_histogram(binwidth = 5) +
   theme(panel.border = element_blank())
 
 # step 4 to 6: assign movement status and apply criterias####
-# for sample data
-threshold <- as.numeric(40)
-caro_6 <- caro_6 %>% 
-  mutate (mov_status = if_else(stepmean <= threshold, "resting", "moving")) %>% 
-  filter(mov_status == "resting") %>% 
-  mutate (
-    wallow = if_else(wallow_month & wallow_day & wallow_area,
-                          TRUE, FALSE), 
-    nest = if_else(nest_month & nest_day & nest_area,
-                          TRUE, FALSE),
-    conflict = if_else(nest & wallow, TRUE, FALSE))
-
 # for all data
 wildboar_6 <- wildboar_6 %>% 
-  mutate (mov_status = if_else(stepmean <= threshold, "resting", "moving")) %>% 
   filter(mov_status == "resting") %>% 
   mutate (
     wallow = if_else(wallow_month & wallow_day & wallow_area,
@@ -458,7 +451,7 @@ summary(wildboar_6)
 ueli_filter <- wildboar_6 %>% 
   filter(
     year == 2016,
-    month == 5,
+    # month == 5,
     TierName == "Ueli",
     wallow = TRUE
   )
@@ -466,19 +459,26 @@ ueli_filter <- wildboar_6 %>%
 frida_filter <- wildboar_6 %>% 
   filter(
     year == 2016,
-    month == 5,
+    # month == 5,
     TierName == "Frida",
     nest = TRUE
   )
 
-ggplot(data=frida_filter, mapping=aes(E, N, colour = segment_id))  +
+caro_filter <- wildboar_6 %>% 
+  filter(
+    year == 2016,
+    # month == 5,
+    TierName == "Caroline",
+    nest = TRUE
+  )
+
+ggplot(data=ueli_filter, mapping=aes(E, N, colour = segment_id))  +
   geom_path() +
   geom_point() +
   coord_equal() +
-  labs(title = "Moving segements coloured by segment ID (uncleaned)") + 
+  labs(title = "Moving segements coloured by segment ID") + 
   theme_classic() +
   theme(legend.position = "none")
-
 
 caro %>%
   ggplot(aes(E, N)) +
