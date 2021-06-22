@@ -224,10 +224,10 @@ wildboar_lags <- wildboar_lags %>%
     # enable line below if you want to filter all NAs in Frucht
     # filter(!is.na(Frucht)) %>% 
     mutate(
-    wallow_month = if_else(month > 4 & month < 10, TRUE, FALSE),
+    wallow_month = if_else(month > 3 & month < 10, TRUE, FALSE),
     wallow_day = case_when(
       day == "Abenddaemmerung"~FALSE,
-      day == "Morgendaemmerung"~FALSE,
+      day == "Morgendaemmerung"~TRUE,
       day == "Nacht"~FALSE,
       day == "1Nachtviertel"~FALSE,
       day == "2Nachtviertel"~FALSE,
@@ -276,9 +276,20 @@ wildboar_lags <- wildboar_lags %>%
       Frucht == "Kuerbis"~FALSE,
       TRUE~NA #Default case
     ),
-    nest_day = wallow_day,
-    nest_month = if_else(month >= 5 & month <= 10, TRUE, FALSE),
-    nest_area = case_when(
+    nest_day = case_when(
+      day == "Abenddaemmerung"~FALSE,
+      day == "Morgendaemmerung"~FALSE,
+      day == "Nacht"~FALSE,
+      day == "1Nachtviertel"~FALSE,
+      day == "2Nachtviertel"~FALSE,
+      day == "3Nachtviertel"~FALSE,
+      day == "4Nachtviertel"~FALSE,
+      day == "Tag"~TRUE,
+      TRUE~NA #Default case
+    ),
+    nest_summer_mon = if_else(month >= 5 & month <= 10, TRUE, FALSE),
+    nest_winter_mon = if_else(month >= 5 & month <= 10, FALSE, TRUE),
+    nest_summer_area = case_when(
       Frucht == "Feuchtgebiet"~FALSE,
       Frucht == "Wald"~TRUE,
       Frucht == "Weizen"~TRUE,
@@ -303,6 +314,46 @@ wildboar_lags <- wildboar_lags %>%
       Frucht == "Kohl"~FALSE,
       Frucht == "Hafer"~TRUE,
       Frucht == "Roggen"~TRUE,
+      Frucht == "Salat"~FALSE,
+      Frucht == "Rhabarber"~FALSE,
+      Frucht == "Sellerie"~FALSE,
+      Frucht == "Brache"~FALSE,
+      Frucht == "Spargel"~FALSE,
+      Frucht == "Obstplantage"~FALSE,
+      Frucht == "Fenchel"~FALSE,
+      Frucht == "Gemuese"~FALSE,
+      Frucht == "Gewaechshaus"~FALSE,
+      Frucht == "Zuchetti"~FALSE,
+      Frucht == "Zucchetti"~FALSE,
+      Frucht == "Flachs"~FALSE,
+      Frucht == "Kuerbis"~FALSE,
+      TRUE~NA #Default case
+    ),
+    nest_winter_area = case_when(
+      Frucht == "Feuchtgebiet"~TRUE,
+      Frucht == "Wald"~TRUE,
+      Frucht == "Weizen"~FALSE,
+      Frucht == "Gerste"~FALSE,
+      Frucht == "Zwiebeln"~FALSE,
+      Frucht == "Bohnen"~FALSE,
+      Frucht == "Kartoffeln"~FALSE,
+      Frucht == "Rueben"~FALSE,
+      Frucht == "Chinaschilf"~FALSE,
+      Frucht == "Mangold"~FALSE,
+      Frucht == "Wiese"~FALSE,
+      Frucht == "Kohlrabi"~FALSE,
+      Frucht == "Weide"~FALSE,
+      Frucht == "Lupinen"~FALSE,
+      Frucht == "Flugplatz"~FALSE,
+      Frucht == "Mais"~FALSE,
+      Frucht == "Raps"~FALSE,
+      Frucht == "Karotten"~FALSE,
+      Frucht == "Acker"~FALSE,
+      Frucht == "Sonnenblumen"~FALSE,
+      Frucht == "Erbsen"~FALSE,
+      Frucht == "Kohl"~FALSE,
+      Frucht == "Hafer"~FALSE,
+      Frucht == "Roggen"~FALSE,
       Frucht == "Salat"~FALSE,
       Frucht == "Rhabarber"~FALSE,
       Frucht == "Sellerie"~FALSE,
@@ -436,11 +487,16 @@ hist_steplength + geom_histogram(binwidth = 5) +
 # step 4 to 6: assign movement status and apply criterias####
 # for all data
 wildboar_lags <- wildboar_lags %>% 
+  group_by(segment_id) %>% 
+  mutate(segment_dur = n()) %>% 
+  ungroup() %>% 
+  mutate(wallow_dur = if_else(segment_dur <=3, TRUE, FALSE)) %>% 
   filter(mov_status == "resting") %>% 
   mutate (
-    wallow = if_else(wallow_month & wallow_day & wallow_area,
+    wallow = if_else(wallow_month & wallow_day & wallow_area & wallow_dur,
                            TRUE, FALSE), 
-    nest = if_else(nest_month & nest_day & nest_area,
+    nest = if_else((nest_summer_mon & nest_day & nest_summer_area & segment_dur >3)|
+                     (nest_winter_mon & nest_day & nest_winter_area & segment_dur >3),
                            TRUE, FALSE),
     conflict = if_else(nest & wallow, TRUE, FALSE),
     site_type = as.factor(case_when(
@@ -451,6 +507,7 @@ wildboar_lags <- wildboar_lags %>%
       TRUE~"NA" #Default case
       ))
     )
+
 # check the dataset (number of wallows, nests, NAs etc) 
 summary(wildboar_lags)
 

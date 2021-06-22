@@ -120,6 +120,51 @@ editor_options:
 
 -   aufenhaltsdauer?
 
+# Auswertung der zugewiesenen Punkte
+
+## Vor Trennung der 45 min Segmente
+site_type    
+both  : 2853, 14.24%
+NA    :  704, 3.51%
+nest  : 1058, 5.28%
+none  :14132, 70.56%
+wallow: 1281, 6.39%
+total: 20028
+
+## Mit segment_dur <= 3
+  site_type    
+ both  :  399, 0.33% 
+ NA    : 4238, 3.52%  
+ nest  :22897, 19.06%
+ none  :92432, 76.96%
+ wallow:  128, 0.10%
+ total: 120094
+
+## Mit Berücksichtigung der Wintermonate
+Nur mit Wälder als möglicher Einstand:
+
+site_type    
+both  :  399, 0.33%
+NA    :11198, 9.32%
+nest  :31470, 26.20%
+none  :76899, 64.03%
+wallow:  128, 0.10% 
+
+Mit Wälder und Feuchtgebiete als möglicher Einstand:
+site_type    
+both  :  399, 0.33%  
+NA    :11198, 9.32%  
+nest  :52709, 43.88%
+none  :55660, 46.34%  
+wallow:  128, 0.10%  
+
+## Mit Berücksichtigung vom Monat März, Morgendaemmerung und segment_dur >= 3 für Nester
+site_type    
+NA    :11071, 9.21%
+nest  :52238, 45.99% 
+none  :56034, 46.66%  
+wallow:  751, 0.62%
+
 # Fragen an Nils
 
 -   Datenbezug Arealstatistik/Bodennutzung: Wie bekommt man die entsprechenden Daten so, dass sie in R importiert werden können?
