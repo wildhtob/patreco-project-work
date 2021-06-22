@@ -426,9 +426,9 @@ ueli_6 <- calc_movement_param(ueli_6)
 # meiner Meinung nach gut ersichtlich wann die Wildschweine pausieren.
 # Hier einsetzen und vergleichen: caro_6, frida_6, ueli_6
 # Mein Vorschlag fuer segment_trigger: 30 bis 50 Meter, GPS genauigkeit bedenken.
-hist_steplength <- ggplot(caro_6, aes(x = stepmean))
+hist_steplength <- ggplot(frida_6, aes(x = stepmean))
 hist_steplength + geom_histogram(binwidth = 5) + 
-  scale_x_continuous(limits = c(0,100)) + 
+  scale_x_continuous(limits = c(0,800)) + 
   geom_vline(xintercept = 0, lty = 2, alpha = 0.5) +
   theme_bw() +
   theme(panel.border = element_blank())
@@ -461,7 +461,7 @@ ueli_filter <- wildboar_6 %>%
     year == 2016,
     # month == 5,
     TierName == "Ueli",
-    site_type == "nest"
+    site_type == "wallow"
   )
 
 frida_filter <- wildboar_6 %>% 
@@ -482,7 +482,7 @@ caro_filter <- wildboar_6 %>%
 # Plot site_type
 # alter site_type to explore (nest, wallow, both, none and NA)
 # alter data to explore different boars
-ggplot(data=frida_filter, mapping=aes(E, N, colour = segment_id))  +
+ggplot(data=ueli_filter, mapping=aes(E, N, colour = segment_id))  +
   #geom_path() +
   geom_point() +
   coord_equal() +
@@ -491,7 +491,7 @@ ggplot(data=frida_filter, mapping=aes(E, N, colour = segment_id))  +
   # RStudio crashes if legend.position "bottom" is chosen
   theme(legend.position = "none")
 
-# Unused plots
+# Unused plots ####
 # caro %>%
 #   ggplot(aes(E, N)) +
 #   geom_path(alpha = 0.5) +
@@ -539,7 +539,7 @@ ggplot(data=frida_filter, mapping=aes(E, N, colour = segment_id))  +
 #   summarise() %>%
 #   st_convex_hull()
 # 
-# # plot convex hull ####
+# plot convex hull
 # 
 # tmap_mode("view") +
 #   tm_shape(mcp_caro) +
@@ -547,18 +547,14 @@ ggplot(data=frida_filter, mapping=aes(E, N, colour = segment_id))  +
 #   tm_borders(col = "red", lwd = 1) +
 #   tm_layout(legend.bg.color = "white")
 
-# step 7: create a convex hull for segmented trajectories####
-
-mcp_caro <- caro_filter %>%
-  group_by(site_type, segment_id) %>%
-  summarise() %>%
-  st_convex_hull()
-
-# plot convex hull ####
-
-tmap_mode("view") +
-  tm_shape(mcp_caro) +
-  tm_fill("segment_id", alpha = 0.5) +
-  tm_borders(col = "red", lwd = 1) +
-  tm_layout(legend.bg.color = "white")
+# mcp_caro <- caro_filter %>%
+#   group_by(site_type, segment_id) %>%
+#   summarise() %>%
+#   st_convex_hull()
+# 
+# tmap_mode("view") +
+#   tm_shape(mcp_caro) +
+#   tm_fill("segment_id", alpha = 0.5) +
+#   tm_borders(col = "red", lwd = 1) +
+#   tm_layout(legend.bg.color = "white")
 
