@@ -442,7 +442,15 @@ wildboar_6 <- wildboar_6 %>%
                            TRUE, FALSE), 
     nest = if_else(nest_month & nest_day & nest_area,
                            TRUE, FALSE),
-    conflict = if_else(nest & wallow, TRUE, FALSE))
+    conflict = if_else(nest & wallow, TRUE, FALSE),
+    site_type = case_when(
+      conflict == TRUE ~"both",
+      nest == TRUE~"nest",
+      wallow == TRUE~"wallow",
+      !wallow & !nest == TRUE~"none",
+      TRUE~"not classified" #Default case
+      )
+    )
 # check the number of wallows  
 summary(wildboar_6)
 
@@ -453,7 +461,7 @@ ueli_filter <- wildboar_6 %>%
     year == 2016,
     # month == 5,
     TierName == "Ueli",
-    wallow = TRUE
+    wallow == TRUE
   )
 
 frida_filter <- wildboar_6 %>% 
@@ -461,7 +469,7 @@ frida_filter <- wildboar_6 %>%
     year == 2016,
     # month == 5,
     TierName == "Frida",
-    nest = TRUE
+    nest == TRUE
   )
 
 caro_filter <- wildboar_6 %>% 
@@ -469,15 +477,16 @@ caro_filter <- wildboar_6 %>%
     year == 2016,
     # month == 5,
     TierName == "Caroline",
-    nest = TRUE
+    nest == TRUE
   )
 
-ggplot(data=ueli_filter, mapping=aes(E, N, colour = segment_id))  +
+ggplot(data=frida_filter, mapping=aes(E, N, colour = segment_id))  +
   geom_path() +
   geom_point() +
   coord_equal() +
   labs(title = "Moving segements coloured by segment ID") + 
   theme_classic() +
+  # RStudio crashes if legend.position "bottom" is chosen
   theme(legend.position = "none")
 
 caro %>%
