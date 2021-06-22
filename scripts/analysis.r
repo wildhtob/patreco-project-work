@@ -30,9 +30,10 @@ calc_movement_param <- function(boar_dt) {
     ) %>% 
     rowwise() %>%
     mutate(
-      stepmean = mean(c(nMinus3, nMinus2, nMinus1,nPlus1,nPlus2, nPlus3))
+      stepmean = mean(c(nMinus3, nMinus2, nMinus1,nPlus1,nPlus2, nPlus3)),
     ) %>%
-    ungroup()
+    ungroup() %>% 
+    mutate(static = stepmean < mean(stepmean, na.rm = TRUE))
   boar_dt
 }
 
@@ -311,11 +312,13 @@ wildboar_lags <- wildboar_lags %>%
 # na_check <- wildboar_lags %>% 
 #   filter(is.na(wallow_area))
 
-# select only rows with an certain timelag
-# if no filter is applied, sequencing creates misleading results
-wildboar_lags <- wildboar_lags %>% 
-  filter(timelag_rounded == 900)
 wildboar_lags <- calc_movement_param(wildboar_lags)
+wildboar_lags <- wildboar_lags %>% 
+  # run segment-based analysis with rle_id
+  mutate(segment_id = rle_id(static)) %>% 
+  # select only rows with an certain timelag
+  # if no filter is applied, sequencing creates misleading results
+  filter(timelag_rounded == 900)
 
 # cross-scale movement analysis ####
 seq3 <- seq(from = 1, to = nrow(wildboar_raw), by = 3)
@@ -423,12 +426,18 @@ hist_steplength + geom_histogram(binwidth = 5) +
   theme_bw() +
   theme(panel.border = element_blank())
 
-# step 4 and 5: define threshold and assign movement status ####
+# step 4 to 6: assign movement status and apply criterias####
 # for sample data
 threshold <- as.numeric(40)
 caro_6 <- caro_6 %>% 
   mutate (mov_status = if_else(stepmean <= threshold, "resting", "moving")) %>% 
-  filter(mov_status == "resting")
+  filter(mov_status == "resting") %>% 
+  mutate (
+    wallow = if_else(wallow_month & wallow_day & wallow_area,
+                          TRUE, FALSE), 
+    nest = if_else(nest_month & nest_day & nest_area,
+                          TRUE, FALSE),
+    conflict = if_else(nest & wallow, TRUE, FALSE))
 
 # for all data
 wildboar_6 <- wildboar_6 %>% 
@@ -442,9 +451,6 @@ wildboar_6 <- wildboar_6 %>%
     conflict = if_else(nest & wallow, TRUE, FALSE))
 # check the number of wallows  
 summary(wildboar_6)
-
-
-
 
 # plot trajectories ####
 

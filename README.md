@@ -78,7 +78,7 @@ editor_options:
 -   [Geocomputation with R](https://geocompr.robinlovelace.net/)
 
 # Vorgehen
-
+-	Preprocessing: Convenience Variabeln erstellen (segment_id, Kriterien)
 -   Schritt 0 Sample 1 Tier, begrenter Zeitraum
 -   Schritt 1: Segementierung
 -   Schritt 2: Steplength und Speed berechnen
@@ -86,13 +86,12 @@ editor_options:
 -   Schritt 4: Schwellenwert definieren und resting / moving festlegen
 -   Schritt 5: Nur resting Data weiterverarbeiten
 -   Schritt 6: Kriterien für Nester und Suhlen definieren und anwenden
--	Schritt 7: mit rle_id die einzelnen suhlen und Nester voneinander trennen
--	Schritt 8: Convex hull der getrennten Elemente berechnen
--   Schritt 9: Heatmap erstellen mit zu definierender Rastergrösse  
+-	Schritt 7: Convex hull der getrennten Elemente berechnen
+-   Schritt 8: Heatmap erstellen mit zu definierender Rastergrösse  
     \>\> Vorschlag: 100m da Arealstatistik dieses Mass aufweist
--   Schritt 10: Rasterfelder zuweisen, Context herstellen
--   Schritt 11: Prozess mit Gesamtdaten testen
--   Schritt 12: Profit
+-   Schritt 9: Rasterfelder zuweisen, Context herstellen
+-   Schritt 10: Prozess mit Gesamtdaten testen
+-   Schritt 11: Profit
 
 # Definitionen
 
