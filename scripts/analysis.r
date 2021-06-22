@@ -443,25 +443,25 @@ wildboar_6 <- wildboar_6 %>%
     nest = if_else(nest_month & nest_day & nest_area,
                            TRUE, FALSE),
     conflict = if_else(nest & wallow, TRUE, FALSE),
-    site_type = case_when(
+    site_type = as.factor(case_when(
       conflict == TRUE ~"both",
       nest == TRUE~"nest",
       wallow == TRUE~"wallow",
       !wallow & !nest == TRUE~"none",
-      TRUE~"not classified" #Default case
-      )
+      TRUE~"NA" #Default case
+      ))
     )
-# check the number of wallows  
+# check the dataset (number of wallows, nests, NAs etc) 
 summary(wildboar_6)
 
 # plot trajectories ####
-
+# generate new samples from wildboar_6 data
 ueli_filter <- wildboar_6 %>% 
   filter(
     year == 2016,
     # month == 5,
     TierName == "Ueli",
-    wallow == TRUE
+    site_type == "nest"
   )
 
 frida_filter <- wildboar_6 %>% 
@@ -469,7 +469,7 @@ frida_filter <- wildboar_6 %>%
     year == 2016,
     # month == 5,
     TierName == "Frida",
-    nest == TRUE
+    site_type == "nest"
   )
 
 caro_filter <- wildboar_6 %>% 
@@ -477,11 +477,13 @@ caro_filter <- wildboar_6 %>%
     year == 2016,
     # month == 5,
     TierName == "Caroline",
-    nest == TRUE
+    # site_type == "nest"
   )
-
+# Plot site_type
+# alter site_type to explore (nest, wallow, both, none and NA)
+# alter data to explore different boars
 ggplot(data=frida_filter, mapping=aes(E, N, colour = segment_id))  +
-  geom_path() +
+  #geom_path() +
   geom_point() +
   coord_equal() +
   labs(title = "Moving segements coloured by segment ID") + 
@@ -489,52 +491,66 @@ ggplot(data=frida_filter, mapping=aes(E, N, colour = segment_id))  +
   # RStudio crashes if legend.position "bottom" is chosen
   theme(legend.position = "none")
 
-caro %>%
-  ggplot(aes(E, N)) +
-  geom_path(alpha = 0.5) +
-  geom_point(alpha = 0.5) +
-  theme_bw() +
-  theme(panel.border = element_blank())
+# Unused plots
+# caro %>%
+#   ggplot(aes(E, N)) +
+#   geom_path(alpha = 0.5) +
+#   geom_point(alpha = 0.5) +
+#   theme_bw() +
+#   theme(panel.border = element_blank())
+# 
+# caro_3 %>%
+#   ggplot(aes(E, N)) +
+#   geom_path(alpha = 0.5) +
+#   geom_point(alpha = 0.5) +
+#   theme_bw() +
+#   theme(panel.border = element_blank())
+# 
+# frida %>%
+#   ggplot(aes(E, N)) +
+#   geom_path(alpha = 0.5) +
+#   geom_point(alpha = 0.5) +
+#   theme_bw() +
+#   theme(panel.border = element_blank())
+# 
+# frida_3 %>%
+#   ggplot(aes(E, N)) +
+#   geom_path(alpha = 0.5) +
+#   geom_point(alpha = 0.5) +
+#   theme_bw() +
+#   theme(panel.border = element_blank())
+# 
+# ueli %>%
+#   ggplot(aes(E, N)) +
+#   geom_path(alpha = 0.5) +
+#   geom_point(alpha = 0.5) +
+#   theme_bw() +
+#   theme(panel.border = element_blank())
+# 
+# ueli_3 %>%
+#   ggplot(aes(E, N)) +
+#   geom_path(alpha = 0.5) +
+#   geom_point(alpha = 0.5) +
+#   theme_bw() +
+#   theme(panel.border = element_blank())
+# 
+# mcp_caro <- caro %>%
+#   group_by(TierID, TierName, CollarID) %>%
+#   summarise() %>%
+#   st_convex_hull()
+# 
+# # plot convex hull ####
+# 
+# tmap_mode("view") +
+#   tm_shape(mcp_caro) +
+#   tm_fill("TierName", alpha = 0.5) +
+#   tm_borders(col = "red", lwd = 1) +
+#   tm_layout(legend.bg.color = "white")
 
-caro_3 %>%
-  ggplot(aes(E, N)) +
-  geom_path(alpha = 0.5) +
-  geom_point(alpha = 0.5) +
-  theme_bw() +
-  theme(panel.border = element_blank())
+# step 7: create a convex hull for segmented trajectories####
 
-frida %>%
-  ggplot(aes(E, N)) +
-  geom_path(alpha = 0.5) +
-  geom_point(alpha = 0.5) +
-  theme_bw() +
-  theme(panel.border = element_blank())
-
-frida_3 %>%
-  ggplot(aes(E, N)) +
-  geom_path(alpha = 0.5) +
-  geom_point(alpha = 0.5) +
-  theme_bw() +
-  theme(panel.border = element_blank())
-
-ueli %>%
-  ggplot(aes(E, N)) +
-  geom_path(alpha = 0.5) +
-  geom_point(alpha = 0.5) +
-  theme_bw() +
-  theme(panel.border = element_blank())
-
-ueli_3 %>%
-  ggplot(aes(E, N)) +
-  geom_path(alpha = 0.5) +
-  geom_point(alpha = 0.5) +
-  theme_bw() +
-  theme(panel.border = element_blank())
-
-# convex hull ####
-
-mcp_caro <- caro %>%
-  group_by(TierID, TierName, CollarID) %>%
+mcp_caro <- caro_filter %>%
+  group_by(site_type, segment_id) %>%
   summarise() %>%
   st_convex_hull()
 
@@ -542,7 +558,7 @@ mcp_caro <- caro %>%
 
 tmap_mode("view") +
   tm_shape(mcp_caro) +
-  tm_fill("TierName", alpha = 0.5) +
+  tm_fill("segment_id", alpha = 0.5) +
   tm_borders(col = "red", lwd = 1) +
   tm_layout(legend.bg.color = "white")
 
