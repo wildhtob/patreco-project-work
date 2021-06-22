@@ -337,10 +337,10 @@ wildboar_lags <- wildboar_lags %>%
 seq3 <- seq(from = 1, to = nrow(wildboar_raw), by = 3)
 seq6 <- seq(from = 1, to = nrow(wildboar_raw), by = 6)
 seq9 <- seq(from = 1, to = nrow(wildboar_raw), by = 9)
-# Mein Vorschlag: unsere Auswertung aller Daten basiert auf wildboar_6
-wildboar_3 <- wildboar_lags %>% slice(seq3)
-wildboar_6 <- wildboar_lags %>% slice(seq6)
-wildboar_9 <- wildboar_lags %>% slice(seq9)
+# Mein Vorschlag: unsere Auswertung aller Daten basiert auf wildboar_lags
+# wildboar_3 <- wildboar_lags %>% slice(seq3)
+# wildboar_6 <- wildboar_lags %>% slice(seq6)
+# wildboar_9 <- wildboar_lags %>% slice(seq9)
 
 # Sample data -------------------------------------------------------------
 
@@ -435,7 +435,7 @@ hist_steplength + geom_histogram(binwidth = 5) +
 
 # step 4 to 6: assign movement status and apply criterias####
 # for all data
-wildboar_6 <- wildboar_6 %>% 
+wildboar_lags <- wildboar_lags %>% 
   filter(mov_status == "resting") %>% 
   mutate (
     wallow = if_else(wallow_month & wallow_day & wallow_area,
@@ -452,11 +452,11 @@ wildboar_6 <- wildboar_6 %>%
       ))
     )
 # check the dataset (number of wallows, nests, NAs etc) 
-summary(wildboar_6)
+summary(wildboar_lags)
 
 # plot trajectories ####
-# generate new samples from wildboar_6 data
-ueli_filter <- wildboar_6 %>% 
+# generate new samples from wildboar_lags data
+ueli_filter <- wildboar_lags %>% 
   filter(
     year == 2016,
     # month == 5,
@@ -464,7 +464,7 @@ ueli_filter <- wildboar_6 %>%
     site_type == "wallow"
   )
 
-frida_filter <- wildboar_6 %>% 
+frida_filter <- wildboar_lags %>% 
   filter(
     year == 2016,
     # month == 5,
@@ -472,7 +472,7 @@ frida_filter <- wildboar_6 %>%
     site_type == "nest"
   )
 
-caro_filter <- wildboar_6 %>% 
+caro_filter <- wildboar_lags %>% 
   filter(
     year == 2016,
     # month == 5,
