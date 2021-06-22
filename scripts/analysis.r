@@ -16,7 +16,30 @@ library(zoo) # moving window function
 library(forcats) # handling factor levels
 
 # functions ---------------------------------------------------------------
+calc_movement_param <- function(boar_dt) {
+  boar_dt <- boar_dt %>% 
+    mutate(timelag = as.integer(difftime(lead(DatetimeUTC), DatetimeUTC, units = "secs")),
+           steplength = sqrt(((E-lead(E,1))^2+(N-lead(N,1))^2)),
+           speed = steplength/timelag,
+           nMinus3 = sqrt((lag(E, 3) - E)^2 + (lag(N, 3) - N)^2),
+           nMinus2 = sqrt((lag(E, 2) - E)^2 + (lag(N, 2) - N)^2),
+           nMinus1 = sqrt((lag(E, 1) - E)^2 + (lag(N, 1) - N)^2),
+           nPlus1 = sqrt((E - lead(E, 1))^2 + (N - lead(N, 1))^2),
+           nPlus2 = sqrt((E - lead(E, 2))^2 + (N - lead(N, 2))^2),
+           nPlus3 = sqrt((E - lead(E, 3))^2 + (N - lead(N, 3))^2)
+    ) %>% 
+    rowwise() %>%
+    mutate(
+      stepmean = mean(c(nMinus3, nMinus2, nMinus1,nPlus1,nPlus2, nPlus3))
+    ) %>%
+    ungroup()
+  boar_dt
+}
 
+rle_id <- function(vec){
+  x <- rle(vec)$lengths
+  as.factor(rep(seq_along(x), times=x))
+}
 # data import -------------------------------------------------------------
 
 wildboar_raw <- wildschwein_BE
@@ -181,25 +204,6 @@ wildboar_lag_cat <- wildboar_lags %>%
 # }
 
 # preprocessing ####
-calc_movement_param <- function(boar_dt) {
-  boar_dt <- boar_dt %>% 
-    mutate(timelag = as.integer(difftime(lead(DatetimeUTC), DatetimeUTC, units = "secs")),
-           steplength = sqrt(((E-lead(E,1))^2+(N-lead(N,1))^2)),
-           speed = steplength/timelag,
-           nMinus3 = sqrt((lag(E, 3) - E)^2 + (lag(N, 3) - N)^2),
-           nMinus2 = sqrt((lag(E, 2) - E)^2 + (lag(N, 2) - N)^2),
-           nMinus1 = sqrt((lag(E, 1) - E)^2 + (lag(N, 1) - N)^2),
-           nPlus1 = sqrt((E - lead(E, 1))^2 + (N - lead(N, 1))^2),
-           nPlus2 = sqrt((E - lead(E, 2))^2 + (N - lead(N, 2))^2),
-           nPlus3 = sqrt((E - lead(E, 3))^2 + (N - lead(N, 3))^2)
-    ) %>% 
-    rowwise() %>%
-    mutate(
-      stepmean = mean(c(nMinus3, nMinus2, nMinus1,nPlus1,nPlus2, nPlus3))
-    ) %>%
-    ungroup()
-  boar_dt
-}
 
 # assign convenience variables for step 6
 wildboar_lags <- wildboar_lags %>% 
@@ -236,7 +240,6 @@ wildboar_lags <- wildboar_lags %>%
       Frucht == "Weide"~FALSE,
       Frucht == "Lupinen"~FALSE,
       Frucht == "Flugplatz"~FALSE,
-      Frucht == "Flugplatz"~FALSE,
       Frucht == "Mais"~FALSE,
       Frucht == "Raps"~FALSE,
       Frucht == "Karotten"~FALSE,
@@ -262,7 +265,47 @@ wildboar_lags <- wildboar_lags %>%
       TRUE~NA #Default case
     ),
     nest_day = wallow_day,
-    nest_month = if_else(month >= 5 & month <= 10, TRUE, FALSE)
+    nest_month = if_else(month >= 5 & month <= 10, TRUE, FALSE),
+    nest_area = case_when(
+      Frucht == "Feuchtgebiet"~FALSE,
+      Frucht == "Wald"~TRUE,
+      Frucht == "Weizen"~TRUE,
+      Frucht == "Gerste"~TRUE,
+      Frucht == "Zwiebeln"~FALSE,
+      Frucht == "Bohnen"~FALSE,
+      Frucht == "Kartoffeln"~FALSE,
+      Frucht == "Rueben"~FALSE,
+      Frucht == "Chinaschilf"~FALSE,
+      Frucht == "Mangold"~FALSE,
+      Frucht == "Wiese"~FALSE,
+      Frucht == "Kohlrabi"~FALSE,
+      Frucht == "Weide"~FALSE,
+      Frucht == "Lupinen"~FALSE,
+      Frucht == "Flugplatz"~FALSE,
+      Frucht == "Mais"~TRUE,
+      Frucht == "Raps"~TRUE,
+      Frucht == "Karotten"~FALSE,
+      Frucht == "Acker"~FALSE,
+      Frucht == "Sonnenblumen"~FALSE,
+      Frucht == "Erbsen"~FALSE,
+      Frucht == "Kohl"~FALSE,
+      Frucht == "Hafer"~TRUE,
+      Frucht == "Roggen"~TRUE,
+      Frucht == "Salat"~FALSE,
+      Frucht == "Rhabarber"~FALSE,
+      Frucht == "Sellerie"~FALSE,
+      Frucht == "Brache"~FALSE,
+      Frucht == "Spargel"~FALSE,
+      Frucht == "Obstplantage"~FALSE,
+      Frucht == "Fenchel"~FALSE,
+      Frucht == "Gemuese"~FALSE,
+      Frucht == "Gewaechshaus"~FALSE,
+      Frucht == "Zuchetti"~FALSE,
+      Frucht == "Zucchetti"~FALSE,
+      Frucht == "Flachs"~FALSE,
+      Frucht == "Kuerbis"~FALSE,
+      TRUE~NA #Default case
+    )
   )
 # This checks a certain variable for NAs
 # na_check <- wildboar_lags %>% 
@@ -391,12 +434,17 @@ caro_6 <- caro_6 %>%
 wildboar_6 <- wildboar_6 %>% 
   mutate (mov_status = if_else(stepmean <= threshold, "resting", "moving")) %>% 
   filter(mov_status == "resting") %>% 
-  mutate (wallow = if_else(wallow_month & 
-                             wallow_day & 
-                             wallow_area,
-                           TRUE, FALSE))
+  mutate (
+    wallow = if_else(wallow_month & wallow_day & wallow_area,
+                           TRUE, FALSE), 
+    nest = if_else(nest_month & nest_day & nest_area,
+                           TRUE, FALSE),
+    conflict = if_else(nest & wallow, TRUE, FALSE))
 # check the number of wallows  
 summary(wildboar_6)
+
+
+
 
 # plot trajectories ####
 
