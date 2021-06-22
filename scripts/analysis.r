@@ -57,11 +57,17 @@ head(wildboar_overlap)
 # import feldaufnahmen
 feldaufnahmen <- read_sf("data/Feldaufnahmen_Fanel.gpkg")
 
-# add geometry ------------------------------------------------------------
+# add geometry and time---------------------------------------------------------
 # argument remove = False keeps the coordinates E and N 
 wildboar_sf <- st_as_sf(wildboar_raw, coords = c("E", "N"), crs = 2056, remove = FALSE)
 # join feldaufnahmen with wildboar data
 wildboar_sf <- st_join(x=wildboar_sf, y=feldaufnahmen)
+# add time
+wildboar_sf <- wildboar_sf %>% 
+  mutate(
+    month = month(DatetimeUTC),
+    year = year(DatetimeUTC)
+  )
 
 # data exploration --------------------------------------------------------
 
@@ -212,7 +218,6 @@ wildboar_lags <- wildboar_lags %>%
     # enable line below if you want to filter all NAs in Frucht
     # filter(!is.na(Frucht)) %>% 
     mutate(
-    month = month(DatetimeUTC),
     wallow_month = if_else(month > 4 & month < 10, TRUE, FALSE),
     wallow_day = case_when(
       day == "Abenddaemmerung"~FALSE,
@@ -318,13 +323,14 @@ wildboar_lags <- wildboar_lags %>%
   mutate(segment_id = rle_id(static)) %>% 
   # select only rows with an certain timelag
   # if no filter is applied, sequencing creates misleading results
+  # fraglich, ob der filter hier angewendet werden soll oder nach Sample data
   filter(timelag_rounded == 900)
 
 # cross-scale movement analysis ####
 seq3 <- seq(from = 1, to = nrow(wildboar_raw), by = 3)
 seq6 <- seq(from = 1, to = nrow(wildboar_raw), by = 6)
 seq9 <- seq(from = 1, to = nrow(wildboar_raw), by = 9)
-
+# Mein Vorschlag: unsere Auswertung aller Daten basiert auf wildboar_6
 wildboar_3 <- wildboar_lags %>% slice(seq3)
 wildboar_6 <- wildboar_lags %>% slice(seq6)
 wildboar_9 <- wildboar_lags %>% slice(seq9)
@@ -332,14 +338,9 @@ wildboar_9 <- wildboar_lags %>% slice(seq9)
 
 # Sample data -------------------------------------------------------------
 
-# step0 : select caroline and two weeks ####
-
-wildboar_sf <- wildboar_sf %>% 
-  mutate(
-    month = month(DatetimeUTC),
-    year = year(DatetimeUTC)
-         )
-
+# step0 : select three different wildboars for a duration of two weeks ####
+# Kritisch: hier werden samples aus wildboar_sf kreiert. so gehen viele
+# convenience variablen verloren. Zudem ist es fehleranfälliger. Überdenken.
 # create a sample of caroline
 caro <- wildboar_sf %>% 
   filter(
@@ -453,6 +454,31 @@ wildboar_6 <- wildboar_6 %>%
 summary(wildboar_6)
 
 # plot trajectories ####
+
+ueli_filter <- wildboar_6 %>% 
+  filter(
+    year == 2016,
+    month == 5,
+    TierName == "Ueli",
+    wallow = TRUE
+  )
+
+frida_filter <- wildboar_6 %>% 
+  filter(
+    year == 2016,
+    month == 5,
+    TierName == "Frida",
+    nest = TRUE
+  )
+
+ggplot(data=frida_filter, mapping=aes(E, N, colour = segment_id))  +
+  geom_path() +
+  geom_point() +
+  coord_equal() +
+  labs(title = "Moving segements coloured by segment ID (uncleaned)") + 
+  theme_classic() +
+  theme(legend.position = "none")
+
 
 caro %>%
   ggplot(aes(E, N)) +
