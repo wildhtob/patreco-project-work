@@ -13,6 +13,7 @@ library(sf) # handling spatial data
 library(janitor) # clean and consistent naming
 library(zoo) # moving window function
 library(forcats) # handling factor levels
+library(raster) # rasterizing vector data
 
 # globals ----------------------------------------------------------------------
 # threshold that triggers the segmentation of the movement trajectory
@@ -437,7 +438,11 @@ frida_6 <- frida %>% slice(frida_seq6)
 ueli_3 <- ueli %>% slice(ueli_seq3)
 ueli_6 <- ueli %>% slice(ueli_seq6)
 
-# step 2: calculate speed, steplength and timelag for segmented data ####
+
+# step 2: calculate speed, steplength and timelag for segmented da --------
+
+
+
 # for sample data, for wildboar_lags its already done
 caro <- calc_movement_param(caro)
 caro_3 <- calc_movement_param(caro_3)
@@ -471,7 +476,10 @@ ueli_6 <- calc_movement_param(ueli_6)
 #   .$steplength / .$timelag
 # }
 
-# step 3: plot histogram and movement trajectories ####
+
+# step 3: plot histogram and movement trajectories ------------------------
+
+
 # plot histogram of steplmean
 # mit einem stepmean von 6 Datenpunkten im Intervall von 15 Minuten wird
 # meiner Meinung nach gut ersichtlich wann die Wildschweine pausieren.
@@ -484,7 +492,10 @@ hist_steplength + geom_histogram(binwidth = 5) +
   theme_bw() +
   theme(panel.border = element_blank())
 
-# step 4 to 6: assign movement status and apply criterias####
+
+# step 4 to 6: assign movement status and apply criterias -----------------
+
+
 # for all data
 wildboar_lags <- wildboar_lags %>% 
   group_by(segment_id) %>% 
@@ -511,7 +522,10 @@ wildboar_lags <- wildboar_lags %>%
 # check the dataset (number of wallows, nests, NAs etc) 
 summary(wildboar_lags)
 
-# plot trajectories ####
+
+# plot trajectories -------------------------------------------------------
+
+
 # generate new samples from wildboar_lags data
 ueli_filter <- wildboar_lags %>% 
   filter(
@@ -548,7 +562,10 @@ ggplot(data=ueli_filter, mapping=aes(E, N, colour = segment_id))  +
   # RStudio crashes if legend.position "bottom" is chosen
   theme(legend.position = "none")
 
-# Unused plots ####
+
+# unused plots ------------------------------------------------------------
+
+
 # caro %>%
 #   ggplot(aes(E, N)) +
 #   geom_path(alpha = 0.5) +
@@ -604,6 +621,8 @@ ggplot(data=ueli_filter, mapping=aes(E, N, colour = segment_id))  +
 #   tm_borders(col = "red", lwd = 1) +
 #   tm_layout(legend.bg.color = "white")
 
+
+
 # mcp_caro <- caro_filter %>%
 #   group_by(site_type, segment_id) %>%
 #   summarise() %>%
@@ -614,4 +633,36 @@ ggplot(data=ueli_filter, mapping=aes(E, N, colour = segment_id))  +
 #   tm_fill("segment_id", alpha = 0.5) +
 #   tm_borders(col = "red", lwd = 1) +
 #   tm_layout(legend.bg.color = "white")
+
+# rasterize data ----------------------------------------------------------
+
+# Erstellein eines raster-templates mit aAufloesung 100m (analog zu Arealstatistik)
+raster_template <- raster(extent(wildboar_lags), resolution = 100, crs = 2056) 
+
+
+wallows <- wildboar_lags %>% 
+  filter(wallow == "TRUE")
+
+nests <- wildboar_lags %>% 
+  filter(nest == "TRUE")
+
+wallows_raster <- rasterize(wallows, raster_template, field = 1, fun = "count")
+nests_raster <- rasterize(nests, raster_template, field = 1, fun = "count")
+
+tm <- 
+tmap_mode("view") +
+  tm_shape(nests_raster) +
+  tm_raster(palette = "Oranges", title = "Nests") +
+  tm_layout(legend.outside = TRUE) +
+  tm_shape(wallows_raster) +
+  tm_raster(palette = "Purples", title = "Wallows") +
+  tm_view(control.position = c("right","bottom"))
+
+tm %>% 
+  tmap_leaflet() %>% 
+  addLayersControl(
+    overlayGroups = c("Nests", "Wallows"),
+    options = layersControlOptions(collapsed = FALSE)
+  )
+  
 
