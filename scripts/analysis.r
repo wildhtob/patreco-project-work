@@ -21,32 +21,34 @@ segment_trigger <- as.numeric(30)
 
 # functions ---------------------------------------------------------------
 calc_movement_param <- function(boar_dt) {
-  boar_dt <- boar_dt %>% 
-    mutate(timelag = as.integer(difftime(lead(DatetimeUTC), DatetimeUTC, units = "secs")),
-           steplength = sqrt(((E-lead(E,1))^2+(N-lead(N,1))^2)),
-           speed = steplength/timelag,
-           nMinus3 = sqrt((lag(E, 3) - E)^2 + (lag(N, 3) - N)^2),
-           nMinus2 = sqrt((lag(E, 2) - E)^2 + (lag(N, 2) - N)^2),
-           nMinus1 = sqrt((lag(E, 1) - E)^2 + (lag(N, 1) - N)^2),
-           nPlus1 = sqrt((E - lead(E, 1))^2 + (N - lead(N, 1))^2),
-           nPlus2 = sqrt((E - lead(E, 2))^2 + (N - lead(N, 2))^2),
-           nPlus3 = sqrt((E - lead(E, 3))^2 + (N - lead(N, 3))^2)
-    ) %>% 
+  boar_dt <- boar_dt %>%
+    mutate(
+      timelag = as.integer(difftime(lead(DatetimeUTC), DatetimeUTC, units = "secs")),
+      steplength = sqrt(((E - lead(E, 1))^2 + (N - lead(N, 1))^2)),
+      speed = steplength / timelag,
+      nMinus3 = sqrt((lag(E, 3) - E)^2 + (lag(N, 3) - N)^2),
+      nMinus2 = sqrt((lag(E, 2) - E)^2 + (lag(N, 2) - N)^2),
+      nMinus1 = sqrt((lag(E, 1) - E)^2 + (lag(N, 1) - N)^2),
+      nPlus1 = sqrt((E - lead(E, 1))^2 + (N - lead(N, 1))^2),
+      nPlus2 = sqrt((E - lead(E, 2))^2 + (N - lead(N, 2))^2),
+      nPlus3 = sqrt((E - lead(E, 3))^2 + (N - lead(N, 3))^2)
+    ) %>%
     rowwise() %>%
     mutate(
-      stepmean = mean(c(nMinus3, nMinus2, nMinus1,nPlus1,nPlus2, nPlus3)),
+      stepmean = mean(c(nMinus3, nMinus2, nMinus1, nPlus1, nPlus2, nPlus3)),
     ) %>%
-    ungroup() %>% 
-    mutate (
+    ungroup() %>%
+    mutate(
       mov_static = if_else(stepmean < segment_trigger, TRUE, FALSE),
       mov_status = if_else(stepmean < segment_trigger, "resting", "moving"),
-      cma_static = stepmean < mean(stepmean, na.rm = TRUE))
+      cma_static = stepmean < mean(stepmean, na.rm = TRUE)
+    )
   boar_dt
 }
 
-rle_id <- function(vec){
+rle_id <- function(vec) {
   x <- rle(vec)$lengths
-  as.factor(rep(seq_along(x), times=x))
+  as.factor(rep(seq_along(x), times = x))
 }
 # data import -------------------------------------------------------------
 
@@ -65,12 +67,12 @@ head(wildboar_overlap)
 feldaufnahmen <- read_sf("data/Feldaufnahmen_Fanel.gpkg")
 
 # add geometry and time---------------------------------------------------------
-# argument remove = False keeps the coordinates E and N 
+# argument remove = False keeps the coordinates E and N
 wildboar_sf <- st_as_sf(wildboar_raw, coords = c("E", "N"), crs = 2056, remove = FALSE)
 # join feldaufnahmen with wildboar data
-wildboar_sf <- st_join(x=wildboar_sf, y=feldaufnahmen)
+wildboar_sf <- st_join(x = wildboar_sf, y = feldaufnahmen)
 # add time
-wildboar_sf <- wildboar_sf %>% 
+wildboar_sf <- wildboar_sf %>%
   mutate(
     month = month(DatetimeUTC),
     year = year(DatetimeUTC)
@@ -79,22 +81,22 @@ wildboar_sf <- wildboar_sf %>%
 # data exploration --------------------------------------------------------
 
 # plotting data points ####
-# 
+#
 # ggplot(wildboar_sf, aes(color = TierName)) +
 #   geom_sf(alpha = 0.4) +
 #   coord_sf(datum = 2056)
-# 
+#
 # ggplot(wildboar_sf, aes(color = as.factor(TierID))) +
 #   geom_sf(alpha = 0.4) +
 #   coord_sf(datum = 2056) +
 #   scale_color_discrete(name = "AnimalID")
 
 # sampling regime ####
-# 
+#
 # limits <- c(0,200)
 # breaks = seq(0,200,50)
 # labels = paste(c(rep("",length(breaks)-1),">"), breaks)
-# 
+#
 # wildboar_raw %>%
 #   mutate(TierName = fct_reorder(TierName, DatetimeUTC,min, .desc = TRUE)) %>%
 #   group_by(TierID, TierName, CollarID) %>%
@@ -111,23 +113,23 @@ wildboar_sf <- wildboar_sf %>%
 # temporal overlap ####
 
 # ?wildschwein_overlap_temp
-# 
+#
 # sampling_periods <- wildboar_raw %>%
 #   group_by(TierID, TierName, CollarID) %>%
 #   summarise(
 #     min = min(DatetimeUTC),
 #     max = max(DatetimeUTC)
 #   )
-# 
+#
 # wildboar_overlap <- wildboar_overlap %>%
 #   left_join(sampling_periods, by = c("TierID", "TierName", "CollarID"))
-# 
+#
 # wildboar_overlap %>%
 #   mutate(TierCollar = paste(TierName, CollarID)) %>%
 #   ggplot(aes(xmin = min, xmax = max, y = TierCollar)) +
 #   geom_errorbarh() +
 #   facet_grid(Groups~., scales = "free_y", space = "free_y")
-# 
+#
 # ggplot(wildboar_sf, aes(x = DatetimeUTC, y = TierName)) +
 #   geom_point() +
 #   scale_x_datetime(breaks = "1 month") +
@@ -137,25 +139,25 @@ wildboar_sf <- wildboar_sf %>%
 # spatial overlap ####
 
 # convex hull ####
-# 
+#
 # wildboar_sf <- wildboar_sf %>%
-#   mutate(tiercollar = paste(TierID, TierName, CollarID)) 
-# 
+#   mutate(tiercollar = paste(TierID, TierName, CollarID))
+#
 # mcp <- wildboar_sf %>%
 #   group_by(TierID, TierName, CollarID) %>%
 #   summarise() %>%
 #   st_convex_hull()
 
 # plot convex hull ####
-# 
+#
 # mcp %>%
 #   mutate(tiercollar = paste(TierID, TierName, CollarID)) %>%
 #   ggplot(aes(fill = factor(TierID))) + geom_sf(alpha = 0.1) +
 #   coord_sf(datum = 2056) +
 #   facet_wrap(~tiercollar) +
 #   theme(legend.position = "none")
-# 
-# 
+#
+#
 # tmap_mode("view") +
 #   tm_shape(mcp) +
 #   tm_fill("TierName", alpha = 0.5) +
@@ -167,15 +169,15 @@ wildboar_sf <- wildboar_sf %>%
 
 # replace wildboar_raw by wildboar_sf for spatial information
 wildboar_lags <- wildboar_sf %>%
-  group_by(TierID) %>% 
+  group_by(TierID) %>%
   mutate(timelag = as.integer(difftime(lead(DatetimeUTC), DatetimeUTC), units = "secs"))
 
-# round lags on -2 digits 
+# round lags on -2 digits
 wildboar_lags$timelag_rounded <- round(wildboar_lags$timelag, -2)
 
 # build categories with rounded lags
 wildboar_lag_cat <- wildboar_lags %>%
-#  st_drop_geometry() %>%
+  #  st_drop_geometry() %>%
   group_by(timelag_rounded) %>%
   summarise(count = n())
 
@@ -204,15 +206,15 @@ wildboar_lag_cat <- wildboar_lags %>%
 
 
 # sample code for different intervals (to be discussed)
-# wildboar_3 <- wildboar_3 %>% 
+# wildboar_3 <- wildboar_3 %>%
 #   mutate(timelag = as.integer(difftime(lead(DatetimeUTC), DatetimeUTC), units = "secs"))
-# 
+#
 # wildboar_3$steplength <- wildboar_3 %>%
 #   {
 #     (.$E - lead(.$E))^2 + (.$N - lead(.$N))^2
 #   } %>%
 #   sqrt()
-# 
+#
 # wildboar_3$speed <- wildboar_3 %>% {
 #   .$steplength / .$timelag
 # }
@@ -220,166 +222,166 @@ wildboar_lag_cat <- wildboar_lags %>%
 # preprocessing ####
 
 # assign convenience variables for step 6
-wildboar_lags <- wildboar_lags %>% 
-# add wallow and nest criterias according to literature
-    # enable line below if you want to filter all NAs in Frucht
-    # filter(!is.na(Frucht)) %>% 
-    mutate(
+wildboar_lags <- wildboar_lags %>%
+  # add wallow and nest criterias according to literature
+  # enable line below if you want to filter all NAs in Frucht
+  # filter(!is.na(Frucht)) %>%
+  mutate(
     wallow_month = if_else(month > 3 & month < 10, TRUE, FALSE),
     wallow_day = case_when(
-      day == "Abenddaemmerung"~FALSE,
-      day == "Morgendaemmerung"~TRUE,
-      day == "Nacht"~FALSE,
-      day == "1Nachtviertel"~FALSE,
-      day == "2Nachtviertel"~FALSE,
-      day == "3Nachtviertel"~FALSE,
-      day == "4Nachtviertel"~FALSE,
-      day == "Tag"~TRUE,
-      TRUE~NA #Default case
+      day == "Abenddaemmerung" ~ FALSE,
+      day == "Morgendaemmerung" ~ TRUE,
+      day == "Nacht" ~ FALSE,
+      day == "1Nachtviertel" ~ FALSE,
+      day == "2Nachtviertel" ~ FALSE,
+      day == "3Nachtviertel" ~ FALSE,
+      day == "4Nachtviertel" ~ FALSE,
+      day == "Tag" ~ TRUE,
+      TRUE ~ NA # Default case
     ),
     wallow_area = case_when(
-      Frucht == "Feuchtgebiet"~TRUE, # Literature says so?
-      Frucht == "Wald"~TRUE,
-      Frucht == "Weizen"~FALSE,
-      Frucht == "Gerste"~FALSE,
-      Frucht == "Zwiebeln"~FALSE,
-      Frucht == "Bohnen"~FALSE,
-      Frucht == "Kartoffeln"~FALSE,
-      Frucht == "Rueben"~FALSE,
-      Frucht == "Chinaschilf"~FALSE,
-      Frucht == "Mangold"~FALSE,
-      Frucht == "Wiese"~FALSE,
-      Frucht == "Kohlrabi"~FALSE,
-      Frucht == "Weide"~FALSE,
-      Frucht == "Lupinen"~FALSE,
-      Frucht == "Flugplatz"~FALSE,
-      Frucht == "Mais"~FALSE,
-      Frucht == "Raps"~FALSE,
-      Frucht == "Karotten"~FALSE,
-      Frucht == "Acker"~FALSE,
-      Frucht == "Sonnenblumen"~FALSE,
-      Frucht == "Erbsen"~FALSE,
-      Frucht == "Kohl"~FALSE,
-      Frucht == "Hafer"~FALSE,
-      Frucht == "Roggen"~FALSE,
-      Frucht == "Salat"~FALSE,
-      Frucht == "Rhabarber"~FALSE,
-      Frucht == "Sellerie"~FALSE,
-      Frucht == "Brache"~FALSE,
-      Frucht == "Spargel"~FALSE,
-      Frucht == "Obstplantage"~FALSE,
-      Frucht == "Fenchel"~FALSE,
-      Frucht == "Gemuese"~FALSE,
-      Frucht == "Gewaechshaus"~FALSE,
-      Frucht == "Zuchetti"~FALSE,
-      Frucht == "Zucchetti"~FALSE,
-      Frucht == "Flachs"~FALSE,
-      Frucht == "Kuerbis"~FALSE,
-      TRUE~NA #Default case
+      Frucht == "Feuchtgebiet" ~ TRUE, # Literature says so?
+      Frucht == "Wald" ~ TRUE,
+      Frucht == "Weizen" ~ FALSE,
+      Frucht == "Gerste" ~ FALSE,
+      Frucht == "Zwiebeln" ~ FALSE,
+      Frucht == "Bohnen" ~ FALSE,
+      Frucht == "Kartoffeln" ~ FALSE,
+      Frucht == "Rueben" ~ FALSE,
+      Frucht == "Chinaschilf" ~ FALSE,
+      Frucht == "Mangold" ~ FALSE,
+      Frucht == "Wiese" ~ FALSE,
+      Frucht == "Kohlrabi" ~ FALSE,
+      Frucht == "Weide" ~ FALSE,
+      Frucht == "Lupinen" ~ FALSE,
+      Frucht == "Flugplatz" ~ FALSE,
+      Frucht == "Mais" ~ FALSE,
+      Frucht == "Raps" ~ FALSE,
+      Frucht == "Karotten" ~ FALSE,
+      Frucht == "Acker" ~ FALSE,
+      Frucht == "Sonnenblumen" ~ FALSE,
+      Frucht == "Erbsen" ~ FALSE,
+      Frucht == "Kohl" ~ FALSE,
+      Frucht == "Hafer" ~ FALSE,
+      Frucht == "Roggen" ~ FALSE,
+      Frucht == "Salat" ~ FALSE,
+      Frucht == "Rhabarber" ~ FALSE,
+      Frucht == "Sellerie" ~ FALSE,
+      Frucht == "Brache" ~ FALSE,
+      Frucht == "Spargel" ~ FALSE,
+      Frucht == "Obstplantage" ~ FALSE,
+      Frucht == "Fenchel" ~ FALSE,
+      Frucht == "Gemuese" ~ FALSE,
+      Frucht == "Gewaechshaus" ~ FALSE,
+      Frucht == "Zuchetti" ~ FALSE,
+      Frucht == "Zucchetti" ~ FALSE,
+      Frucht == "Flachs" ~ FALSE,
+      Frucht == "Kuerbis" ~ FALSE,
+      TRUE ~ NA # Default case
     ),
     nest_day = case_when(
-      day == "Abenddaemmerung"~FALSE,
-      day == "Morgendaemmerung"~FALSE,
-      day == "Nacht"~FALSE,
-      day == "1Nachtviertel"~FALSE,
-      day == "2Nachtviertel"~FALSE,
-      day == "3Nachtviertel"~FALSE,
-      day == "4Nachtviertel"~FALSE,
-      day == "Tag"~TRUE,
-      TRUE~NA #Default case
+      day == "Abenddaemmerung" ~ FALSE,
+      day == "Morgendaemmerung" ~ FALSE,
+      day == "Nacht" ~ FALSE,
+      day == "1Nachtviertel" ~ FALSE,
+      day == "2Nachtviertel" ~ FALSE,
+      day == "3Nachtviertel" ~ FALSE,
+      day == "4Nachtviertel" ~ FALSE,
+      day == "Tag" ~ TRUE,
+      TRUE ~ NA # Default case
     ),
     nest_summer_mon = if_else(month >= 5 & month <= 10, TRUE, FALSE),
     nest_winter_mon = if_else(month >= 5 & month <= 10, FALSE, TRUE),
     nest_summer_area = case_when(
-      Frucht == "Feuchtgebiet"~FALSE,
-      Frucht == "Wald"~TRUE,
-      Frucht == "Weizen"~TRUE,
-      Frucht == "Gerste"~TRUE,
-      Frucht == "Zwiebeln"~FALSE,
-      Frucht == "Bohnen"~FALSE,
-      Frucht == "Kartoffeln"~FALSE,
-      Frucht == "Rueben"~FALSE,
-      Frucht == "Chinaschilf"~FALSE,
-      Frucht == "Mangold"~FALSE,
-      Frucht == "Wiese"~FALSE,
-      Frucht == "Kohlrabi"~FALSE,
-      Frucht == "Weide"~FALSE,
-      Frucht == "Lupinen"~FALSE,
-      Frucht == "Flugplatz"~FALSE,
-      Frucht == "Mais"~TRUE,
-      Frucht == "Raps"~TRUE,
-      Frucht == "Karotten"~FALSE,
-      Frucht == "Acker"~FALSE,
-      Frucht == "Sonnenblumen"~FALSE,
-      Frucht == "Erbsen"~FALSE,
-      Frucht == "Kohl"~FALSE,
-      Frucht == "Hafer"~TRUE,
-      Frucht == "Roggen"~TRUE,
-      Frucht == "Salat"~FALSE,
-      Frucht == "Rhabarber"~FALSE,
-      Frucht == "Sellerie"~FALSE,
-      Frucht == "Brache"~FALSE,
-      Frucht == "Spargel"~FALSE,
-      Frucht == "Obstplantage"~FALSE,
-      Frucht == "Fenchel"~FALSE,
-      Frucht == "Gemuese"~FALSE,
-      Frucht == "Gewaechshaus"~FALSE,
-      Frucht == "Zuchetti"~FALSE,
-      Frucht == "Zucchetti"~FALSE,
-      Frucht == "Flachs"~FALSE,
-      Frucht == "Kuerbis"~FALSE,
-      TRUE~NA #Default case
+      Frucht == "Feuchtgebiet" ~ FALSE,
+      Frucht == "Wald" ~ TRUE,
+      Frucht == "Weizen" ~ TRUE,
+      Frucht == "Gerste" ~ TRUE,
+      Frucht == "Zwiebeln" ~ FALSE,
+      Frucht == "Bohnen" ~ FALSE,
+      Frucht == "Kartoffeln" ~ FALSE,
+      Frucht == "Rueben" ~ FALSE,
+      Frucht == "Chinaschilf" ~ FALSE,
+      Frucht == "Mangold" ~ FALSE,
+      Frucht == "Wiese" ~ FALSE,
+      Frucht == "Kohlrabi" ~ FALSE,
+      Frucht == "Weide" ~ FALSE,
+      Frucht == "Lupinen" ~ FALSE,
+      Frucht == "Flugplatz" ~ FALSE,
+      Frucht == "Mais" ~ TRUE,
+      Frucht == "Raps" ~ TRUE,
+      Frucht == "Karotten" ~ FALSE,
+      Frucht == "Acker" ~ FALSE,
+      Frucht == "Sonnenblumen" ~ FALSE,
+      Frucht == "Erbsen" ~ FALSE,
+      Frucht == "Kohl" ~ FALSE,
+      Frucht == "Hafer" ~ TRUE,
+      Frucht == "Roggen" ~ TRUE,
+      Frucht == "Salat" ~ FALSE,
+      Frucht == "Rhabarber" ~ FALSE,
+      Frucht == "Sellerie" ~ FALSE,
+      Frucht == "Brache" ~ FALSE,
+      Frucht == "Spargel" ~ FALSE,
+      Frucht == "Obstplantage" ~ FALSE,
+      Frucht == "Fenchel" ~ FALSE,
+      Frucht == "Gemuese" ~ FALSE,
+      Frucht == "Gewaechshaus" ~ FALSE,
+      Frucht == "Zuchetti" ~ FALSE,
+      Frucht == "Zucchetti" ~ FALSE,
+      Frucht == "Flachs" ~ FALSE,
+      Frucht == "Kuerbis" ~ FALSE,
+      TRUE ~ NA # Default case
     ),
     nest_winter_area = case_when(
-      Frucht == "Feuchtgebiet"~TRUE,
-      Frucht == "Wald"~TRUE,
-      Frucht == "Weizen"~FALSE,
-      Frucht == "Gerste"~FALSE,
-      Frucht == "Zwiebeln"~FALSE,
-      Frucht == "Bohnen"~FALSE,
-      Frucht == "Kartoffeln"~FALSE,
-      Frucht == "Rueben"~FALSE,
-      Frucht == "Chinaschilf"~FALSE,
-      Frucht == "Mangold"~FALSE,
-      Frucht == "Wiese"~FALSE,
-      Frucht == "Kohlrabi"~FALSE,
-      Frucht == "Weide"~FALSE,
-      Frucht == "Lupinen"~FALSE,
-      Frucht == "Flugplatz"~FALSE,
-      Frucht == "Mais"~FALSE,
-      Frucht == "Raps"~FALSE,
-      Frucht == "Karotten"~FALSE,
-      Frucht == "Acker"~FALSE,
-      Frucht == "Sonnenblumen"~FALSE,
-      Frucht == "Erbsen"~FALSE,
-      Frucht == "Kohl"~FALSE,
-      Frucht == "Hafer"~FALSE,
-      Frucht == "Roggen"~FALSE,
-      Frucht == "Salat"~FALSE,
-      Frucht == "Rhabarber"~FALSE,
-      Frucht == "Sellerie"~FALSE,
-      Frucht == "Brache"~FALSE,
-      Frucht == "Spargel"~FALSE,
-      Frucht == "Obstplantage"~FALSE,
-      Frucht == "Fenchel"~FALSE,
-      Frucht == "Gemuese"~FALSE,
-      Frucht == "Gewaechshaus"~FALSE,
-      Frucht == "Zuchetti"~FALSE,
-      Frucht == "Zucchetti"~FALSE,
-      Frucht == "Flachs"~FALSE,
-      Frucht == "Kuerbis"~FALSE,
-      TRUE~NA #Default case
+      Frucht == "Feuchtgebiet" ~ TRUE,
+      Frucht == "Wald" ~ TRUE,
+      Frucht == "Weizen" ~ FALSE,
+      Frucht == "Gerste" ~ FALSE,
+      Frucht == "Zwiebeln" ~ FALSE,
+      Frucht == "Bohnen" ~ FALSE,
+      Frucht == "Kartoffeln" ~ FALSE,
+      Frucht == "Rueben" ~ FALSE,
+      Frucht == "Chinaschilf" ~ FALSE,
+      Frucht == "Mangold" ~ FALSE,
+      Frucht == "Wiese" ~ FALSE,
+      Frucht == "Kohlrabi" ~ FALSE,
+      Frucht == "Weide" ~ FALSE,
+      Frucht == "Lupinen" ~ FALSE,
+      Frucht == "Flugplatz" ~ FALSE,
+      Frucht == "Mais" ~ FALSE,
+      Frucht == "Raps" ~ FALSE,
+      Frucht == "Karotten" ~ FALSE,
+      Frucht == "Acker" ~ FALSE,
+      Frucht == "Sonnenblumen" ~ FALSE,
+      Frucht == "Erbsen" ~ FALSE,
+      Frucht == "Kohl" ~ FALSE,
+      Frucht == "Hafer" ~ FALSE,
+      Frucht == "Roggen" ~ FALSE,
+      Frucht == "Salat" ~ FALSE,
+      Frucht == "Rhabarber" ~ FALSE,
+      Frucht == "Sellerie" ~ FALSE,
+      Frucht == "Brache" ~ FALSE,
+      Frucht == "Spargel" ~ FALSE,
+      Frucht == "Obstplantage" ~ FALSE,
+      Frucht == "Fenchel" ~ FALSE,
+      Frucht == "Gemuese" ~ FALSE,
+      Frucht == "Gewaechshaus" ~ FALSE,
+      Frucht == "Zuchetti" ~ FALSE,
+      Frucht == "Zucchetti" ~ FALSE,
+      Frucht == "Flachs" ~ FALSE,
+      Frucht == "Kuerbis" ~ FALSE,
+      TRUE ~ NA # Default case
     )
   )
 # This checks a certain variable for NAs
-# na_check <- wildboar_lags %>% 
+# na_check <- wildboar_lags %>%
 #   filter(is.na(wallow_area))
 
 wildboar_lags <- calc_movement_param(wildboar_lags)
-wildboar_lags <- wildboar_lags %>% 
+wildboar_lags <- wildboar_lags %>%
   # run segment-based analysis with rle_id. copied from cma_week 3
   # choose between: own threshold (mov_static) or from cma_week 3 (cma_static)
-  mutate(segment_id = rle_id(mov_static)) %>% 
+  mutate(segment_id = rle_id(mov_static)) %>%
   # select only rows with an certain timelag
   # if no filter is applied, sequencing creates misleading results
   # fraglich, ob der filter hier angewendet werden soll oder nach Sample data
@@ -400,7 +402,7 @@ seq9 <- seq(from = 1, to = nrow(wildboar_raw), by = 9)
 # Kritisch: hier werden samples aus wildboar_sf kreiert. so gehen viele
 # convenience variablen verloren. Zudem ist es fehleranfälliger. Überdenken.
 # create a sample of caroline
-caro <- wildboar_sf %>% 
+caro <- wildboar_sf %>%
   filter(
     year == 2015,
     month == 5,
@@ -408,7 +410,7 @@ caro <- wildboar_sf %>%
   )
 
 # create a sample of Frida
-frida <- wildboar_sf %>% 
+frida <- wildboar_sf %>%
   filter(
     year == 2016,
     month == 5,
@@ -416,7 +418,7 @@ frida <- wildboar_sf %>%
   )
 
 # create a sample of Ueli
-ueli <- wildboar_sf %>% 
+ueli <- wildboar_sf %>%
   filter(
     year == 2016,
     month == 5,
@@ -460,18 +462,18 @@ ueli_6 <- calc_movement_param(ueli_6)
 #     (.$E - lead(.$E))^2 + (.$N - lead(.$N))^2
 #   } %>%
 #   sqrt()
-# 
+#
 # caro_3$speed <- caro_3 %>% {
 #   .$steplength / .$timelag
 # }
-# 
-# 
+#
+#
 # caro$steplength <- caro %>%
 #   {
 #     (.$E - lead(.$E))^2 + (.$N - lead(.$N))^2
 #   } %>%
 #   sqrt()
-# 
+#
 # caro$speed <- caro %>% {
 #   .$steplength / .$timelag
 # }
@@ -486,8 +488,8 @@ ueli_6 <- calc_movement_param(ueli_6)
 # Hier einsetzen und vergleichen: caro_6, frida_6, ueli_6
 # Mein Vorschlag fuer segment_trigger: 30 bis 50 Meter, GPS genauigkeit bedenken.
 hist_steplength <- ggplot(frida_6, aes(x = stepmean))
-hist_steplength + geom_histogram(binwidth = 5) + 
-  scale_x_continuous(limits = c(0,800)) + 
+hist_steplength + geom_histogram(binwidth = 5) +
+  scale_x_continuous(limits = c(0, 800)) +
   geom_vline(xintercept = 0, lty = 2, alpha = 0.5) +
   theme_bw() +
   theme(panel.border = element_blank())
@@ -497,29 +499,31 @@ hist_steplength + geom_histogram(binwidth = 5) +
 
 
 # for all data
-wildboar_lags <- wildboar_lags %>% 
-  group_by(segment_id) %>% 
-  mutate(segment_dur = n()) %>% 
-  ungroup() %>% 
-  mutate(wallow_dur = if_else(segment_dur <=3, TRUE, FALSE)) %>% 
-  filter(mov_status == "resting") %>% 
-  mutate (
+wildboar_lags <- wildboar_lags %>%
+  group_by(segment_id) %>%
+  mutate(segment_dur = n()) %>%
+  ungroup() %>%
+  mutate(wallow_dur = if_else(segment_dur <= 3, TRUE, FALSE)) %>%
+  filter(mov_status == "resting") %>%
+  mutate(
     wallow = if_else(wallow_month & wallow_day & wallow_area & wallow_dur,
-                           TRUE, FALSE), 
-    nest = if_else((nest_summer_mon & nest_day & nest_summer_area & segment_dur >3)|
-                     (nest_winter_mon & nest_day & nest_winter_area & segment_dur >3),
-                           TRUE, FALSE),
+      TRUE, FALSE
+    ),
+    nest = if_else((nest_summer_mon & nest_day & nest_summer_area & segment_dur > 3) |
+      (nest_winter_mon & nest_day & nest_winter_area & segment_dur > 3),
+    TRUE, FALSE
+    ),
     conflict = if_else(nest & wallow, TRUE, FALSE),
     site_type = as.factor(case_when(
-      conflict == TRUE ~"both",
-      nest == TRUE~"nest",
-      wallow == TRUE~"wallow",
-      !wallow & !nest == TRUE~"none",
-      TRUE~"NA" #Default case
-      ))
-    )
+      conflict == TRUE ~ "both",
+      nest == TRUE ~ "nest",
+      wallow == TRUE ~ "wallow",
+      !wallow & !nest == TRUE ~ "none",
+      TRUE ~ "NA" # Default case
+    ))
+  )
 
-# check the dataset (number of wallows, nests, NAs etc) 
+# check the dataset (number of wallows, nests, NAs etc)
 summary(wildboar_lags)
 
 
@@ -527,7 +531,7 @@ summary(wildboar_lags)
 
 
 # generate new samples from wildboar_lags data
-ueli_filter <- wildboar_lags %>% 
+ueli_filter <- wildboar_lags %>%
   filter(
     year == 2016,
     # month == 5,
@@ -535,7 +539,7 @@ ueli_filter <- wildboar_lags %>%
     site_type == "wallow"
   )
 
-frida_filter <- wildboar_lags %>% 
+frida_filter <- wildboar_lags %>%
   filter(
     year == 2016,
     # month == 5,
@@ -543,7 +547,7 @@ frida_filter <- wildboar_lags %>%
     site_type == "nest"
   )
 
-caro_filter <- wildboar_lags %>% 
+caro_filter <- wildboar_lags %>%
   filter(
     year == 2016,
     # month == 5,
@@ -553,11 +557,11 @@ caro_filter <- wildboar_lags %>%
 # Plot site_type
 # alter site_type to explore (nest, wallow, both, none and NA)
 # alter data to explore different boars
-ggplot(data=ueli_filter, mapping=aes(E, N, colour = segment_id))  +
-  #geom_path() +
+ggplot(data = ueli_filter, mapping = aes(E, N, colour = segment_id)) +
+  # geom_path() +
   geom_point() +
   coord_equal() +
-  labs(title = "Moving segements coloured by segment ID") + 
+  labs(title = "Moving segements coloured by segment ID") +
   theme_classic() +
   # RStudio crashes if legend.position "bottom" is chosen
   theme(legend.position = "none")
@@ -572,49 +576,49 @@ ggplot(data=ueli_filter, mapping=aes(E, N, colour = segment_id))  +
 #   geom_point(alpha = 0.5) +
 #   theme_bw() +
 #   theme(panel.border = element_blank())
-# 
+#
 # caro_3 %>%
 #   ggplot(aes(E, N)) +
 #   geom_path(alpha = 0.5) +
 #   geom_point(alpha = 0.5) +
 #   theme_bw() +
 #   theme(panel.border = element_blank())
-# 
+#
 # frida %>%
 #   ggplot(aes(E, N)) +
 #   geom_path(alpha = 0.5) +
 #   geom_point(alpha = 0.5) +
 #   theme_bw() +
 #   theme(panel.border = element_blank())
-# 
+#
 # frida_3 %>%
 #   ggplot(aes(E, N)) +
 #   geom_path(alpha = 0.5) +
 #   geom_point(alpha = 0.5) +
 #   theme_bw() +
 #   theme(panel.border = element_blank())
-# 
+#
 # ueli %>%
 #   ggplot(aes(E, N)) +
 #   geom_path(alpha = 0.5) +
 #   geom_point(alpha = 0.5) +
 #   theme_bw() +
 #   theme(panel.border = element_blank())
-# 
+#
 # ueli_3 %>%
 #   ggplot(aes(E, N)) +
 #   geom_path(alpha = 0.5) +
 #   geom_point(alpha = 0.5) +
 #   theme_bw() +
 #   theme(panel.border = element_blank())
-# 
+#
 # mcp_caro <- caro %>%
 #   group_by(TierID, TierName, CollarID) %>%
 #   summarise() %>%
 #   st_convex_hull()
-# 
+#
 # plot convex hull
-# 
+#
 # tmap_mode("view") +
 #   tm_shape(mcp_caro) +
 #   tm_fill("TierName", alpha = 0.5) +
@@ -627,42 +631,61 @@ ggplot(data=ueli_filter, mapping=aes(E, N, colour = segment_id))  +
 #   group_by(site_type, segment_id) %>%
 #   summarise() %>%
 #   st_convex_hull()
-# 
+#
 # tmap_mode("view") +
 #   tm_shape(mcp_caro) +
 #   tm_fill("segment_id", alpha = 0.5) +
 #   tm_borders(col = "red", lwd = 1) +
 #   tm_layout(legend.bg.color = "white")
 
-# rasterize data ----------------------------------------------------------
+# stept 7 to 8: rasterize data ----------------------------------------------------------
 
-# Erstellein eines raster-templates mit aAufloesung 100m (analog zu Arealstatistik)
-raster_template <- raster(extent(wildboar_lags), resolution = 100, crs = 2056) 
+# Erstellen eines raster-templates mit Aufloesung 100 m (analog zu Arealstatistik)
+raster_template <- raster(extent(wildboar_lags), resolution = 100, crs = 2056)
 
-
-wallows <- wildboar_lags %>% 
+# Wallows und Nests filtern fuer separate Layers
+wallows <- wildboar_lags %>%
   filter(wallow == "TRUE")
 
-nests <- wildboar_lags %>% 
+nests <- wildboar_lags %>%
   filter(nest == "TRUE")
 
-wallows_raster <- rasterize(wallows, raster_template, field = 1, fun = "count")
-nests_raster <- rasterize(nests, raster_template, field = 1, fun = "count")
 
-tm <- 
-tmap_mode("view") +
+# Rastern der layer
+wallows_raster <- raster::rasterize(wallows, raster_template, field = 1, fun = "count")
+nests_raster <- raster::rasterize(nests, raster_template, field = 1, fun = "count")
+
+type_raster <- raster::rasterize(wildboar_lags, raster_template, field = 1)
+
+# plot definieren
+
+oranges <- tmaptools::get_brewer_pal("Oranges", n = 5, contrast = c(0.3, 0.9))
+purples <- tmaptools::get_brewer_pal("Purples", n = 5, contrast = c(0.3, 0.9))
+
+tm <-
+  tmap_mode("view") +
   tm_shape(nests_raster) +
-  tm_raster(palette = "Oranges", title = "Nests") +
-  tm_layout(legend.outside = TRUE) +
+  tm_raster(palette = oranges, title = "Nests", alpha = 1) +
   tm_shape(wallows_raster) +
-  tm_raster(palette = "Purples", title = "Wallows") +
-  tm_view(control.position = c("right","bottom"))
+  tm_raster(palette = purples, title = "Wallows", alpha = 1) +
+  tm_view(control.position = c("right", "top"))
 
-tm %>% 
-  tmap_leaflet() %>% 
-  addLayersControl(
-    overlayGroups = c("Nests", "Wallows"),
-    options = layersControlOptions(collapsed = FALSE)
-  )
-  
+tm
 
+# layer landnutzung: nicht sinnvoll, da unuebersichtlich
+
+# tm +
+# tm_shape(feldnutzung) +
+# tm_polygon(col = "Frucht")
+
+# leaflet plotten
+
+# layer controls funktionieren nicht richtig
+
+# tm %>%
+#   tmap_leaflet() %>%
+#   addLayersControl(
+#     overlayGroups = c("Nests", "Wallows"),
+#     options = layersControlOptions(collapsed = FALSE)
+#   )
+#
