@@ -66,6 +66,12 @@ ggplot(schreck_locations, aes(E, N)) +
 
 # Material and Methods
 
+## Data
+
+## Analytical Concepts
+
+## R Concecpts
+
 <!-- the following is just a placeholder text, remove it!-->
 
 Text
@@ -78,6 +84,8 @@ Text
 
 # Discussion
 
+## Risk analysis / Problems
+
 <!-- the following is just a placeholder text, remove it!-->
 
 Text
@@ -88,9 +96,10 @@ Text
 
 # Annex
 
+R Script
+
 ```{r source code, echo=FALSE}
 
 # source("scripts/analysis.r")
 
 ```
-
