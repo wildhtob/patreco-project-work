@@ -11,15 +11,17 @@ library(terra) # handling spatial data
 library(ComputationalMovementAnalysisData) # wild boar data
 library(sf) # handling spatial data
 library(janitor) # clean and consistent naming
-library(zoo) # moving window function
 library(forcats) # handling factor levels
 library(raster) # rasterizing vector data
 
 # globals ----------------------------------------------------------------------
+
 # threshold that triggers the segmentation of the movement trajectory
+
 segment_trigger <- as.numeric(30)
 
 # functions ---------------------------------------------------------------
+
 calc_movement_param <- function(boar_dt) {
   boar_dt <- boar_dt %>%
     mutate(
@@ -50,6 +52,7 @@ rle_id <- function(vec) {
   x <- rle(vec)$lengths
   as.factor(rep(seq_along(x), times = x))
 }
+
 # data import -------------------------------------------------------------
 
 wildboar_raw <- wildschwein_BE
@@ -67,6 +70,7 @@ head(wildboar_overlap)
 feldaufnahmen <- read_sf("data/Feldaufnahmen_Fanel.gpkg")
 
 # add geometry and time---------------------------------------------------------
+
 # argument remove = False keeps the coordinates E and N
 wildboar_sf <- st_as_sf(wildboar_raw, coords = c("E", "N"), crs = 2056, remove = FALSE)
 # join feldaufnahmen with wildboar data
@@ -183,6 +187,7 @@ wildboar_lag_cat <- wildboar_lags %>%
 
 
 # viualise change in lag over time ####
+
 # takes a while for plotting..
 # wildboar_lags %>%
 #   filter(timelag < 30000 & timelag > 0) %>%
@@ -190,7 +195,7 @@ wildboar_lag_cat <- wildboar_lags %>%
 #   geom_point() +
 #   geom_line(size = 0.1)
 
-# calculating steplength ####
+# DELETE: calculating steplength ####
 
 # wildboar_lags$steplength <- wildboar_raw %>%
 #   {
@@ -373,6 +378,7 @@ wildboar_lags <- wildboar_lags %>%
       TRUE ~ NA # Default case
     )
   )
+
 # This checks a certain variable for NAs
 # na_check <- wildboar_lags %>%
 #   filter(is.na(wallow_area))
@@ -401,6 +407,7 @@ seq9 <- seq(from = 1, to = nrow(wildboar_raw), by = 9)
 # step0 : select three different wildboars for a duration of two weeks ####
 # Kritisch: hier werden samples aus wildboar_sf kreiert. so gehen viele
 # convenience variablen verloren. Zudem ist es fehleranfälliger. Überdenken.
+
 # create a sample of caroline
 caro <- wildboar_sf %>%
   filter(
@@ -478,9 +485,11 @@ hist_steplength + geom_histogram(binwidth = 5) +
 
 
 # for all data
+
 wildboar_lags <- wildboar_lags %>%
   group_by(segment_id) %>%
   mutate(segment_dur = n()) %>%
+  filter(row_number(segment_id) == 1) %>% # keep only the first data point per segment
   ungroup() %>%
   mutate(wallow_dur = if_else(segment_dur <= 3, TRUE, FALSE)) %>%
   filter(mov_status == "resting") %>%
@@ -501,9 +510,30 @@ wildboar_lags <- wildboar_lags %>%
       TRUE ~ "NA" # Default case
     ))
   )
+  
 
 # check the dataset (number of wallows, nests, NAs etc)
+
 summary(wildboar_lags)
+
+# create pie chart
+
+site_type <- data.frame(summary(wildboar_lags$site_type)) %>% 
+  rename(count = 1) %>% 
+    rownames_to_column(var = "type")
+
+pie <- ggplot(site_type, aes(x = "", y = count, fill = type))+
+  geom_bar(width = 1, stat = "identity") +
+  coord_polar("y", start = 0) +
+  scale_fill_brewer(palette = "Set1") +
+  theme(axis.text.x=element_blank()) +
+  geom_text(aes(y = count/3 + c(0, cumsum(count)[-length(count)]), 
+                label = scales::percent(count/100)), size=5) +
+  theme_void()
+
+pie
+
+
 
 
 # plot trajectories -------------------------------------------------------
@@ -620,9 +650,10 @@ ggplot(data = ueli_filter, mapping = aes(E, N, colour = segment_id)) +
 # stept 7 to 8: rasterize data ----------------------------------------------------------
 
 # Erstellen eines raster-templates mit Aufloesung 30m (Analog zu steplenth threshold)
-raster_template <- raster(extent(wildboar_lags), resolution = 100, crs = 2056)
+raster_100 <- raster(extent(wildboar_lags), resolution = 100, crs = 2056)
+raster_30 <- raster(extent(wildboar_lags), resolution = 30, crs = 2056)
 
-# resting filtern fuer 
+# resting filtern, jeweils ersten datenpunk pro segment id 
 
 resting <- wildboar_lags %>% 
   group_by(segment_id) %>% 
@@ -640,9 +671,8 @@ nests <- wildboar_lags %>%
   filter(row_number(segment_id) == 1)
 
 
-# Rastern der layer
+# rasterize data
 resting_raster <- raster::rasterize(resting, raster_template, field = 1, fun = "count")
-
 wallows_raster <- raster::rasterize(wallows, raster_template, field = 1, fun = "count")
 nests_raster <- raster::rasterize(nests, raster_template, field = 1, fun = "count")
 
@@ -652,12 +682,14 @@ greens <- tmaptools::get_brewer_pal("Greens", n = 6, contrast = c(0.3, 0.9))
 oranges <- tmaptools::get_brewer_pal("Oranges", n = 5, contrast = c(0.3, 0.9))
 purples <- tmaptools::get_brewer_pal("Purples", n = 5, contrast = c(0.3, 0.9))
 
-tmap_mode("view") +
+tm_r <- 
+  tmap_mode("view") +
   tm_shape(resting_raster) +
   tm_raster(palette = greens, title = "Resting sites", alpha = 1)
   
+tm_r
 
-tm <-
+tm_nw <-
   tmap_mode("view") +
   tm_shape(nests_raster) +
   tm_raster(palette = oranges, title = "Nests", alpha = 1) +
@@ -665,7 +697,7 @@ tm <-
   tm_raster(palette = purples, title = "Wallows", alpha = 1) +
   tm_view(control.position = c("right", "top"))
 
-tm
+tm_nw
 
 # layer landnutzung: nicht sinnvoll, da unuebersichtlich
 
