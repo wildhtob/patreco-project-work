@@ -647,7 +647,7 @@ ggplot(data = ueli_filter, mapping = aes(E, N, colour = segment_id)) +
 #   tm_borders(col = "red", lwd = 1) +
 #   tm_layout(legend.bg.color = "white")
 
-# stept 7 to 8: rasterize data ----------------------------------------------------------
+# step 7 to 8: rasterize data ----------------------------------------------------------
 
 # Erstellen eines raster-templates mit Aufloesung 30m (Analog zu steplenth threshold)
 raster_100 <- raster(extent(wildboar_lags), resolution = 100, crs = 2056)
@@ -670,8 +670,12 @@ nests <- wildboar_lags %>%
   group_by(segment_id) %>% 
   filter(row_number(segment_id) == 1)
 
+<<<<<<< HEAD
 
 # rasterize data
+=======
+# Rastern der layer
+>>>>>>> 645e1467d403708e144ff655d37f7eaccf9d6acb
 resting_raster <- raster::rasterize(resting, raster_template, field = 1, fun = "count")
 wallows_raster <- raster::rasterize(wallows, raster_template, field = 1, fun = "count")
 nests_raster <- raster::rasterize(nests, raster_template, field = 1, fun = "count")
