@@ -55,7 +55,7 @@ The provided data contains spatio temporal datasets of 39 wildboars which were e
 
 -\> Sampling Regime bild
 
-Furthermore data from a field survey has been used. In this survey provides spatial information about the type of use during the investigated time. If an area was used for agriculture the planted crops is also given.
+Furthermore we added spatial information about the vegetation to the spatiotemporal wild boar data. This data was provided by a survey which classified the investigated area in forests, wetlands and agriculture. If a lot of land was used for agriculture, information about the planted crop is also provided.
 
 Yves
 
@@ -65,7 +65,7 @@ Feldaufnahmen berücksichtigen
 
 ## Analytical Concepts
 
-Yves
+
 
 Stepmean, Segmentation,
 
