@@ -400,6 +400,27 @@ wildboar_lags <- wildboar_lags %>%
   # fraglich, ob der filter hier angewendet werden soll oder nach Sample data
   filter(timelag_rounded == 900)
 
+
+summary(as.factor(wildboar_lags$mov_status))
+
+mov_status <- data.frame(summary(as.factor(wildboar_lags$mov_status))) %>% 
+  rename(count = 1) %>% 
+  slice(-3) %>% 
+  rownames_to_column(var = "status") %>% 
+  mutate(prop = count/sum(count) * 100,
+         prop = round(prop, 1)) %>% 
+  arrange(desc(status)) %>%
+  mutate(lab.ypos = cumsum(prop) - 0.5 * prop)
+
+pie <- ggplot(mov_status, aes(x = "", y = prop, fill = status)) +
+  geom_bar(width = 1, stat = "identity", color = "white") +
+  coord_polar("y", start = 0) +
+  geom_text(aes(y = lab.ypos, label = prop), color = "white") +
+  scale_fill_discrete(name = "Status", labels = c("Resting", "Moving")) +
+  theme_void()
+
+pie
+
 # cross-scale movement analysis ####
 seq3 <- seq(from = 1, to = nrow(wildboar_raw), by = 3)
 seq6 <- seq(from = 1, to = nrow(wildboar_raw), by = 6)
@@ -527,15 +548,17 @@ summary(wildboar_lags)
 
 site_type <- data.frame(summary(wildboar_lags$site_type)) %>% 
   rename(count = 1) %>% 
-    rownames_to_column(var = "type")
+  rownames_to_column(var = "type") %>% 
+  mutate(prop = count/sum(count) * 100,
+         prop = round(prop, 1)) %>% 
+  arrange(desc(type)) %>%
+  mutate(lab.ypos = cumsum(prop) - 0.5 * prop)
 
-pie <- ggplot(site_type, aes(x = "", y = count, fill = type))+
-  geom_bar(width = 1, stat = "identity") +
+pie <- ggplot(site_type, aes(x = "", y = prop, fill = type)) +
+  geom_bar(width = 1, stat = "identity", color = "white") +
   coord_polar("y", start = 0) +
-  scale_fill_brewer(palette = "Set1") +
-  theme(axis.text.x=element_blank()) +
-  geom_text(aes(y = count/3 + c(0, cumsum(count)[-length(count)]), 
-                label = scales::percent(count/100)), size=5) +
+  geom_text(aes(y = lab.ypos, label = prop), color = "white") +
+  scale_fill_discrete(name = "Type", labels = c("NA", "Nest", "None", "Wallow")) +
   theme_void()
 
 pie
@@ -543,44 +566,121 @@ pie
 
 
 
-# plot trajectories -------------------------------------------------------
+# plot sample data -------------------------------------------------------
 
 
 # generate new samples from wildboar_lags data
+
 ueli_filter <- wildboar_lags %>%
   filter(
     year == 2016,
     # month == 5,
-    TierName == "Ueli",
-    site_type == "wallow"
-  )
+    site_type == "wallow" | site_type == "nest",
+    TierName == "Ueli"
+  ) %>% 
+  mutate(site_type = droplevels(site_type))
 
 frida_filter <- wildboar_lags %>%
   filter(
     year == 2016,
     # month == 5,
-    TierName == "Frida",
-    site_type == "nest"
-  )
+    site_type == "wallow" | site_type == "nest",
+    TierName == "Frida"
+  ) %>% 
+  mutate(site_type = droplevels(site_type))
 
 caro_filter <- wildboar_lags %>%
   filter(
     year == 2016,
     # month == 5,
-    TierName == "Caroline",
-    # site_type == "nest"
-  )
+    site_type == "wallow" | site_type == "nest",
+    TierName == "Caroline"
+  ) %>% 
+  mutate(site_type = droplevels(site_type))
+
+wallows_sample <- wildboar_lags %>%
+  filter(
+    year == 2016,
+    # month == 5,
+    site_type == "wallow", 
+    TierName == "Caroline" | TierName == "Ueli" | TierName == "Frida"
+  ) %>% 
+  mutate(site_type = droplevels(site_type))
+
+nests_sample <- wildboar_lags %>%
+  filter(
+    year == 2016,
+    # month == 5,
+    site_type == "nest", 
+    TierName == "Caroline" | TierName == "Ueli" | TierName == "Frida"
+  ) %>% 
+  mutate(site_type = droplevels(site_type))
+
+
+
+# frida_filter <- wildboar_lags %>%
+#   filter(
+#     year == 2016,
+#     # month == 5,
+#     TierName == "Frida",
+#     site_type == "nest"
+#   )
+# 
+# caro_filter <- wildboar_lags %>%
+#   filter(
+#     year == 2016,
+#     # month == 5,
+#     TierName == "Caroline",
+#     # site_type == "nest"
+#   )
+
 # Plot site_type
 # alter site_type to explore (nest, wallow, both, none and NA)
 # alter data to explore different boars
-ggplot(data = ueli_filter, mapping = aes(E, N, colour = segment_id)) +
-  # geom_path() +
-  geom_point() +
-  coord_equal() +
-  labs(title = "Moving segements coloured by segment ID") +
-  theme_classic() +
-  # RStudio crashes if legend.position "bottom" is chosen
-  theme(legend.position = "none")
+
+# ggplot(data = ueli_filter, mapping = aes(E, N, colour = segment_id)) +
+#   # geom_path() +
+#   geom_point() +
+#   coord_equal() +
+#   labs(title = "Moving segements coloured by segment ID") +
+#   theme_classic() +
+#   # RStudio crashes if legend.position "bottom" is chosen
+#   theme(legend.position = "none")
+
+# Polt interactive map with sample animals ####
+
+# one layer per animal
+
+oranges <- tmaptools::get_brewer_pal("Oranges", n = 3, contrast = c(0.3, 0.9))
+purples <- tmaptools::get_brewer_pal("Purples", n = 3, contrast = c(0.3, 0.9))
+
+tm_animals <- 
+  tmap_mode("view") +
+  tm_shape(ueli_filter) +
+  tm_symbols(col = "site_type", size = "segment_dur", alpha = 0.5, title.col = "Ueli", 
+             palette = c("orange", "purple"), size.lim = c(1, 10)) +
+  tm_shape(frida_filter) +
+  tm_symbols(col = "site_type", size = "segment_dur", alpha = 0.5, title.col = "Frida", 
+             palette = c("orange", "purple"), size.lim = c(1, 10)) +
+    tm_shape(caro_filter) +
+  tm_symbols(col = "site_type", size = "segment_dur", alpha = 0.5, title.col = "Caroline", 
+             palette = c("orange", "purple"), size.lim = c(1, 10))
+
+tm_animals
+
+# one layer per field type (nests and wallos only)
+
+tm_sample <- 
+  tmap_mode("view") +
+  tm_shape(nests_sample) +
+  tm_symbols(col = "TierName", size = "segment_dur", alpha = 0.5, title.col = "Nests", 
+             palette = oranges, size.lim = c(1, 10)) +
+  tm_shape(wallows_sample) +
+  tm_symbols(col = "TierName", size = "segment_dur", alpha = 0.5, title.col = "Wallows", 
+             palette = purples, size.lim = c(1, 10))
+
+tm_sample
+
 
 
 # unused plots ------------------------------------------------------------
@@ -677,15 +777,18 @@ nests <- wildboar_lags %>%
   group_by(segment_id) %>% 
   filter(row_number(segment_id) == 1)
 
-<<<<<<< HEAD
 
 # rasterize data
-=======
+
 # Rastern der layer
->>>>>>> 645e1467d403708e144ff655d37f7eaccf9d6acb
-resting_raster <- raster::rasterize(resting, raster_template, field = 1, fun = "count")
-wallows_raster <- raster::rasterize(wallows, raster_template, field = 1, fun = "count")
-nests_raster <- raster::rasterize(nests, raster_template, field = 1, fun = "count")
+
+resting_raster_100 <- raster::rasterize(resting, raster_100, field = 1, fun = "count")
+wallows_raster_100 <- raster::rasterize(wallows, raster_100, field = 1, fun = "count")
+nests_raster_100 <- raster::rasterize(nests, raster_100, field = 1, fun = "count")
+
+resting_raster_30 <- raster::rasterize(resting, raster_30, field = 1, fun = "count")
+wallows_raster_30 <- raster::rasterize(wallows, raster_30, field = 1, fun = "count")
+nests_raster_30 <- raster::rasterize(nests, raster_30, field = 1, fun = "count")
 
 # plots
 
@@ -693,22 +796,44 @@ greens <- tmaptools::get_brewer_pal("Greens", n = 6, contrast = c(0.3, 0.9))
 oranges <- tmaptools::get_brewer_pal("Oranges", n = 5, contrast = c(0.3, 0.9))
 purples <- tmaptools::get_brewer_pal("Purples", n = 5, contrast = c(0.3, 0.9))
 
-tm_r <- 
+# resolution: 100 m
+
+tm_r_100 <- 
   tmap_mode("view") +
-  tm_shape(resting_raster) +
+  tm_shape(resting_raster_100) +
   tm_raster(palette = greens, title = "Resting sites", alpha = 1)
   
-tm_r
+tm_r_100
 
-tm_nw <-
+tm_nw_100 <-
   tmap_mode("view") +
-  tm_shape(nests_raster) +
+  tm_shape(nests_raster_100) +
   tm_raster(palette = oranges, title = "Nests", alpha = 1) +
-  tm_shape(wallows_raster) +
+  tm_shape(wallows_raster_100) +
   tm_raster(palette = purples, title = "Wallows", alpha = 1) +
   tm_view(control.position = c("right", "top"))
 
-tm_nw
+tm_nw_100
+
+# resolution: 30 m
+
+tm_r_30 <- 
+  tmap_mode("view") +
+  tm_shape(resting_raster_30) +
+  tm_raster(palette = greens, title = "Resting sites", alpha = 1)
+
+tm_r_30
+
+tm_nw_30 <-
+  tmap_mode("view") +
+  tm_shape(nests_raster_30) +
+  tm_raster(palette = oranges, title = "Nests", alpha = 1) +
+  tm_shape(wallows_raster_30) +
+  tm_raster(palette = purples, title = "Wallows", alpha = 1) +
+  tm_view(control.position = c("right", "top"))
+
+tm_nw_30
+
 
 # layer landnutzung: nicht sinnvoll, da unuebersichtlich
 
