@@ -69,7 +69,10 @@ In a prelimary step we enriched the given data by some important movement parame
 
 Wild boars share a common movement pattern when spending time at wallows and nests: they stick to a spot for a certain while. Distinguishing this behavior from other (feeding, fleeing, strolling) builds the basement of our analytical concept. For this we calculated the mean distance within a moving window of six data points (stepmean). This variable allowed us to apply segmentation on our wild boar data and define stops and moves. In our work we called it *movement status* (“resting” or “moving”).
 
-In a second phase we defined the threshold of stepmean. For this three wild boar samples were analyzed. 
+In a second phase we defined the threshold of stepmean. For this stepmean of three wild boars were plotted in a histogram. We expected to see a clear decline in the first bins of stepmean since wild boars gather at spots and move often in a slow manner.
+
+Setting the threshold seems reasonable at the point where stepmean flattens in a distinct manner (see histograms). In our samples this threshold can be anywhere between 30 to 50 meter. 
+
 
 This was followed by finding a meaningful parameter that allows us to allocate 
 
