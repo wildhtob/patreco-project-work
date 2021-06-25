@@ -666,7 +666,10 @@ tm_animals <-
   tm_symbols(col = "site_type", size = "segment_dur", alpha = 0.5, title.col = "Caroline", 
              palette = c("orange", "purple"), size.lim = c(1, 10))
 
+tm_animals
+
 # one layer per field type (nests and wallos only)
+
 tm_sample <- 
   tmap_mode("view") +
   tm_shape(nests_sample) +
