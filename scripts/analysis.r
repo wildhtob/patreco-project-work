@@ -638,7 +638,7 @@ ggplot(data = ueli_filter, mapping = aes(E, N, colour = segment_id)) +
 #   tm_borders(col = "red", lwd = 1) +
 #   tm_layout(legend.bg.color = "white")
 
-# stept 7 to 8: rasterize data ----------------------------------------------------------
+# step 7 to 8: rasterize data ----------------------------------------------------------
 
 # Erstellen eines raster-templates mit Aufloesung 100 m (analog zu Arealstatistik)
 raster_template <- raster(extent(wildboar_lags), resolution = 100, crs = 2056)
@@ -649,7 +649,6 @@ wallows <- wildboar_lags %>%
 
 nests <- wildboar_lags %>%
   filter(nest == "TRUE")
-
 
 # Rastern der layer
 wallows_raster <- raster::rasterize(wallows, raster_template, field = 1, fun = "count")
