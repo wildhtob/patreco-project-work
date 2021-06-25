@@ -167,8 +167,10 @@ pre code {
 </div>
 
 
-<div id="suhlen-aus-keuling-und-stier-2009" class="section level1">
-<h1>Suhlen (Aus Keuling und Stier, 2009):</h1>
+<div id="recherche" class="section level1">
+<h1>Recherche</h1>
+<div id="suhlen-aus-keuling-und-stier-2009" class="section level2">
+<h2>Suhlen (Aus Keuling und Stier, 2009):</h2>
 <ul>
 <li>Keine vorhanden im Februar und März NÁNDEZ-LLARIO (2005)</li>
 <li>Suhlen in der warmen Jahreszeit MEYNHARDT (1990)</li>
@@ -182,20 +184,20 @@ pre code {
 <li>Kirren: Angewöhnen von Futterstellen, Anfütterung.</li>
 </ul>
 </div>
-<div id="reproduktive-nester" class="section level1">
-<h1>Reproduktive Nester:</h1>
+<div id="reproduktive-nester" class="section level2">
+<h2>Reproduktive Nester:</h2>
 <ul>
 <li>Aus Schlageter 2015: Group composition is a function of life cycle and seasonal changes. Reproductive females separate from the group shortly before giving birth. About one or two weeks after having built a farrowing nest and having given birth to an average of 5 piglets, the sow usually rejoins her initial group (Martys 1982, Teillaud 1986). Most births take place around March – April but reproduction can occur all year round.</li>
 </ul>
 </div>
-<div id="schlafnester" class="section level1">
-<h1>Schlafnester:</h1>
+<div id="schlafnester" class="section level2">
+<h2>Schlafnester:</h2>
 <ul>
 <li>Aus Suter et al. 2018: Neben Frassschäden entstehen dabei auch Schäden an jenen Orten, an denen die Tiere ihre Schlafnester bauen. Beliebte Einstände bieten Raps, Weizen und Mais. In Jahr 2016 verblieben auch einige besenderte Individuen tagsüber in den Feldern.</li>
 </ul>
 </div>
-<div id="schlussbericht-wildschweinprojekt-suter-2010" class="section level1">
-<h1>Schlussbericht Wildschweinprojekt (Suter 2010):</h1>
+<div id="schlussbericht-wildschweinprojekt-suter-2010" class="section level2">
+<h2>Schlussbericht Wildschweinprojekt (Suter 2010):</h2>
 <ul>
 <li>Zwischen 8:00 und 17:00 ruhen Bachen in ihrem Tagesnest.</li>
 <li>Ab 70cm Vegetationshöhe (ab Mai) auch Tagesnest in einem Feld möglich (Raps- Mais- Getreide)</li>
@@ -206,32 +208,154 @@ pre code {
 <li>Präferenz für Uferwälder</li>
 </ul>
 </div>
-<div id="interessante-papers-für-movement-patterns" class="section level1">
-<h1>Interessante Papers für Movement patterns:</h1>
+<div id="interessante-quellen-für-movement-patterns" class="section level2">
+<h2>Interessante Quellen für Movement patterns:</h2>
 <ul>
 <li>Dissertation von Keuling 2009: Managing wild boar-Considerations for wild boar management based on game biology data</li>
 <li>Methodisches Paper zu Homerange und KDE: LoCoH: Nonparameteric Kernel Methods for Constructing Home Ranges and Utilization Distributions</li>
+<li><a href="https://geocompr.robinlovelace.net/">Geocomputation with R</a></li>
 </ul>
+</div>
 </div>
 <div id="vorgehen" class="section level1">
 <h1>Vorgehen</h1>
 <ul>
+<li>Preprocessing: Convenience Variabeln erstellen (segment_id, Kriterien)</li>
 <li>Schritt 0 Sample 1 Tier, begrenter Zeitraum</li>
 <li>Schritt 1: Segementierung</li>
 <li>Schritt 2: Steplength und Speed berechnen</li>
 <li>Schritt 3: Verteilung anschauen</li>
 <li>Schritt 4: Schwellenwert definieren und resting / moving festlegen</li>
 <li>Schritt 5: Nur resting Data weiterverarbeiten</li>
-<li>Schritt 6: Heatmap erstellen mit zu definierender Rastergrösse</li>
-<li>Schritt 7: Kriterien für Nester und Suhlen definieren</li>
-<li>Schritt 8: Rasterfelder zuweisen, Context herstellen</li>
+<li>Schritt 6: Kriterien für Nester und Suhlen definieren und anwenden</li>
+<li>Schritt 7: Daten mit definierter Auflösung rastern (100 m, analog zu Arealstatistik; 30 m analog zu Steplength Schwellenwert)</li>
+<li>Schritt 8: Heatmap erstellen</li>
 <li>Schritt 9: Prozess mit Gesamtdaten testen</li>
-<li>Schritt 10: Profit</li>
 </ul>
 </div>
 <div id="definitionen" class="section level1">
 <h1>Definitionen</h1>
-<p>Nester:</p>
+<p><strong>Nester:</strong></p>
+<ul>
+<li><p>day = Tag</p></li>
+<li><p>resting</p></li>
+<li><p>bodennutzung == wald | feld</p></li>
+<li><p>wenn bodennutzung == feld:<br />
+vegetationshöhe &gt;= 70cm &amp; # Höhe in den Luftbildern statisch, daher für Felder besser nicht berücksichtigen<br />
+month (mai - oktober) &amp;<br />
+feldaufnahmen == raps | mais | getreide</p></li>
+<li><p>wenn vegetationstyp == feld , dann anbau == raps | mais | getreide</p></li>
+</ul>
+<p><strong>Suhlen:</strong></p>
+<ul>
+<li><p>day = Tag</p></li>
+<li><p>bodennutzun == wald | bodennutzung == unproduktive vegetation</p></li>
+<li><p>monate != November bis März</p></li>
+<li><p>aufenhaltsdauer?</p></li>
+</ul>
+</div>
+<div id="auswertung-der-zugewiesenen-punkte" class="section level1">
+<h1>Auswertung der zugewiesenen Punkte</h1>
+<div id="vor-trennung-der-45-min-segmente" class="section level2">
+<h2>Vor Trennung der 45 min Segmente</h2>
+<p>site_type</p>
+<ul>
+<li>both : 2853, 14.24%</li>
+<li>NA : 704, 3.51%</li>
+<li>nest : 1058, 5.28%</li>
+<li>none :14132, 70.56%</li>
+<li>wallow: 1281, 6.39%</li>
+<li>total: 20028</li>
+</ul>
+</div>
+<div id="mit-segment_dur-3" class="section level2">
+<h2>Mit segment_dur &lt;= 3</h2>
+<p>site_type</p>
+<ul>
+<li>both : 399, 0.33%</li>
+<li>NA : 4238, 3.52%<br />
+</li>
+<li>nest :22897, 19.06%</li>
+<li>none :92432, 76.96%</li>
+<li>wallow: 128, 0.10%</li>
+<li>total: 120094</li>
+</ul>
+</div>
+<div id="mit-berücksichtigung-der-wintermonate" class="section level2">
+<h2>Mit Berücksichtigung der Wintermonate</h2>
+<div id="nur-mit-wälder-als-möglicher-einstand" class="section level3">
+<h3>Nur mit Wälder als möglicher Einstand:</h3>
+<p>site_type</p>
+<ul>
+<li>both : 399, 0.33%</li>
+<li>NA :11198, 9.32%</li>
+<li>nest :31470, 26.20%</li>
+<li>none :76899, 64.03%</li>
+<li>wallow: 128, 0.10%</li>
+</ul>
+</div>
+<div id="mit-wälder-und-feuchtgebiete-als-möglicher-einstand-site_type" class="section level3">
+<h3>Mit Wälder und Feuchtgebiete als möglicher Einstand: site_type</h3>
+<ul>
+<li>both : 399, 0.33%<br />
+</li>
+<li>NA :11198, 9.32%<br />
+</li>
+<li>nest :52709, 43.88%</li>
+<li>none :55660, 46.34%<br />
+</li>
+<li>wallow: 128, 0.10%</li>
+</ul>
+</div>
+</div>
+<div id="mit-berücksichtigung-vom-monat-märz-morgendaemmerung-und-segment_dur-3-für-nester" class="section level2">
+<h2>Mit Berücksichtigung vom Monat März, Morgendaemmerung und segment_dur &gt;= 3 für Nester</h2>
+<p>site_type</p>
+<ul>
+<li>NA :11071, 9.21%</li>
+<li>nest :52238, 45.99%</li>
+<li>none :56034, 46.66%<br />
+</li>
+<li>wallow: 751, 0.62%</li>
+</ul>
+</div>
+</div>
+<div id="rasterkarten" class="section level1">
+<h1>Rasterkarten</h1>
+<ul>
+<li><p>jeweils ein Layer erstellt für Nester und Suhlen (gefiltertet nach Nest == TRUE resp. Wallow == TRUE</p></li>
+<li><p>diese überlagern sich wie zu erwarten war (wegen der “both”-Werte)</p></li>
+<li><p>Layer lassen sich bei Bedarf ausblenden, Karte interaktiv</p></li>
+<li><p>Auflösung: 100m, analog zu Arealstatistik (die wir allerdings nicht verwendet haben), feinere Auflösung wäre also möglich (z. B. 50 Meter)</p></li>
+<li><p>Einfügen des Layers Feldaufnahmen versucht aber nicht sinnvoll, da zu unübersichtlich</p></li>
+</ul>
+</div>
+<div id="fragen-an-nils" class="section level1">
+<h1>Fragen an Nils</h1>
+<ul>
+<li><p>Datenbezug Arealstatistik/Bodennutzung: Wie bekommt man die entsprechenden Daten so, dass sie in R importiert werden können? Portale lassen Download eines csv-Files der Gesamtschweiz zu. Scheint aber mega umständlich. Was ist sein Vorschlag für den Bezug? Oder hätte er die Daten schon?</p></li>
+<li><p>Antwort von Nils: mycsv &lt;- read_csv(“arealstat.csv”) mycsv %&gt;% select(x, y, meinespalte) %&gt;% raster::rasterFromXYZ()</p>
+<p><a href="https://www.bfs.admin.ch/bfs/de/home/dienstleistungen/geostat/geodaten-bundesstatistik/boden-nutzung-bedeckung-eignung/arealstatistik-schweiz/bodennutzung.html">Bodennutzung / Arealstatistik</a></p>
+<p><a href="https://map.geo.admin.ch/?topic=ech&amp;lang=de&amp;bgLayer=ch.swisstopo.pixelkarte-grau&amp;layers=ch.bfs.gebaeude_wohnungs_register,ch.bfs.arealstatistik-hintergrund&amp;layers_visibility=false,true&amp;catalogNodes=457,532,477,599&amp;layers_opacity=1,0.65&amp;zoom=2&amp;E=2704737.50&amp;N=1230875.00">Vereinfachte Bodennutzung</a></p></li>
+<li><p>Evtl. geplantes Vorgehen kurz durchsprechen für Feedback oder Ergänzungen seinerseits</p></li>
+</ul>
+</div>
+<div id="tipps-von-nils" class="section level1">
+<h1>Tipps von Nils</h1>
+<ul>
+<li>Passt auf, die Daten haben eine Vignette (nicht alle sind im viertelstundentakt)</li>
+<li>Nach dem alle Daten enriched wurden müssen diese auf einzelne Suhlen und Nester aufgetrennt werden. dafür rle_id verwenden (cma-week3).</li>
+<li>Wichtige Funktion: rle_id &lt;- function(vec){ x &lt;- rle(vec)$lengths as.factor(rep(seq_along(x), times=x)) } Task 4: Segment-based analysis caro &lt;- caro %&gt;% mutate(segment_id = rle_id(static))</li>
+</ul>
+</div>
+<div id="offene-fragen" class="section level1">
+<h1>Offene Fragen</h1>
+<ul>
+<li><p>Müssen wir vor dem Erstellen der Raster nach einzigartigen seq_ids filtern? Oder wie war das von Nils gemeint? To be discussed. Umsetzung wäre easy. &gt;&gt; wird gefiltert, zudem Rastergrösse auf 30m anpassen</p></li>
+<li><p>Weitere Visualisierungen bezüglich Landnutzung oder besuchten Gebieten von Einzeltieren? So im Proposal enthalten, bezüglich der Beantwortung der Forschungsfragen jedoch wenig hilfreich. Recurse-Package ebenfalls nicht verwendet: Vorschlag: Diesen Ansatz diskutieren (Nicht angewendet, da Literatur keine Informationen zur Beurteilung von häufig besuchten Orten hergibt). &gt;&gt; Undifferenzierte Resting &gt;&gt; Plot mit drei Tieren über gesamten Zeitraum (oder nur ein Jahr), ein Layer pro Tier, Shape nach Field Type</p></li>
+<li><p>Vorgehen Arbeit abfassen besprechen. Vorschlag Aufbau besprechen (Mischung Template Nils und eigener Vorlage)</p></li>
+<li><p>Quellen Zotero</p></li>
+</ul>
 </div>
 
 
