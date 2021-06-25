@@ -226,14 +226,18 @@ site_type
 
 -   Müssen wir vor dem Erstellen der Raster nach einzigartigen seq_ids
     filtern? Oder wie war das von Nils gemeint? To be discussed.
-    Umsetzung wäre easy.
+    Umsetzung wäre easy. \>\> wird gefiltert, zudem Rastergrösse auf 30m
+    anpassen
 
 -   Weitere Visualisierungen bezüglich Landnutzung oder besuchten
     Gebieten von Einzeltieren? So im Proposal enthalten, bezüglich der
     Beantwortung der Forschungsfragen jedoch wenig hilfreich.
     Recurse-Package ebenfalls nicht verwendet: Vorschlag: Diesen Ansatz
     diskutieren (Nicht angewendet, da Literatur keine Informationen zur
-    Beurteilung von häufig besuchten Orten hergibt).
+    Beurteilung von häufig besuchten Orten hergibt). \>\>
+    Undifferenzierte Resting \>\> Plot mit drei Tieren über gesamten
+    Zeitraum (oder nur ein Jahr), ein Layer pro Tier, Shape nach Field
+    Type
 
 -   Vorgehen Arbeit abfassen besprechen. Vorschlag Aufbau besprechen
     (Mischung Template Nils und eigener Vorlage)

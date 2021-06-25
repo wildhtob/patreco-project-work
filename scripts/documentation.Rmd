@@ -11,6 +11,7 @@ output:
     theme: darkly
     highlight: tango
     code_folding: hide
+bibliography: references.bib
 ---
 
 <!-- You can add  your R Code with Code chunks-->
@@ -34,13 +35,13 @@ knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
 
 <!-- the following is just a placeholder text, remove it!-->
 
-Text
+Tobias
 
-# Introduction
+# Research Questions
 
 <!-- the following is just a placeholder text, remove it!-->
 
-Text
+Yves
 
 ```{r placeholder 1}
 library(ComputationalMovementAnalysisData)
@@ -58,9 +59,6 @@ Text
 ```{r placeholder 2}
 # include plots automatically
 
-ggplot(schreck_locations, aes(E, N)) +
-  geom_point() +
-  coord_map()
 
 ```
 
@@ -68,23 +66,47 @@ ggplot(schreck_locations, aes(E, N)) +
 
 ## Data
 
+Yves
+
+Datenexploration, Rohdaten beschreiben, Plots aus Exploration
+
+Feldaufnahmen berücksichtigen
+
 ## Analytical Concepts
+
+Yves
+
+Stepmean, Segmentation,
+
+Anhand von Literatur Kriterien festgelegt für Nester und Suhlen
+
+Sampling Regime (nur 15 Minuten Intervalle)
 
 ## R Concecpts
 
-<!-- the following is just a placeholder text, remove it!-->
+Tobias
 
-Text
+Umsetzungskonzepte in R
 
-# Results
+Packages mit deren Funktion
 
-<!-- the following is just a placeholder text, remove it!-->
+# Results / Products
+
+Tobias
+
+Boxplot mit Stepmean, Exemplarische Plots nach Tieren, Raster graphs, Anteile Site Types & Moving / Resting,
 
 Text
 
 # Discussion
 
+Yves
+
+Warum so viele none und auch both? Evtl. Tabelle der Anteile hier bringen.
+
 ## Risk analysis / Problems
+
+Keine Validierung möglich, Literaturangaben zur Differenzierung nach N/W unzureichend. Intervalle der Messungen diskutieren, nur 15 Min berücksichtigt, dadurch Datenvelrust
 
 <!-- the following is just a placeholder text, remove it!-->
 
@@ -92,14 +114,18 @@ Text
 
 # References
 
-Text
+Tobias
+
+Zotero und so
 
 # Annex
 
 R Script
 
-```{r source code, echo=FALSE}
+```{r source code, echo=TRUE}
 
 # source("scripts/analysis.r")
 
 ```
+
+[@baettig2021]
