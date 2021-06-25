@@ -53,8 +53,7 @@ Tobias
 
 The provided data contains spatio temporal datasets of 39 wildboars which were equipped with the GPS collar VERTEX PLUS [@vectronicaerospace2021]. Some wildboars were equipped multiple time which results in 46 unique datasets. The data was taken between 2014-05-28 and 2016-10-18 on a irregular basis. This results in
 
-We will mainly use data that we have already used in the exercises. The basis is the wild boar movement
-dataset and its metadata. In addition, we will also use the raster and vector data provided on the environment (field and vegetation type). Additional data on land coverage may be required (e.g. area statistics, vegetation height), which would be obtained from swisstopo.
+We will mainly use data that we have already used in the exercises. The basis is the wild boar movement dataset and its metadata. In addition, we will also use the raster and vector data provided on the environment (field and vegetation type). Additional data on land coverage may be required (e.g. area statistics, vegetation height), which would be obtained from swisstopo.
 
 Yves
 
