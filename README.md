@@ -88,12 +88,10 @@ editor_options:
 -   Schritt 4: Schwellenwert definieren und resting / moving festlegen
 -   Schritt 5: Nur resting Data weiterverarbeiten
 -   Schritt 6: Kriterien für Nester und Suhlen definieren und anwenden
--   Schritt 7: Heatmap erstellen mit zu definierender Rastergrösse
-    (Convex hull wurde verworfen) \>\> Vorschlag: 100m da Arealstatistik
-    dieses Mass aufweist
--   Schritt 8: Rasterfelder zuweisen, Context herstellen
+-   Schritt 7: Daten mit definierter Auflösung rastern (100 m, analog zu
+    Arealstatistik; 30 m analog zu Steplength Schwellenwert)
+-   Schritt 8: Heatmap erstellen
 -   Schritt 9: Prozess mit Gesamtdaten testen
--   Schritt 11: Profit
 
 # Definitionen
 

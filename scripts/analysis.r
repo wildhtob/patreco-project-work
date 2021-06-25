@@ -456,27 +456,6 @@ ueli <- calc_movement_param(ueli)
 ueli_3 <- calc_movement_param(ueli_3)
 ueli_6 <- calc_movement_param(ueli_6)
 
-# Gibt es einen Grund speed so zu berechnen? Alternativ habe ich es oben implementiert
-# caro_3$steplength <- caro_3 %>%
-#   {
-#     (.$E - lead(.$E))^2 + (.$N - lead(.$N))^2
-#   } %>%
-#   sqrt()
-#
-# caro_3$speed <- caro_3 %>% {
-#   .$steplength / .$timelag
-# }
-#
-#
-# caro$steplength <- caro %>%
-#   {
-#     (.$E - lead(.$E))^2 + (.$N - lead(.$N))^2
-#   } %>%
-#   sqrt()
-#
-# caro$speed <- caro %>% {
-#   .$steplength / .$timelag
-# }
 
 
 # step 3: plot histogram and movement trajectories ------------------------
@@ -640,26 +619,42 @@ ggplot(data = ueli_filter, mapping = aes(E, N, colour = segment_id)) +
 
 # step 7 to 8: rasterize data ----------------------------------------------------------
 
-# Erstellen eines raster-templates mit Aufloesung 100 m (analog zu Arealstatistik)
+# Erstellen eines raster-templates mit Aufloesung 30m (Analog zu steplenth threshold)
 raster_template <- raster(extent(wildboar_lags), resolution = 100, crs = 2056)
 
-# Wallows und Nests filtern fuer separate Layers
+# resting filtern fuer 
+
+resting <- wildboar_lags %>% 
+  group_by(segment_id) %>% 
+  filter(row_number(segment_id) == 1)
+
+# Wallows und Nests filtern fuer separate Layers, jeweils ersten Datenpunk pro segment id
 wallows <- wildboar_lags %>%
-  filter(wallow == "TRUE")
+  filter(wallow == "TRUE") %>% 
+  group_by(segment_id) %>% 
+  filter(row_number(segment_id) == 1)
 
 nests <- wildboar_lags %>%
-  filter(nest == "TRUE")
+  filter(nest == "TRUE") %>% 
+  group_by(segment_id) %>% 
+  filter(row_number(segment_id) == 1)
 
 # Rastern der layer
+resting_raster <- raster::rasterize(resting, raster_template, field = 1, fun = "count")
+
 wallows_raster <- raster::rasterize(wallows, raster_template, field = 1, fun = "count")
 nests_raster <- raster::rasterize(nests, raster_template, field = 1, fun = "count")
 
-type_raster <- raster::rasterize(wildboar_lags, raster_template, field = 1)
+# plots
 
-# plot definieren
-
+greens <- tmaptools::get_brewer_pal("Greens", n = 6, contrast = c(0.3, 0.9))
 oranges <- tmaptools::get_brewer_pal("Oranges", n = 5, contrast = c(0.3, 0.9))
 purples <- tmaptools::get_brewer_pal("Purples", n = 5, contrast = c(0.3, 0.9))
+
+tmap_mode("view") +
+  tm_shape(resting_raster) +
+  tm_raster(palette = greens, title = "Resting sites", alpha = 1)
+  
 
 tm <-
   tmap_mode("view") +
