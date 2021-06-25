@@ -651,8 +651,18 @@ nests_sample <- wildboar_lags %>%
 
 # one layer per animal
 
-oranges <- tmaptools::get_brewer_pal("Oranges", n = 3, contrast = c(0.3, 0.9))
-purples <- tmaptools::get_brewer_pal("Purples", n = 3, contrast = c(0.3, 0.9))
+# tmaptools::palette_explorer()
+
+oranges <- tmaptools::get_brewer_pal("Oranges", n = 3, contrast = c(0.1, 0.9))
+purples <- tmaptools::get_brewer_pal("Purples", n = 3, contrast = c(0.1, 0.9))
+
+viridis <- viridisLite::viridis(3, begin = 0.23, end = 0.78)
+magma   <- viridisLite::magma  (3, begin = 0.23, end = 0.78)
+
+dark2 <- tmaptools::get_brewer_pal("Dark2", n = 6)
+dark_n <- dark2[1:3]
+dark_w <- dark2[4:6]
+
 
 tm_animals <- 
   tmap_mode("view") +
@@ -674,10 +684,10 @@ tm_sample <-
   tmap_mode("view") +
   tm_shape(nests_sample) +
   tm_symbols(col = "TierName", size = "segment_dur", alpha = 0.5, title.col = "Nests", 
-             palette = oranges, size.lim = c(1, 10)) +
+             palette = magma, size.lim = c(1, 10)) +
   tm_shape(wallows_sample) +
   tm_symbols(col = "TierName", size = "segment_dur", alpha = 0.5, title.col = "Wallows", 
-             palette = purples, size.lim = c(1, 10))
+             palette = viridis, size.lim = c(1, 10))
 
 tm_sample
 
