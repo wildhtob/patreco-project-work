@@ -101,7 +101,7 @@ wildboar_sf <- wildboar_sf %>%
 # breaks = seq(0,200,50)
 # labels = paste(c(rep("",length(breaks)-1),">"), breaks)
 #
-# wildboar_raw %>%
+# sampling_regime <- wildboar_raw %>%
 #   mutate(TierName = fct_reorder(TierName, DatetimeUTC,min, .desc = TRUE)) %>%
 #   group_by(TierID, TierName, CollarID) %>%
 #   mutate(
@@ -181,10 +181,17 @@ wildboar_lags$timelag_rounded <- round(wildboar_lags$timelag, -2)
 
 # build categories with rounded lags
 wildboar_lag_cat <- wildboar_lags %>%
-  #  st_drop_geometry() %>%
+  st_drop_geometry() %>%
   group_by(timelag_rounded) %>%
   summarise(count = n())
+wildboar_lag_cat
 
+# compares count of timelag_rounded
+hist_lag_cat <- ggplot(wildboar_lag_cat)
+hist_lag_cat + geom_col(aes(x = timelag_rounded, y = count)) +
+  coord_cartesian(ylim=c(0,200000), xlim=c(0,5000)) +
+  theme_bw() +
+  theme(panel.border = element_blank())
 
 # viualise change in lag over time ####
 
