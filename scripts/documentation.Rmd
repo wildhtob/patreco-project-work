@@ -51,9 +51,11 @@ Tobias
 
 ## Data
 
-The provided data contains spatio temporal datasets of 39 wildboars which were equipped with the GPS collar VERTEX PLUS [@vectronicaerospace2021]. Some wildboars were equipped multiple time which results in 46 unique datasets. The data was taken between 2014-05-28 and 2016-10-18 on a irregular basis. This results in
+The provided data contains spatio temporal datasets of 39 wildboars which were equipped with the GPS collar VERTEX PLUS [@vectronicaerospace2021]. Some wildboars were equipped multiple times which results in 46 unique datasets. The data was taken between 2014-05-28 and 2016-10-18 around the conservation zone Fanel which belongs to the cantons Bern and Neuenburg. The sampling regime varies widely in duration and interval. 
 
-We will mainly use data that we have already used in the exercises. The basis is the wild boar movement dataset and its metadata. In addition, we will also use the raster and vector data provided on the environment (field and vegetation type). Additional data on land coverage may be required (e.g. area statistics, vegetation height), which would be obtained from swisstopo.
+-\> Sampling Regime bild
+
+Furthermore data from a field survey has been used. In this survey provides spatial information about the type of use during the investigated time. If an area was used for agriculture the planted crops is also given.
 
 Yves
 
