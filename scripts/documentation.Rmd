@@ -39,32 +39,22 @@ Tobias
 
 # Research Questions
 
-<!-- the following is just a placeholder text, remove it!-->
+(yves) Our research is based on data from the ZHAW research project "Prevention of Wild Boar Damage in Agriculture"[@suter2018]. With this dataset as a basis, we want to answer the following research questions:
 
-Yves
+-   How can resting sites be modelled based on spatiotemporal movement data?
 
-```{r placeholder 1}
-library(ComputationalMovementAnalysisData)
-library(ggplot2)
+-   Can locations frequently visited by wild boar be determined efficiently and effectively in the provided research data?
 
-# Include tables with the function "kable"
-
-knitr::kable(head(wildschwein_BE))
-```
-
-<!-- the following is just a placeholder text, remove it!-->
-
-Text
-
-```{r placeholder 2}
-# include plots automatically
-
-
-```
+-   Can these regular resting places be clearly defined as nests or wallows?
 
 # Material and Methods
 
 ## Data
+
+The provided data contains spatio temporal datasets of 39 wildboars which were equipped with the GPS collar VERTEX PLUS [@vectronicaerospace2021]. Some wildboars were equipped multiple time which results in 46 unique datasets. The data was taken between 2014-05-28 and 2016-10-18 on a irregular basis. This results in
+
+We will mainly use data that we have already used in the exercises. The basis is the wild boar movement
+dataset and its metadata. In addition, we will also use the raster and vector data provided on the environment (field and vegetation type). Additional data on land coverage may be required (e.g. area statistics, vegetation height), which would be obtained from swisstopo.
 
 Yves
 
