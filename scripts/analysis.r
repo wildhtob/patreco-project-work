@@ -566,44 +566,118 @@ pie
 
 
 
-# plot trajectories -------------------------------------------------------
+# plot sample data -------------------------------------------------------
 
 
 # generate new samples from wildboar_lags data
+
 ueli_filter <- wildboar_lags %>%
   filter(
     year == 2016,
     # month == 5,
-    TierName == "Ueli",
-    site_type == "wallow"
-  )
+    site_type == "wallow" | site_type == "nest",
+    TierName == "Ueli"
+  ) %>% 
+  mutate(site_type = droplevels(site_type))
 
 frida_filter <- wildboar_lags %>%
   filter(
     year == 2016,
     # month == 5,
-    TierName == "Frida",
-    site_type == "nest"
-  )
+    site_type == "wallow" | site_type == "nest",
+    TierName == "Frida"
+  ) %>% 
+  mutate(site_type = droplevels(site_type))
 
 caro_filter <- wildboar_lags %>%
   filter(
     year == 2016,
     # month == 5,
-    TierName == "Caroline",
-    # site_type == "nest"
-  )
+    site_type == "wallow" | site_type == "nest",
+    TierName == "Caroline"
+  ) %>% 
+  mutate(site_type = droplevels(site_type))
+
+wallows_sample <- wildboar_lags %>%
+  filter(
+    year == 2016,
+    # month == 5,
+    site_type == "wallow", 
+    TierName == "Caroline" | TierName == "Ueli" | TierName == "Frida"
+  ) %>% 
+  mutate(site_type = droplevels(site_type))
+
+nests_sample <- wildboar_lags %>%
+  filter(
+    year == 2016,
+    # month == 5,
+    site_type == "nest", 
+    TierName == "Caroline" | TierName == "Ueli" | TierName == "Frida"
+  ) %>% 
+  mutate(site_type = droplevels(site_type))
+
+
+
+# frida_filter <- wildboar_lags %>%
+#   filter(
+#     year == 2016,
+#     # month == 5,
+#     TierName == "Frida",
+#     site_type == "nest"
+#   )
+# 
+# caro_filter <- wildboar_lags %>%
+#   filter(
+#     year == 2016,
+#     # month == 5,
+#     TierName == "Caroline",
+#     # site_type == "nest"
+#   )
+
 # Plot site_type
 # alter site_type to explore (nest, wallow, both, none and NA)
 # alter data to explore different boars
-ggplot(data = ueli_filter, mapping = aes(E, N, colour = segment_id)) +
-  # geom_path() +
-  geom_point() +
-  coord_equal() +
-  labs(title = "Moving segements coloured by segment ID") +
-  theme_classic() +
-  # RStudio crashes if legend.position "bottom" is chosen
-  theme(legend.position = "none")
+
+# ggplot(data = ueli_filter, mapping = aes(E, N, colour = segment_id)) +
+#   # geom_path() +
+#   geom_point() +
+#   coord_equal() +
+#   labs(title = "Moving segements coloured by segment ID") +
+#   theme_classic() +
+#   # RStudio crashes if legend.position "bottom" is chosen
+#   theme(legend.position = "none")
+
+# Polt interactive map with sample animals ####
+
+# one layer per animal
+
+oranges <- tmaptools::get_brewer_pal("Oranges", n = 3, contrast = c(0.3, 0.9))
+purples <- tmaptools::get_brewer_pal("Purples", n = 3, contrast = c(0.3, 0.9))
+
+tm_animals <- 
+  tmap_mode("view") +
+  tm_shape(ueli_filter) +
+  tm_symbols(col = "site_type", size = "segment_dur", alpha = 0.5, title.col = "Ueli", 
+             palette = c("orange", "purple"), size.lim = c(1, 10)) +
+  tm_shape(frida_filter) +
+  tm_symbols(col = "site_type", size = "segment_dur", alpha = 0.5, title.col = "Frida", 
+             palette = c("orange", "purple"), size.lim = c(1, 10)) +
+    tm_shape(caro_filter) +
+  tm_symbols(col = "site_type", size = "segment_dur", alpha = 0.5, title.col = "Caroline", 
+             palette = c("orange", "purple"), size.lim = c(1, 10))
+
+# one layer per field type (nests and wallos only)
+tm_sample <- 
+  tmap_mode("view") +
+  tm_shape(nests_sample) +
+  tm_symbols(col = "TierName", size = "segment_dur", alpha = 0.5, title.col = "Nests", 
+             palette = oranges, size.lim = c(1, 10)) +
+  tm_shape(wallows_sample) +
+  tm_symbols(col = "TierName", size = "segment_dur", alpha = 0.5, title.col = "Wallows", 
+             palette = purples, size.lim = c(1, 10))
+
+tm_sample
+
 
 
 # unused plots ------------------------------------------------------------
