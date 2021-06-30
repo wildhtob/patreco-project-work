@@ -31,7 +31,7 @@ knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
 
 ```
 
-```{r main, message=FALSE, warning=FALSE, include=FALSE, paged.print=FALSE}
+```{r main, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
 # libraries ---------------------------------------------------------------
 
 # install package with wildobar data:
@@ -222,10 +222,15 @@ wildboar_lag_cat <- wildboar_lags %>%
   summarise(count = n())
 wildboar_lag_cat
 
+# used below
 # compares count of timelag_rounded
 hist_lag_cat <- ggplot(wildboar_lag_cat)
 hist_lag_cat + geom_col(aes(x = timelag_rounded, y = count)) +
   coord_cartesian(ylim=c(0,200000), xlim=c(0,5000)) +
+  labs(x = "rounded timelag [seconds]",
+     y = "number of counts", 
+     title = "Distribution of timelag between to data points",
+     subtitle = "a clear majority is sampled with a timelag of 900 seconds") + 
   theme_bw() +
   theme(panel.border = element_blank())
 
@@ -532,14 +537,14 @@ ueli_6 <- calc_movement_param(ueli_6)
 # step 3: plot histogram and movement trajectories ------------------------
 
 
-# plot histogram of steplmean
+# plot histogram of stepmean
 # mit einem stepmean von 6 Datenpunkten im Intervall von 15 Minuten wird
 # meiner Meinung nach gut ersichtlich wann die Wildschweine pausieren.
 # Hier einsetzen und vergleichen: caro_6, frida_6, ueli_6
 # Mein Vorschlag fuer segment_trigger: 30 bis 50 Meter, GPS genauigkeit bedenken.
-hist_steplength <- ggplot(frida_6, aes(x = stepmean))
-hist_steplength + geom_histogram(binwidth = 5) +
-  scale_x_continuous(limits = c(0, 800)) +
+hist_steplength <- ggplot(frida_6, aes(x = stepmean, fill = mov_status))
+hist_steplength + geom_histogram(binwidth = 5 ) +
+  scale_x_continuous(limits = c(0, 500)) +
   geom_vline(xintercept = 0, lty = 2, alpha = 0.5) +
   theme_bw() +
   theme(panel.border = element_blank())
@@ -598,8 +603,6 @@ pie <- ggplot(site_type, aes(x = "", y = prop, fill = type)) +
   theme_void()
 
 pie
-
-
 
 
 # plot sample data -------------------------------------------------------
@@ -925,19 +928,19 @@ Tobias
 (yves) The provided data contains spatio-temporal datasets of 39 wildboars which were equipped with the GPS collar VERTEX PLUS [@vectronicaerospace2021]. Some wildboars were equipped multiple times which results in 46 unique datasets. The data was taken between 2014-05-28 and 2016-10-18 around the conservation zone Fanel which belongs to the cantons Bern and Neuenburg. The sampling regime varies widely in duration and interval. The vast majority of the recorded wild boar data has a timelag of 900 seconds between to datapoints (see *Figure 1*).
 
 ```{r histogram timelag, message=TRUE, warning=FALSE}
-hist_lag_cat
+# compares count of timelag_rounded
+hist_lag_cat <- ggplot(wildboar_lag_cat)
+hist_lag_cat + geom_col(aes(x = timelag_rounded, y = count)) +
+  coord_cartesian(ylim=c(0,200000), xlim=c(0,5000)) +
+  labs(x = "rounded timelag [seconds]",
+     y = "number of counts", 
+     title = "Distribution of timelag between to data points",
+     subtitle = "a clear majority is sampled with a timelag of 900 seconds") + 
+  theme_bw() +
+  theme(panel.border = element_blank())
 ```
 
-
--\> Sampling Regime bild
-
 Furthermore we added spatial information about the vegetation to the spatio-temporal wild boar data. This data was provided by a survey which classified the investigated area in forests, wetlands, settlement and agriculture. If a lot of land was used for agriculture, information about the planted crop is also given. In total the survey evaluated 5154 lots of land, covering an area of 120 km\^2. The evaluated area consists of 63 % agriculture, 22 % forest, 9 % settlement and 6 % wetlands. [@suter2010]
-
--\> Grafik aus Suters bericht?
-
-Datenexploration, Rohdaten beschreiben, Plots aus Exploration
-
-Feldaufnahmen berücksichtigen
 
 ## Analytical Concepts
 
@@ -945,7 +948,9 @@ In a prelimary phase we enriched the given data by important movement parameter.
 
 Wild boars share a common movement pattern when spending time at wallows and nests: they stick to a spot for a certain while. Distinguishing this behavior from other (feeding, fleeing, strolling) builds the basement of our analytical concept. For this we calculated the mean distance within a moving window of six data points (stepmean). This variable allowed us to apply segmentation on our wild boar data and define stops and moves. In our work we call it *movement status* (Variable *mov_status* with a two factors: “resting” or “moving”).
 
-Finding a In a second phase we defined the threshold of stepmean. For this stepmean of three wild boars were plotted in a histogram. We expected to see a clear decline in the first bins of stepmean since wild boars gather at spots and move often in a slow manner.
+This was followed by the evaluation of an appropriate threshold of stepmean. Sample data sets from three different wild boar movements were generated and evaluated in a histogram. With a binwidth of 10, we were able to see a clear decline in the first bins of stepmean. This lead to our interpretation that wild boars rest on the left side of the histogram and move on the right side.
+
+
 
 Setting the threshold seems reasonable at the point where stepmean flattens in a distinct manner (see histograms). In our samples this threshold can be anywhere between 30 to 50 meter. 
 
