@@ -51,8 +51,8 @@ library(raster) # rasterizing vector data
 # change working directory
 # setwd(r"(C:\code_wc\Modul_CMA\patreco-project-work)")
 
-# auskommentiert, da zu fehlermeldung gefuehrt, stattdessen in global options unter 
-# R Markdown "Evaluate junks in directory" auf "Project" umstellen
+# auskommentiert, da zu Fehlermeldung gefuehrt, stattdessen in Global Options unter # R Markdown "Evaluate junks in directory" auf "Project" umstellen
+
 # threshold that triggers the segmentation of the movement trajectory
 
 segment_trigger <- 40
@@ -1021,9 +1021,9 @@ Sampling Regime (nur 15 Minuten Intervalle)
 
 Tobias
 
-Umsetzungskonzepte in R
+The analysis, visualisation and documentation was conducted in the open-source software R, version 4.0.5 [@rcoreteam2021]. The handling of spatiotemporal data was managed with the packages sf [@pebesma2018], terra [@hijmans2021] and raster [@hijmans2020]. The graphical representations were created with ggplot2 [@wickham2016] as part of tidyverse [@wickham2019], which was also used for general data wrangling, alongside forcats [@wickham2021] to handle factor levels and janitor [@firke2021] for clean and consistent naming. Maps were generated using tmap [@tennekes2018] and leaflet [@cheng2021].
 
-Packages mit deren Funktion
+Umsetzungskonzepte in R
 
 # Results / Products
 
