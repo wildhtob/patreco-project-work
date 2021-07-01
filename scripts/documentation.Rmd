@@ -293,7 +293,7 @@ wildboar_lags <- wildboar_lags %>%
       TRUE ~ NA # Default case
     ),
     wallow_area = case_when(
-      Frucht == "Feuchtgebiet" ~ TRUE, # Literature says so?
+      Frucht == "Feuchtgebiet" ~ TRUE,
       Frucht == "Wald" ~ TRUE,
       Frucht == "Weizen" ~ FALSE,
       Frucht == "Gerste" ~ FALSE,
@@ -501,8 +501,8 @@ ueli <- wildboar_sf %>%
     TierName == "Ueli"
   )
 
-# step 1: sequence data (resolution to be discussed) ####
-# for sample data, for wildboar_lags its already done
+# step 1: sequence data ####
+# for sample data
 caro_seq3 <- seq(from = 1, to = nrow(caro), by = 3)
 caro_seq6 <- seq(from = 1, to = nrow(caro), by = 6)
 frida_seq3 <- seq(from = 1, to = nrow(frida), by = 3)
@@ -517,9 +517,7 @@ ueli_3 <- ueli %>% slice(ueli_seq3)
 ueli_6 <- ueli %>% slice(ueli_seq6)
 
 
-# step 2: calculate speed, steplength and timelag for segmented da --------
-
-
+# step 2: calculate speed, steplength and timelag for segmented da ####
 
 # for sample data, for wildboar_lags its already done
 caro <- calc_movement_param(caro)
@@ -943,7 +941,7 @@ Tobias
 
 ## Data
 
-(yves) The provided data contains spatio-temporal datasets of 39 wildboars which were equipped with the GPS collar VERTEX PLUS [@vectronicaerospace2021]. Some wildboars were equipped multiple times which results in 46 unique datasets. The data was taken between 2014-05-28 and 2016-10-18 around the conservation zone Fanel which belongs to the cantons Bern and Neuenburg. The sampling regime varies widely in duration and interval. The vast majority of the recorded wild boar data has a timelag of 900 seconds between two datapoints.
+(yves) The provided data contains spatio-temporal datasets of 39 wildboars which were equipped with the GPS collar VERTEX PLUS [@vectronicaerospace2021]. Some wildboars were equipped multiple times which results in 46 unique datasets. The data was taken between 2014-05-28 and 2016-10-18 around the conservation zone Fanel which belongs to the cantons Bern and Neuenburg. The sampling regime varies widely in duration and interval. The vast majority of the recorded wild boar data has a timelag of 900 seconds between two points.
 
 ```{r histogram timelag, message=TRUE, warning=FALSE}
 # compares count of timelag_rounded
@@ -962,9 +960,21 @@ Furthermore we added spatial information about the vegetation to the spatio-temp
 
 ## Analytical Concepts
 
-In a prelimary phase we enriched the given data by important movement parameter. For every data point we calculated steplength and timelag to the next point.
+In a prelimary phase we enriched the given data with important parameter for *Computational Movement Analysis*. For every data point we calculated *speed*, *steplength* and *timelag* to the next point.
 
-Wild boars share a common movement pattern when spending time at wallows and nests: they stick to a spot for a certain while. Distinguishing this behavior from other (feeding, fleeing, strolling) builds the basement of our analytical concept. For this we calculated the mean distance within a moving window of six data points (stepmean). This variable allowed us to apply segmentation on our wild boar data and define stops and moves. In our work we call it *movement status* (Variable *mov_status* with a two factors: "resting" or "moving").
+Wild boars share a common movement pattern when spending time at wallows and nests: they stick to a location for a certain while and do not undertake wide distances during this time. Distinguishing this behavior from others builds the basement of our analytical concept. Wild boar biologists differentiate between the following wild boar behaviour [@keuling2009]:
+
+- Feeding
+- protective behaviour
+- aggressive behaviour
+- comfort behaviour
+- other behaviour (sleeping, resting, fleeing, strolling)
+
+According to literature wild boar show some behavioral patterns at nests and wallows:
+
+- **Nests:** Multiple wild boars gather in close distance and stay there for an undefined while [@keuling2009]. Since wild boars are nocturnal animals, they preferably rest in covered areas like forests or wetlands with high reeds. During summertime agricultural Fields with high crops like barley, rapeseed or wheat can also provide a suitable nesting habitat [@suter2010].
+
+For this we calculated the mean distance within a moving window of six data points (stepmean). This variable allowed us to apply segmentation on our wild boar data and define stops and moves. In our work we call it *movement status* (Variable *mov_status* with a two factors: "resting" or "moving").
 
 This was followed by the evaluation of an appropriate threshold of stepmean. Sample data sets from three different wild boar movements were generated and evaluated in a histogram. With a binwidth of 5, we were able to see a clear decline in the first bins of stepmean. This lead to our interpretation that wild boars rest on the left side of the histogram and move on the right side.
 
