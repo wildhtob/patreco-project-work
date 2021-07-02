@@ -9,7 +9,7 @@ editor_options:
 ## Suhlen (Aus Keuling und Stier, 2009):
 
 -   Keine vorhanden im Februar und März NÁNDEZ-LLARIO (2005)
--   Suhlen in der warmen Jahreszeit MEYNHARDT (1990)
+-   Suhlen in der warmen Jahreszeit Wallo (1990)
 -   erstreckten sich ausschließlich über die Nachtphasen, wobei kein
     eindeutiger allgemeiner nächtlicher Aktivi- tätshöhepunkt zu
     erkennen war
