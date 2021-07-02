@@ -46,6 +46,7 @@ library(sf) # handling spatial data
 library(janitor) # clean and consistent naming
 library(forcats) # handling factor levels
 library(raster) # rasterizing vector data
+library(knitr) # for pretty tables
 
 # globals ----------------------------------------------------------------------
 # change working directory
@@ -220,7 +221,11 @@ wildboar_lags$timelag_rounded <- round(wildboar_lags$timelag, -2)
 wildboar_lag_cat <- wildboar_lags %>%
   st_drop_geometry() %>%
   group_by(timelag_rounded) %>%
-  summarise(count = n())
+  summarise(count = n()) %>% 
+  mutate(proportion = count/sum(count) * 100,
+       proportion = round(prop, 1)) %>% 
+  arrange(desc(proportion))
+
 wildboar_lag_cat
 
 #### DELETE ####
@@ -1421,6 +1426,24 @@ tm_nw_30
 ```
 
 # Discussion
+
+The present project work shows one possible approach to modell resting sites based on spatiotemporal movement data. With the calculation of a movement status we are able to distinguish between resting phases and moving phases. The threshold of this classification is based on sample datasets which we use for an simple assessment. Due to missing field data, this assessment method clearly lacks of validation and introduces uncertainty in the following analysis. 
+
+The given research data provides a unique sampling regime with different timelags. With the aim to reduce complexity we only used trajectories with a timelag of 900 seconds. This results in a loss of 42.1 % of the provided dataset. On a first glance, a loss of 42.1 % seems like a problematic amount. At a second look this can be justified since 31.2 % has an invalid timelag of zero seconds. If one substracts this chunk, our analysis is able to assess 
+
+```{r echo=FALSE, results='asis'}
+wildboar_lag_cat <- wildboar_lag_cat %>% 
+  filter(count >= 100)
+
+kable(wildboar_lag_cat, caption = "Proportion of rounded timelags in provided dataset")
+
+```
+
+Apart from this uncertainty we are confident that we have developed a robust method for the assignment of resting sites. Nevertheless, the developed method requires fine tuning and a validation of the results.
+
+-   Can locations frequently visited by wild boar be determined efficiently and effectively in the provided research data?
+
+-   Can these regular resting places be clearly defined as nests or wallows?
 
 Yves
 
