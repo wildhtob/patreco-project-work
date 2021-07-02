@@ -4,7 +4,7 @@ subtitle: "Project Works Patterns and Trends in Environmental Data"
 author: "Yves Gubelmann and Tobias Wildhaber"
 date: "4 July, 2021"
 output: 
-  html_document:
+  bookdown::html_document2: default
     toc: true
     toc_float: true
     number_sections: true
@@ -30,7 +30,7 @@ knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
 
 ```
 
-```{r main, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
+```{r main, include=FALSE}
 # libraries ---------------------------------------------------------------
 
 # install package with wildobar data:
@@ -941,22 +941,30 @@ Tobias
 
 ## Data
 
-(yves) The provided data contains spatio-temporal datasets of 39 wildboars which were equipped with the GPS collar VERTEX PLUS [@vectronicaerospace2021]. Some wildboars were equipped multiple times which results in 46 unique datasets. The data was taken between 2014-05-28 and 2016-10-18 around the conservation zone Fanel which belongs to the cantons Bern and Neuenburg. The sampling regime varies widely in duration and interval. The vast majority of the recorded wild boar data has a timelag of 900 seconds between two points.
+(yves) The provided data contains spatio-temporal datasets of 39 wildboars which were equipped with the GPS collar VERTEX PLUS [@vectronicaerospace2021]. Some wildboars were equipped multiple times which results in 46 sampling sets. The data was taken between 2014-05-28 and 2016-10-18 around the conservation zone Fanel which belongs to the cantons Bern and Neuenburg. The sampling regime varies widely in duration and interval. The vast majority of the recorded wild boar data has a timelag of 15 minutes (≙ 900 seconds) between two points.
 
-```{r histogram timelag, message=TRUE, warning=FALSE}
-# compares count of timelag_rounded
-hist_lag_cat <- ggplot(wildboar_lag_cat)
-hist_lag_cat + geom_col(aes(x = timelag_rounded, y = count)) +
-  coord_cartesian(ylim=c(0,200000), xlim=c(0,5000)) +
-  labs(x = "rounded timelag [seconds]",
-     y = "number of counts", 
-     title = "Distribution of timelag between to data points",
-     subtitle = "a clear majority is sampled with a timelag of 900 seconds") + 
-  theme_bw() +
-  theme(panel.border = element_blank())
+```{r sampling regime, fig.cap="Sampling regime for all individuals in minutes", fig.width=9}
+
+limits <- c(0,200)
+breaks = seq(0,200,50)
+labels = paste(c(rep("",length(breaks)-1),">"), breaks)
+
+wildschwein_BE %>%
+  mutate(TierName = fct_reorder(TierName, DatetimeUTC,min, .desc = TRUE)) %>%
+  group_by(TierID, TierName, CollarID) %>%
+  mutate(
+    timelag = as.numeric(difftime(lead(DatetimeUTC),DatetimeUTC, units = "mins")),
+    ) %>%
+  ggplot(aes(DatetimeUTC, TierName, colour = timelag)) +
+  geom_line(lwd = 10) +
+  scale_color_gradientn(name = "Sampling interval", colours = RColorBrewer::brewer.pal(11, "Spectral"), limits = limits, na.value = NA, oob = scales::squish, breaks = seq(0,200,50), labels = labels) +
+  theme_minimal() +
+  theme(legend.position = "top") +
+  guides(color = guide_colorbar(title.position = "top", title.hjust = .5, barwidth = unit(20, "lines"), barheight = unit(.5, "lines")))
+
 ```
 
-Furthermore we added spatial information about the vegetation to the spatio-temporal wild boar data. This data was provided by a survey which classified the investigated area in forests, wetlands, settlement and agriculture. If a lot of land was used for agriculture, information about the planted crop is also given. In total the survey evaluated 5154 lots of land, covering an area of 120 km\^2. The evaluated area consists of 63 % agriculture, 22 % forest, 9 % settlement and 6 % wetlands [@suter2010].
+Furthermore we use spatial information about the vegetation to the spatio-temporal wild boar data. This data is provided by a survey which classified the investigated area in forests, wetlands, settlement and agriculture. If a lot of land was used for agriculture, information about the planted crop is also given. In total the survey evaluated 5154 lots of land, covering an area of 120 km\^2. The evaluated area consists of 63 % agriculture, 22 % forest, 9 % settlement and 6 % wetlands [@suter2010].
 
 ## Analytical Concepts
 
@@ -966,7 +974,7 @@ The *steplength* is calculated based on the Euclidean distance, using the follow
 
 $$\text{distance} = \sqrt{(\text{E1} - \text{E2})^{2}+(\text{N1} - \text{N2})^{2}}$$Based on the calculated *steplength*, additional parameters such as *speed* and *timelag* are calculated. In a further step, the average distance within a given temporal window is calculated (*stepmean*) and then used to segment the wildboar data and to differentiate between resting and moving (*movement status*).
 
-Since wild boars usually rest at nests and wallows the parameter movement status builds the basement for further analysis. A clear distinction between *resting* and *moving* is made by the introduction of the variable *segment_trigger*. The apropriate level of this threshold is evaluated in a critical manner. Sample data sets from three different wild boar movements are generated and evaluated.
+Since wild boars usually rest at nests and wallows the parameter movement status builds the basement for further analysis.
 
 ### Wild Boar Behavior
 
@@ -992,13 +1000,63 @@ The analysis, visualisation and documentation was conducted in the open-source s
 
 The wildboar data from the ZHAW research project [@suter2010a] is provided in form of the seperate R package ComputationalMovementAnalysis, version 0.1.14 [@ratnaweera2021a].
 
-### Calculation of Movement Parameter
+### Calculation of Movement Parameters
 
-In a prelimary phase we enriched the given data with important parameter for *Computational Movement Analysis*. For every data point we calculated *speed*, *steplength* and *timelag* to the next point.
+In a prelimary phase we enrich the given data with important parameters for *Computational Movement Analysis*. For every data point we calculate *speed*, *steplength* and *timelag* to the next point.
 
-Another movement parameter we added for our analysis is *stepmean*. It calculates the mean distance within a moving window of six data points. This variable allowed us to apply segmentation on our wild boar data and define stops and moves. In our work we call it *movement status* (Variable *mov_status* with a two factors: "resting" or "moving").
+Another movement parameter we add for our analysis is *stepmean*. It calculates the mean distance within a moving window of six data points. This variable allowes us to apply segmentation on our wild boar data and define stops and moves (Variable *mov_status* with a two factors: *resting* or *moving*).
 
-Since wild boars usually rest at nests and wallows the parameter movement status builds the basement for further analysis. A clear distinction between *resting* and *moving* was done by the introduction of the variable *segment_trigger*. The apropriate level of this threshold was evaluated in a critical manner. Sample data sets from three different wild boar movements were generated and evaluated in a histogram. With a binwidth of 5, we were able to see a clear decline in the first bins of stepmean. This lead to our interpretation that wild boars rest on the left side of the histogram and move on the right side.
+The mentioned movement parameter are implemented via the function *calc_movement_param*.
+
+```{r calc_movement_param, echo=TRUE, eval=FALSE, class.source = "fold-show"}
+
+calc_movement_param <- function(boar_dt) {
+  boar_dt <- boar_dt %>%
+    mutate(
+      timelag = as.integer(difftime(lead(DatetimeUTC), DatetimeUTC, units = "secs")),
+      steplength = sqrt(((E - lead(E, 1))^2 + (N - lead(N, 1))^2)),
+      speed = steplength / timelag,
+      nMinus3 = sqrt((lag(E, 3) - E)^2 + (lag(N, 3) - N)^2),
+      nMinus2 = sqrt((lag(E, 2) - E)^2 + (lag(N, 2) - N)^2),
+      nMinus1 = sqrt((lag(E, 1) - E)^2 + (lag(N, 1) - N)^2),
+      nPlus1 = sqrt((E - lead(E, 1))^2 + (N - lead(N, 1))^2),
+      nPlus2 = sqrt((E - lead(E, 2))^2 + (N - lead(N, 2))^2),
+      nPlus3 = sqrt((E - lead(E, 3))^2 + (N - lead(N, 3))^2)
+    ) %>%
+    rowwise() %>%
+    mutate(
+      stepmean = mean(c(nMinus3, nMinus2, nMinus1, nPlus1, nPlus2, nPlus3)),
+    ) %>%
+    ungroup() %>%
+    mutate(
+      mov_static = if_else(stepmean < segment_trigger, TRUE, FALSE),
+      mov_status = if_else(stepmean < segment_trigger, "resting", "moving"),
+      cma_static = stepmean < mean(stepmean, na.rm = TRUE)
+    )
+  boar_dt
+}
+```
+
+### Filtering and Segmentation
+
+As mentioned above, the majority of the recorded wild boar data has a rounded *timelag* of 900 seconds (≙ 15 minutes) between two points:
+
+```{r time lag hist, message=TRUE, warning=FALSE, fig.cap="Time lag distribution", appendix=TRUE}
+
+hist_lag_cat <- ggplot(wildboar_lag_cat)
+hist_lag_cat + geom_col(aes(x = timelag_rounded, y = count)) +
+  coord_cartesian(ylim=c(0,200000), xlim=c(0,4000)) +
+  labs(x = "rounded timelag [seconds]",
+     y = "number of counts", 
+     title = "Distribution of timelag between two data points",
+     subtitle = "a clear majority is sampled with a timelag of 900 seconds") + 
+  theme_bw() +
+  theme(panel.border = element_blank())
+```
+
+Therefore, only observations with a rounded *timelag* of 900 seconds are processed further whilte the others are excluded..
+
+A clear distinction between *resting* and *moving* isdone by the introduction of the variable *segment_trigger*. The appropriate level for this threshold is evaluated in a critical manner. Sample data sets from three different wild boar movements are generated and evaluated in a histogram. With a binwidth of 5, we are able to see a clear decline in the first bins of stepmean. This leads to our interpretation that wild boars rest on the left side of the histogram and move on the right side.
 
 ```{r stepmean_threshold}
 stepmean_ueli <- ggplot(ueli_6, aes(x = stepmean, fill = mov_status))
@@ -1035,43 +1093,7 @@ stepmean_frida + geom_histogram(binwidth = 5 ) +
    subtitle = "Sample dataset from May 2016 (segment_trigger = 40)")
 ```
 
-Setting the threshold seems reasonable at the point where stepmean flattens in a distinct manner (see histograms). In our samples this threshold can be anywhere between 30 to 50 meter.
-
-The mentioned movement parameter were implemented in the function *calc_movement_param*.
-
-```{r calc_movement_param, echo=TRUE, eval=FALSE, class.source = "fold-show"}
-# functions ---------------------------------------------------------------
-
-calc_movement_param <- function(boar_dt) {
-  boar_dt <- boar_dt %>%
-    mutate(
-      timelag = as.integer(difftime(lead(DatetimeUTC), DatetimeUTC, units = "secs")),
-      steplength = sqrt(((E - lead(E, 1))^2 + (N - lead(N, 1))^2)),
-      speed = steplength / timelag,
-      nMinus3 = sqrt((lag(E, 3) - E)^2 + (lag(N, 3) - N)^2),
-      nMinus2 = sqrt((lag(E, 2) - E)^2 + (lag(N, 2) - N)^2),
-      nMinus1 = sqrt((lag(E, 1) - E)^2 + (lag(N, 1) - N)^2),
-      nPlus1 = sqrt((E - lead(E, 1))^2 + (N - lead(N, 1))^2),
-      nPlus2 = sqrt((E - lead(E, 2))^2 + (N - lead(N, 2))^2),
-      nPlus3 = sqrt((E - lead(E, 3))^2 + (N - lead(N, 3))^2)
-    ) %>%
-    rowwise() %>%
-    mutate(
-      stepmean = mean(c(nMinus3, nMinus2, nMinus1, nPlus1, nPlus2, nPlus3)),
-    ) %>%
-    ungroup() %>%
-    mutate(
-      mov_static = if_else(stepmean < segment_trigger, TRUE, FALSE),
-      mov_status = if_else(stepmean < segment_trigger, "resting", "moving"),
-      cma_static = stepmean < mean(stepmean, na.rm = TRUE)
-    )
-  boar_dt
-}
-```
-
-### Segementation
-
-The generated stops and moves will then be annotated with a status and joined with land use type to provide further context. Finally, for each resting trajectory a convex hull will be calculated to visualize the results.
+Setting the threshold seems reasonable at the point where stepmean flattens in a distinct manner (see histograms). In our samples this threshold can be anywhere between 30 to 50 meter. The *segment_trigger* is therefore set to 40
 
 ### Adding Context
 
@@ -1112,9 +1134,9 @@ Tobias
 ::: {#refs}
 :::
 
-# Annex
+# Appendix
 
-R Script
+Complete R Script
 
 ```{r ref.label=knitr::all_labels(), echo=TRUE, eval=FALSE, class.source = "fold-show"}
 
