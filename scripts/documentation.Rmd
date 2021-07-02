@@ -4,7 +4,7 @@ subtitle: "Project Works Patterns and Trends in Environmental Data"
 author: "Yves Gubelmann and Tobias Wildhaber"
 date: "4 July, 2021"
 output: 
-  bookdown::html_document2: default
+  bookdown::html_document2:
     toc: true
     toc_float: true
     number_sections: true
@@ -30,7 +30,7 @@ knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
 
 ```
 
-```{r main, include=FALSE}
+```{r main, include=FALSE, appendix=TRUE}
 # libraries ---------------------------------------------------------------
 
 # install package with wildobar data:
@@ -228,6 +228,7 @@ wildboar_lag_cat <- wildboar_lags %>%
 
 wildboar_lag_cat
 
+#### DELETE ####
 # used below
 # compares count of timelag_rounded
 hist_lag_cat <- ggplot(wildboar_lag_cat)
@@ -446,6 +447,7 @@ wildboar_lags <- wildboar_lags %>%
   # fraglich, ob der filter hier angewendet werden soll oder nach Sample data
   filter(timelag_rounded == 900)
 
+#### visualize movement status ####
 
 summary(as.factor(wildboar_lags$mov_status))
 
@@ -609,7 +611,7 @@ wildboar_lags <- wildboar_lags %>%
 
 summary(wildboar_lags)
 
-# create pie chart
+# create pie chart for site_type ####
 
 site_type <- data.frame(summary(wildboar_lags$site_type)) %>% 
   rename(count = 1) %>% 
@@ -948,7 +950,7 @@ Tobias
 
 (yves) The provided data contains spatio-temporal datasets of 39 wildboars which were equipped with the GPS collar VERTEX PLUS [@vectronicaerospace2021]. Some wildboars were equipped multiple times which results in 46 sampling sets. The data was taken between 2014-05-28 and 2016-10-18 around the conservation zone Fanel which belongs to the cantons Bern and Neuenburg. The sampling regime varies widely in duration and interval. The vast majority of the recorded wild boar data has a timelag of 15 minutes (≙ 900 seconds) between two points.
 
-```{r sampling regime, fig.cap="Sampling regime for all individuals in minutes", fig.width=9}
+```{r sampling regime, fig.cap="Sampling regime for all individuals in minutes", fig.width=9, fig.height=7, appendix=TRUE}
 
 limits <- c(0,200)
 breaks = seq(0,200,50)
@@ -993,11 +995,11 @@ Wild boars share a common movement pattern when spending time at wallows and nes
 
 According to literature wild boar show some behavioral patterns at nests and wallows:
 
--   **Nests:** Multiple wild boars gather in close distance and stay there for an undefined while [@keuling2009]. Since wild boars are nocturnal animals, they preferably rest in covered areas like forests or wetlands with high reeds. During summertime agricultural Fields with high crops like barley, rapeseed or wheat can also provide a suitable nesting habitat. Surveys in this area showed that wild boars normally rest between 8:00 and 17:00 and revisit its nests up to eight times [@suter2010].
+-   **Nests:** Multiple wild boars gather in close distance and stay there for an undefined while [@keuling2009]. Since wild boars are nocturnal animals, they preferably rest in covered areas like forests or wetlands with high reeds. During summertime agricultural fields with high crops like cereal (wheat, barley, oat etc.), rapeseed or corn can also provide a suitable nesting habitat. Surveys in this area showed that wild boars normally rest between 8:00 and 17:00 and revisit its nests up to eight times [@suter2010].
 
--   **Wallows:** Wild boars use wallows for hygiene purposes [@keuling2009]. In a wallow the boar is able to regulate their body temperature since wild boars cannot sweat. This leads to fact that wallowing happens mainly during summer season and are not observed before April [@fernández-llario2005]. On a daily view, wild boars wallow during nighttime and early morning [@meynhardt1990]. In comparison to the behavior at nests, wild boars spend less time at wallows since it is clearly a comfort behavior and does not serve a basic need[@keuling2009].
+-   **Wallows:** Wild boars use wallows for hygiene purposes [@keuling2009]. In a wallow the boar is able to regulate their body temperature since wild boars cannot sweat. This leads to fact that wallowing happens mainly during summer season and are not observed before April [@fernández-llario2005]. On a daily view, wild boars visit wallows during nighttime and early morning hours [@meynhardt1990]. In comparison to the behavior at nests, wild boars spend less time at wallows since it is clearly a comfort behavior and does not serve a basic need[@keuling2009].
 
-## R Concecpts
+## R Concepts
 
 Tobias
 
@@ -1059,9 +1061,9 @@ hist_lag_cat + geom_col(aes(x = timelag_rounded, y = count)) +
   theme(panel.border = element_blank())
 ```
 
-Therefore, only observations with a rounded *timelag* of 900 seconds are processed further whilte the others are excluded..
+Therefore, we only process observations with a rounded *timelag* of 900 seconds further while we exluce the others.
 
-A clear distinction between *resting* and *moving* isdone by the introduction of the variable *segment_trigger*. The appropriate level for this threshold is evaluated in a critical manner. Sample data sets from three different wild boar movements are generated and evaluated in a histogram. With a binwidth of 5, we are able to see a clear decline in the first bins of stepmean. This leads to our interpretation that wild boars rest on the left side of the histogram and move on the right side.
+A clear distinction between *resting* and *moving* is done by the introduction of the variable *segment_trigger*. The appropriate level for this threshold is evaluated in a critical manner. We generate sample data sets from three different wild boars and evaluate them in a histogram. With a binwidth of 5, we are able to see a clear decline in the first bins of stepmean. This leads to our interpretation that wild boars rest on the left side of the histogram and move on the right side.
 
 ```{r stepmean_threshold}
 stepmean_ueli <- ggplot(ueli_6, aes(x = stepmean, fill = mov_status))
@@ -1098,15 +1100,277 @@ stepmean_frida + geom_histogram(binwidth = 5 ) +
    subtitle = "Sample dataset from May 2016 (segment_trigger = 40)")
 ```
 
-Setting the threshold seems reasonable at the point where stepmean flattens in a distinct manner (see histograms). In our samples this threshold can be anywhere between 30 to 50 meter. The *segment_trigger* is therefore set to 40
+Setting the threshold seems reasonable at the point where stepmean flattens in a distinct manner (see histograms). In our samples this threshold can be anywhere between 30 to 50 meter. The *segment_trigger* is therfore set to 40. This leads to a division of the *movment status* into approximately 32 % resting and 68 % moving at the level of individual observations.
+
+```{r movement status}
+
+pie <- ggplot(mov_status, aes(x = "", y = prop, fill = status)) +
+  geom_bar(width = 1, stat = "identity", color = "white") +
+  coord_polar("y", start = 0) +
+  geom_text(aes(y = lab.ypos, label = prop), color = "white") +
+  scale_fill_discrete(name = "Status", labels = c("Resting", "Moving")) +
+  theme_void()
+
+pie
+
+```
 
 ### Adding Context
 
-Stepmean, Segmentation,
+The vegetational information is joined with the wild boar observation to add spatial context which can then be used to further differentiate between potential nests and wallows based on literature informations about circadian activity and preferred crop types.
 
-Anhand von Literatur Kriterien festgelegt für Nester und Suhlen
+```{r adding context, echo=TRUE, eval=F}
 
-Sampling Regime (nur 15 Minuten Intervalle)
+wildboar_lags <- wildboar_lags %>%
+  # add wallow and nest criterias according to literature
+  # enable line below if you want to filter all NAs in Frucht
+  # filter(!is.na(Frucht)) %>%
+  mutate(
+    wallow_month = if_else(month > 3 & month < 10, TRUE, FALSE),
+    wallow_day = case_when(
+      day == "Abenddaemmerung" ~ FALSE,
+      day == "Morgendaemmerung" ~ TRUE,
+      day == "Nacht" ~ FALSE,
+      day == "1Nachtviertel" ~ FALSE,
+      day == "2Nachtviertel" ~ FALSE,
+      day == "3Nachtviertel" ~ FALSE,
+      day == "4Nachtviertel" ~ FALSE,
+      day == "Tag" ~ TRUE,
+      TRUE ~ NA # Default case
+    ),
+    wallow_area = case_when(
+      Frucht == "Feuchtgebiet" ~ TRUE,
+      Frucht == "Wald" ~ TRUE,
+      Frucht == "Weizen" ~ FALSE,
+      Frucht == "Gerste" ~ FALSE,
+      Frucht == "Zwiebeln" ~ FALSE,
+      Frucht == "Bohnen" ~ FALSE,
+      Frucht == "Kartoffeln" ~ FALSE,
+      Frucht == "Rueben" ~ FALSE,
+      Frucht == "Chinaschilf" ~ FALSE,
+      Frucht == "Mangold" ~ FALSE,
+      Frucht == "Wiese" ~ FALSE,
+      Frucht == "Kohlrabi" ~ FALSE,
+      Frucht == "Weide" ~ FALSE,
+      Frucht == "Lupinen" ~ FALSE,
+      Frucht == "Flugplatz" ~ FALSE,
+      Frucht == "Mais" ~ FALSE,
+      Frucht == "Raps" ~ FALSE,
+      Frucht == "Karotten" ~ FALSE,
+      Frucht == "Acker" ~ FALSE,
+      Frucht == "Sonnenblumen" ~ FALSE,
+      Frucht == "Erbsen" ~ FALSE,
+      Frucht == "Kohl" ~ FALSE,
+      Frucht == "Hafer" ~ FALSE,
+      Frucht == "Roggen" ~ FALSE,
+      Frucht == "Salat" ~ FALSE,
+      Frucht == "Rhabarber" ~ FALSE,
+      Frucht == "Sellerie" ~ FALSE,
+      Frucht == "Brache" ~ FALSE,
+      Frucht == "Spargel" ~ FALSE,
+      Frucht == "Obstplantage" ~ FALSE,
+      Frucht == "Fenchel" ~ FALSE,
+      Frucht == "Gemuese" ~ FALSE,
+      Frucht == "Gewaechshaus" ~ FALSE,
+      Frucht == "Zuchetti" ~ FALSE,
+      Frucht == "Zucchetti" ~ FALSE,
+      Frucht == "Flachs" ~ FALSE,
+      Frucht == "Kuerbis" ~ FALSE,
+      TRUE ~ NA # Default case
+    ),
+    nest_day = case_when(
+      day == "Abenddaemmerung" ~ FALSE,
+      day == "Morgendaemmerung" ~ FALSE,
+      day == "Nacht" ~ FALSE,
+      day == "1Nachtviertel" ~ FALSE,
+      day == "2Nachtviertel" ~ FALSE,
+      day == "3Nachtviertel" ~ FALSE,
+      day == "4Nachtviertel" ~ FALSE,
+      day == "Tag" ~ TRUE,
+      TRUE ~ NA # Default case
+    ),
+    nest_summer_mon = if_else(month >= 5 & month <= 10, TRUE, FALSE),
+    nest_winter_mon = if_else(month >= 5 & month <= 10, FALSE, TRUE),
+    nest_summer_area = case_when(
+      Frucht == "Feuchtgebiet" ~ FALSE,
+      Frucht == "Wald" ~ TRUE,
+      Frucht == "Weizen" ~ TRUE,
+      Frucht == "Gerste" ~ TRUE,
+      Frucht == "Zwiebeln" ~ FALSE,
+      Frucht == "Bohnen" ~ FALSE,
+      Frucht == "Kartoffeln" ~ FALSE,
+      Frucht == "Rueben" ~ FALSE,
+      Frucht == "Chinaschilf" ~ FALSE,
+      Frucht == "Mangold" ~ FALSE,
+      Frucht == "Wiese" ~ FALSE,
+      Frucht == "Kohlrabi" ~ FALSE,
+      Frucht == "Weide" ~ FALSE,
+      Frucht == "Lupinen" ~ FALSE,
+      Frucht == "Flugplatz" ~ FALSE,
+      Frucht == "Mais" ~ TRUE,
+      Frucht == "Raps" ~ TRUE,
+      Frucht == "Karotten" ~ FALSE,
+      Frucht == "Acker" ~ FALSE,
+      Frucht == "Sonnenblumen" ~ FALSE,
+      Frucht == "Erbsen" ~ FALSE,
+      Frucht == "Kohl" ~ FALSE,
+      Frucht == "Hafer" ~ TRUE,
+      Frucht == "Roggen" ~ TRUE,
+      Frucht == "Salat" ~ FALSE,
+      Frucht == "Rhabarber" ~ FALSE,
+      Frucht == "Sellerie" ~ FALSE,
+      Frucht == "Brache" ~ FALSE,
+      Frucht == "Spargel" ~ FALSE,
+      Frucht == "Obstplantage" ~ FALSE,
+      Frucht == "Fenchel" ~ FALSE,
+      Frucht == "Gemuese" ~ FALSE,
+      Frucht == "Gewaechshaus" ~ FALSE,
+      Frucht == "Zuchetti" ~ FALSE,
+      Frucht == "Zucchetti" ~ FALSE,
+      Frucht == "Flachs" ~ FALSE,
+      Frucht == "Kuerbis" ~ FALSE,
+      TRUE ~ NA # Default case
+    ),
+    nest_winter_area = case_when(
+      Frucht == "Feuchtgebiet" ~ TRUE,
+      Frucht == "Wald" ~ TRUE,
+      Frucht == "Weizen" ~ FALSE,
+      Frucht == "Gerste" ~ FALSE,
+      Frucht == "Zwiebeln" ~ FALSE,
+      Frucht == "Bohnen" ~ FALSE,
+      Frucht == "Kartoffeln" ~ FALSE,
+      Frucht == "Rueben" ~ FALSE,
+      Frucht == "Chinaschilf" ~ FALSE,
+      Frucht == "Mangold" ~ FALSE,
+      Frucht == "Wiese" ~ FALSE,
+      Frucht == "Kohlrabi" ~ FALSE,
+      Frucht == "Weide" ~ FALSE,
+      Frucht == "Lupinen" ~ FALSE,
+      Frucht == "Flugplatz" ~ FALSE,
+      Frucht == "Mais" ~ FALSE,
+      Frucht == "Raps" ~ FALSE,
+      Frucht == "Karotten" ~ FALSE,
+      Frucht == "Acker" ~ FALSE,
+      Frucht == "Sonnenblumen" ~ FALSE,
+      Frucht == "Erbsen" ~ FALSE,
+      Frucht == "Kohl" ~ FALSE,
+      Frucht == "Hafer" ~ FALSE,
+      Frucht == "Roggen" ~ FALSE,
+      Frucht == "Salat" ~ FALSE,
+      Frucht == "Rhabarber" ~ FALSE,
+      Frucht == "Sellerie" ~ FALSE,
+      Frucht == "Brache" ~ FALSE,
+      Frucht == "Spargel" ~ FALSE,
+      Frucht == "Obstplantage" ~ FALSE,
+      Frucht == "Fenchel" ~ FALSE,
+      Frucht == "Gemuese" ~ FALSE,
+      Frucht == "Gewaechshaus" ~ FALSE,
+      Frucht == "Zuchetti" ~ FALSE,
+      Frucht == "Zucchetti" ~ FALSE,
+      Frucht == "Flachs" ~ FALSE,
+      Frucht == "Kuerbis" ~ FALSE,
+      TRUE ~ NA # Default case
+    )
+  )
+
+
+```
+
+### Applying criteria for nests and wallows
+
+After adding all the necessary convenience and context variables we are now able to apply the definied criterias to identify potential nests and wallows. In addition, we reduce the observations to one point per segment, while keeping the segment duration in a different viarbale (*segment_dur*) for further processing. The reason for this is that we only want to consider one count per segment in the final results, as the different lengths of the segments would otherwise lead to distorted representations. For example, according to literature and our applied definition, stays at wallows are much shorter than at nests, while the latter can vary greatly in duration.
+
+```{r applying criteria, echo=TRUE, eval=FALSE, class.source = "fold-show"}
+
+wildboar_lags <- wildboar_lags %>%
+  group_by(segment_id) %>%
+  mutate(segment_dur = n()) %>%
+  filter(row_number(segment_id) == 1) %>% # keep first data point per segment only
+  ungroup() %>%
+  mutate(wallow_dur = if_else(segment_dur <= 3, TRUE, FALSE)) %>%
+  filter(mov_status == "resting") %>%
+  mutate(
+    wallow = if_else(wallow_month & wallow_day & wallow_area & wallow_dur,
+      TRUE, FALSE
+    ),
+    nest = if_else((nest_summer_mon & nest_day & nest_summer_area & segment_dur > 3) |
+      (nest_winter_mon & nest_day & nest_winter_area & segment_dur > 3),
+    TRUE, FALSE
+    ),
+    conflict = if_else(nest & wallow, TRUE, FALSE),
+    site_type = as.factor(case_when(
+      conflict == TRUE ~ "both",
+      nest == TRUE ~ "nest",
+      wallow == TRUE ~ "wallow",
+      !wallow & !nest == TRUE ~ "none",
+      TRUE ~ "NA" # Default case
+    ))
+  )
+
+```
+
+The applied criteria are summarized in the following table:
+
++----------------------+-------------------------------------------+--------------------+
+|                      | Nests                                     | Wallows            |
++======================+===========================================+====================+
+| **Movement**         | resting                                   | resting            |
++----------------------+-------------------------------------------+--------------------+
+| **Month**            | January to December                       | April to September |
++----------------------+-------------------------------------------+--------------------+
+| **Time of day**      | day                                       | day & dawn         |
++----------------------+-------------------------------------------+--------------------+
+| **Vegetation**       | forests & wetlands (winter)               | forests & wetlands |
+|                      |                                           |                    |
+|                      | forests, cereal, corn & rapeseed (summer) |                    |
++----------------------+-------------------------------------------+--------------------+
+| **Resting duration** | \> 45 minutes                             | \<= 45 minutes     |
++----------------------+-------------------------------------------+--------------------+
+
+: Applied criteria for nests and wallows
+
+### Visualizing Sample Data
+
+To generate a visual representation of the newly filtered data, we create a sample subset with only three individuals (Carlone, Frida and Ueli) for the year 2016. The layers show potential nests and wallows, color-coded by the individuals. Each point represents one segment while the size of the points corresponds to the segment duration. The two layers can be hidden via the interactive map menu in the top left corner.
+
+The map shows that there is some overlap between Caroline and Frida, while Ueli seems to prefer other areas.
+
+```{r sample subset areas}
+
+tm_sample <- 
+  tmap_mode("view") +
+  tm_shape(nests_sample) +
+  tm_symbols(col = "TierName", size = "segment_dur", alpha = 0.5, title.col = "Nests", 
+             palette = magma, size.lim = c(1, 10)) +
+  tm_shape(wallows_sample) +
+  tm_symbols(col = "TierName", size = "segment_dur", alpha = 0.5, title.col = "Wallows", 
+             palette = viridis, size.lim = c(1, 10))
+
+tm_sample
+
+```
+
+A second map shows the same data but without color-coding for the individuals. Here it is clearly visible that (for the chosen sample) potential nests and wallows are not found in clearly distinc areas.
+
+```{r sample subset animals}
+
+tm_animals <- 
+  tmap_mode("view") +
+  tm_shape(ueli_filter) +
+  tm_symbols(col = "site_type", size = "segment_dur", alpha = 0.5, title.col = "Ueli", 
+             palette = c("orange", "purple"), size.lim = c(1, 10)) +
+  tm_shape(frida_filter) +
+  tm_symbols(col = "site_type", size = "segment_dur", alpha = 0.5, title.col = "Frida", 
+             palette = c("orange", "purple"), size.lim = c(1, 10)) +
+    tm_shape(caro_filter) +
+  tm_symbols(col = "site_type", size = "segment_dur", alpha = 0.5, title.col = "Caroline", 
+             palette = c("orange", "purple"), size.lim = c(1, 10))
+
+tm_animals
+
+```
+
+### **Rasterizing Data**
 
 # Results / Products
 
@@ -1161,6 +1425,6 @@ Tobias
 
 Complete R Script
 
-```{r ref.label=knitr::all_labels(), echo=TRUE, eval=FALSE, class.source = "fold-show"}
+```{r ref.label = knitr::all_labels(appendix == TRUE), echo=TRUE, eval=FALSE, class.source = "fold-show"}
 
 ```
