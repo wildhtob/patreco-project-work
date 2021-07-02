@@ -1429,27 +1429,25 @@ tm_nw_30
 
 The present project work shows one possible approach to modell resting sites based on spatiotemporal movement data. With the calculation of a movement status we are able to distinguish between resting phases and moving phases. The threshold of this classification is based on sample datasets which we use for an simple assessment. Due to missing field data, this assessment method clearly lacks of validation and introduces uncertainty in the following analysis.
 
-The given research data provides a unique sampling regime with different timelags. With the aim to reduce complexity we only used trajectories with a timelag of 900 seconds. This results in a loss of 42.1 % of the provided dataset. On a first glance, a loss of 42.1 % seems like a problematic amount. At a second look this can be justified since 31.2 % has an invalid timelag of zero seconds. If one substracts this chunk, our analysis is able to assess
+The given research data provides a unique sampling regime with different timelags. With the aim to reduce complexity we only used trajectories with a timelag of 900 seconds. This results in a loss of 42.1 % of the provided dataset. On a first glance, a loss of 42.1 % seems like a problematic amount. At a second look this can be justified since 31.2 % has an invalid timelag of zero seconds. If one subtracts this portion, our analysis is able to assess roughly 84 % of all given trajectories which can be considered as effective. According to our research question the effectiveness is only considered for resting sites. Nonetheless it is worth mentioning that the effectiveness decreases rapidly when one looks at the final results of assigned nests and wallows. Only 20.7 % could be assigned to a nest or a wallow. 
 
 ```{r echo=FALSE, results='asis'}
 wildboar_lag_cat <- wildboar_lag_cat %>% 
   filter(count >= 100)
 
 kable(wildboar_lag_cat, caption = "Proportion of rounded timelags in provided dataset")
-
 ```
 
-Apart from this uncertainty we are confident that we have developed a robust method for the assignment of resting sites. Nevertheless, the developed method requires fine tuning and a validation of the results.
+The clear assignment of nests and wallows is the most challenging task. In our work we base our criterias for the assignment on a mix of analyzed movement patterns and preferred habitat use which we derived from literature. We are able to assign 16.4 % of all resting sites to nests, 4.3 % to wallows. The fact that assigned number of nests is four times higher than wallows can be explained. Wild boars spend more time with basic needs than comfort behavior like wallowing.
 
--   Can locations frequently visited by wild boar be determined efficiently and effectively in the provided research data?
+Since we stick to these criterias in a conservative manner
 
--   Can these regular resting places be clearly defined as nests or wallows?
+- konservative wahl der Kriterien
+- NAs beschreiben
+- Forschungsfragen beantwortet?
 
-Yves
 
-Warum so viele none und auch both? Evtl. Tabelle der Anteile hier bringen.
-
-Forschungsfragen beantworten
+Apart from this uncertainty  we are confident that we have developed a robust method for the assignment of resting sites. Nevertheless, the developed method requires fine tuning and a validation of the results.
 
 Schwellenwerte und Rastergrössen diskutieren
 
