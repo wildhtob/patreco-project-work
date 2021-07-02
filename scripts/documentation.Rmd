@@ -8,6 +8,7 @@ output:
     toc: true
     toc_float: true
     number_sections: true
+    fig_caption: yes
     theme: darkly
     highlight: tango
     code_folding: hide
@@ -16,9 +17,6 @@ csl: apa.csl
 ---
 
 ```{r chunk settings, echo = FALSE, warning=FALSE, message=FALSE}
-
-# You can set chunk options individually per code chunk, as was done with this
-# code chunk.
 
 # echo = FALSE           hides the code from the generated output
 # warning = FALSE        hides warnings from the generated output
@@ -46,16 +44,11 @@ library(sf) # handling spatial data
 library(janitor) # clean and consistent naming
 library(forcats) # handling factor levels
 library(raster) # rasterizing vector data
-library(knitr) # for pretty tables
+library(knitr) # for pretty kables
 
 # globals ----------------------------------------------------------------------
-# change working directory
-# setwd(r"(C:\code_wc\Modul_CMA\patreco-project-work)")
-
-# auskommentiert, da zu Fehlermeldung gefuehrt, stattdessen in Global Options unter # R Markdown "Evaluate junks in directory" auf "Project" umstellen
 
 # threshold that triggers the segmentation of the movement trajectory
-
 segment_trigger <- 40
 
 # functions ---------------------------------------------------------------
@@ -107,7 +100,7 @@ head(wildboar_overlap)
 # import feldaufnahmen
 feldaufnahmen <- read_sf("data/Feldaufnahmen_Fanel.gpkg")
 
-# add geometry and time---------------------------------------------------------
+# add geometry and time ---------------------------------------------------------
 
 # argument remove = False keeps the coordinates E and N
 wildboar_sf <- st_as_sf(wildboar_raw, coords = c("E", "N"), crs = 2056, remove = FALSE)
@@ -120,94 +113,7 @@ wildboar_sf <- wildboar_sf %>%
     year = year(DatetimeUTC)
   )
 
-# data exploration --------------------------------------------------------
-
-# plotting data points ####
-#
-# ggplot(wildboar_sf, aes(color = TierName)) +
-#   geom_sf(alpha = 0.4) +
-#   coord_sf(datum = 2056)
-#
-# ggplot(wildboar_sf, aes(color = as.factor(TierID))) +
-#   geom_sf(alpha = 0.4) +
-#   coord_sf(datum = 2056) +
-#   scale_color_discrete(name = "AnimalID")
-
-# sampling regime ####
-#
-# limits <- c(0,200)
-# breaks = seq(0,200,50)
-# labels = paste(c(rep("",length(breaks)-1),">"), breaks)
-#
-# sampling_regime <- wildboar_raw %>%
-#   mutate(TierName = fct_reorder(TierName, DatetimeUTC,min, .desc = TRUE)) %>%
-#   group_by(TierID, TierName, CollarID) %>%
-#   mutate(
-#     timelag = as.numeric(difftime(lead(DatetimeUTC),DatetimeUTC, units = "mins")),
-#   ) %>%
-#   ggplot(aes(DatetimeUTC, TierName, colour = timelag)) +
-#   geom_line(lwd = 10) +
-#   scale_color_gradientn(name = "Sampling interval", colours = RColorBrewer::brewer.pal(11, "Spectral"), limits = limits, na.value = NA, oob = scales::squish, breaks = seq(0,200,50), labels = labels) +
-#   theme_minimal() +
-#   theme(legend.position = "top") +
-#   guides(color = guide_colorbar(title.position = "top", title.hjust = .5, barwidth = unit(20, "lines"), barheight = unit(.5, "lines")))
-
-# temporal overlap ####
-
-# ?wildschwein_overlap_temp
-#
-# sampling_periods <- wildboar_raw %>%
-#   group_by(TierID, TierName, CollarID) %>%
-#   summarise(
-#     min = min(DatetimeUTC),
-#     max = max(DatetimeUTC)
-#   )
-#
-# wildboar_overlap <- wildboar_overlap %>%
-#   left_join(sampling_periods, by = c("TierID", "TierName", "CollarID"))
-#
-# wildboar_overlap %>%
-#   mutate(TierCollar = paste(TierName, CollarID)) %>%
-#   ggplot(aes(xmin = min, xmax = max, y = TierCollar)) +
-#   geom_errorbarh() +
-#   facet_grid(Groups~., scales = "free_y", space = "free_y")
-#
-# ggplot(wildboar_sf, aes(x = DatetimeUTC, y = TierName)) +
-#   geom_point() +
-#   scale_x_datetime(breaks = "1 month") +
-#   theme_grey()
-
-
-# spatial overlap ####
-
-# convex hull ####
-#
-# wildboar_sf <- wildboar_sf %>%
-#   mutate(tiercollar = paste(TierID, TierName, CollarID))
-#
-# mcp <- wildboar_sf %>%
-#   group_by(TierID, TierName, CollarID) %>%
-#   summarise() %>%
-#   st_convex_hull()
-
-# plot convex hull ####
-#
-# mcp %>%
-#   mutate(tiercollar = paste(TierID, TierName, CollarID)) %>%
-#   ggplot(aes(fill = factor(TierID))) + geom_sf(alpha = 0.1) +
-#   coord_sf(datum = 2056) +
-#   facet_wrap(~tiercollar) +
-#   theme(legend.position = "none")
-#
-#
-# tmap_mode("view") +
-#   tm_shape(mcp) +
-#   tm_fill("TierName", alpha = 0.5) +
-#   tm_borders(col = "red", lwd = 1) +
-#   tm_layout(legend.bg.color = "white")
-
-
-# time lags ####
+# time lags ---------------------------------------------------------
 
 # replace wildboar_raw by wildboar_sf for spatial information
 wildboar_lags <- wildboar_sf %>%
@@ -228,57 +134,8 @@ wildboar_lag_cat <- wildboar_lags %>%
 
 wildboar_lag_cat
 
-#### DELETE ####
-# used below
-# compares count of timelag_rounded
-hist_lag_cat <- ggplot(wildboar_lag_cat)
-hist_lag_cat + geom_col(aes(x = timelag_rounded, y = count)) +
-  coord_cartesian(ylim=c(0,200000), xlim=c(0,5000)) +
-  labs(x = "rounded timelag [seconds]",
-     y = "number of counts", 
-     title = "Distribution of timelag between to data points",
-     subtitle = "a clear majority is sampled with a timelag of 900 seconds") +   theme_bw() +
-  theme(panel.border = element_blank())
 
-# viualise change in lag over time ####
-
-# takes a while for plotting..
-# wildboar_lags %>%
-#   filter(timelag < 30000 & timelag > 0) %>%
-#   ggplot(., aes(DatetimeUTC, timelag, col = TierName)) +
-#   geom_point() +
-#   geom_line(size = 0.1)
-
-# DELETE: calculating steplength ####
-
-# wildboar_lags$steplength <- wildboar_raw %>%
-#   {
-#     (.$E - lead(.$E))^2 + (.$N - lead(.$N))^2
-#   } %>%
-#   sqrt()
-
-# calculating speed based on timelag (t) in secs and steplength (s) in meter ####
-
-# wildboar_lags$speed <- wildboar_lags %>% {
-#   .$steplength / .$timelag
-# }
-
-
-# sample code for different intervals (to be discussed)
-# wildboar_3 <- wildboar_3 %>%
-#   mutate(timelag = as.integer(difftime(lead(DatetimeUTC), DatetimeUTC), units = "secs"))
-#
-# wildboar_3$steplength <- wildboar_3 %>%
-#   {
-#     (.$E - lead(.$E))^2 + (.$N - lead(.$N))^2
-#   } %>%
-#   sqrt()
-#
-# wildboar_3$speed <- wildboar_3 %>% {
-#   .$steplength / .$timelag
-# }
-
-# preprocessing ####
+# preprocessing ---------------------------------------------------------
 
 # assign convenience variables for step 6
 wildboar_lags <- wildboar_lags %>%
@@ -447,7 +304,7 @@ wildboar_lags <- wildboar_lags %>%
   # fraglich, ob der filter hier angewendet werden soll oder nach Sample data
   filter(timelag_rounded == 900)
 
-#### visualize movement status ####
+# visualize movement status --------------------------------------------------
 
 summary(as.factor(wildboar_lags$mov_status))
 
@@ -473,16 +330,8 @@ pie
 seq3 <- seq(from = 1, to = nrow(wildboar_raw), by = 3)
 seq6 <- seq(from = 1, to = nrow(wildboar_raw), by = 6)
 seq9 <- seq(from = 1, to = nrow(wildboar_raw), by = 9)
-# Mein Vorschlag: unsere Auswertung aller Daten basiert auf wildboar_lags
-# wildboar_3 <- wildboar_lags %>% slice(seq3)
-# wildboar_6 <- wildboar_lags %>% slice(seq6)
-# wildboar_9 <- wildboar_lags %>% slice(seq9)
 
-# Sample data -------------------------------------------------------------
-
-# step0 : select three different wildboars for a duration of two weeks ####
-# Kritisch: hier werden samples aus wildboar_sf kreiert. so gehen viele
-# convenience variablen verloren. Zudem ist es fehleranfälliger. Überdenken.
+# sample data -------------------------------------------------------------
 
 # create a sample of caroline
 caro <- wildboar_sf %>%
@@ -508,7 +357,6 @@ ueli <- wildboar_sf %>%
     TierName == "Ueli"
   )
 
-# step 1: sequence data ####
 # for sample data
 caro_seq3 <- seq(from = 1, to = nrow(caro), by = 3)
 caro_seq6 <- seq(from = 1, to = nrow(caro), by = 6)
@@ -524,7 +372,7 @@ ueli_3 <- ueli %>% slice(ueli_seq3)
 ueli_6 <- ueli %>% slice(ueli_seq6)
 
 
-# step 2: calculate speed, steplength and timelag for segmented da ####
+# calculate speed, steplength and timelag for sample data ####
 
 # for sample data, for wildboar_lags its already done
 caro <- calc_movement_param(caro)
@@ -538,45 +386,48 @@ ueli_3 <- calc_movement_param(ueli_3)
 ueli_6 <- calc_movement_param(ueli_6)
 
 
+# plot mean steplength for sample data ####
 
-# step 3: plot histogram and movement trajectories ------------------------
-
-# plot histogram of stepmean
 stepmean_ueli <- ggplot(ueli_6, aes(x = stepmean, fill = mov_status))
-stepmean_ueli + geom_histogram(binwidth = 5 ) +
+stepmean_ueli <- stepmean_ueli + geom_histogram(binwidth = 5 ) +
   scale_x_continuous(limits = c(0, 500)) +
   geom_vline(xintercept = 0, lty = 2, alpha = 0.5) +
   theme_bw() +
   theme(panel.border = element_blank()) +
-  labs(x = "Mean steplength [meter]",
-   y = "Number of counts", 
-   title = "Mean steplength of wildboar Ueli",
-   subtitle = "Sample dataset from May 2016 (segment_trigger = 40)")
+  labs(
+    x = "Mean steplength [m]",
+    y = "Number of counts"
+    )
+
+stepmean_ueli
 
 stepmean_caro <- ggplot(caro_6, aes(x = stepmean, fill = mov_status))
-stepmean_caro + geom_histogram(binwidth = 5 ) +
+stepmean_caro <- stepmean_caro + geom_histogram(binwidth = 5 ) +
   scale_x_continuous(limits = c(0, 500)) +
   geom_vline(xintercept = 0, lty = 2, alpha = 0.5) +
   theme_bw() +
   theme(panel.border = element_blank()) +
-  labs(x = "Mean steplength [meter]",
-   y = "Number of counts", 
-   title = "Mean steplength of wildboar Caroline",
-   subtitle = "Sample dataset from May 2015 (segment_trigger = 40)")
+  labs(
+    x = "Mean steplength [m]",
+    y = "Number of counts"
+    )
+
+stepmean_caro
 
 stepmean_frida <- ggplot(frida_6, aes(x = stepmean, fill = mov_status))
-stepmean_frida + geom_histogram(binwidth = 5 ) +
+stepmean_frida <- stepmean_frida + geom_histogram(binwidth = 5 ) +
   scale_x_continuous(limits = c(0, 500)) +
   geom_vline(xintercept = 0, lty = 2, alpha = 0.5) +
   theme_bw() +
   theme(panel.border = element_blank()) +
-  labs(x = "Mean steplength [meter]",
-   y = "Number of counts", 
-   title = "Mean steplength of wildboar Frida",
-   subtitle = "Sample dataset from May 2016 (segment_trigger = 40)")
+  labs(
+    x = "Mean steplength [m]",
+    y = "Number of counts"
+  )
 
+stepmean_frida
 
-# step 4 to 6: assign movement status and apply criterias -----------------
+# assign movement status and apply criterias -----------------
 
 
 # for all data
@@ -682,36 +533,6 @@ nests_sample <- wildboar_lags %>%
   mutate(site_type = droplevels(site_type))
 
 
-
-# frida_filter <- wildboar_lags %>%
-#   filter(
-#     year == 2016,
-#     # month == 5,
-#     TierName == "Frida",
-#     site_type == "nest"
-#   )
-# 
-# caro_filter <- wildboar_lags %>%
-#   filter(
-#     year == 2016,
-#     # month == 5,
-#     TierName == "Caroline",
-#     # site_type == "nest"
-#   )
-
-# Plot site_type
-# alter site_type to explore (nest, wallow, both, none and NA)
-# alter data to explore different boars
-
-# ggplot(data = ueli_filter, mapping = aes(E, N, colour = segment_id)) +
-#   # geom_path() +
-#   geom_point() +
-#   coord_equal() +
-#   labs(title = "Moving segements coloured by segment ID") +
-#   theme_classic() +
-#   # RStudio crashes if legend.position "bottom" is chosen
-#   theme(legend.position = "none")
-
 # Polt interactive map with sample animals ####
 
 # one layer per animal
@@ -760,78 +581,8 @@ tm_sample
 
 
 
-# unused plots ------------------------------------------------------------
 
-
-# caro %>%
-#   ggplot(aes(E, N)) +
-#   geom_path(alpha = 0.5) +
-#   geom_point(alpha = 0.5) +
-#   theme_bw() +
-#   theme(panel.border = element_blank())
-#
-# caro_3 %>%
-#   ggplot(aes(E, N)) +
-#   geom_path(alpha = 0.5) +
-#   geom_point(alpha = 0.5) +
-#   theme_bw() +
-#   theme(panel.border = element_blank())
-#
-# frida %>%
-#   ggplot(aes(E, N)) +
-#   geom_path(alpha = 0.5) +
-#   geom_point(alpha = 0.5) +
-#   theme_bw() +
-#   theme(panel.border = element_blank())
-#
-# frida_3 %>%
-#   ggplot(aes(E, N)) +
-#   geom_path(alpha = 0.5) +
-#   geom_point(alpha = 0.5) +
-#   theme_bw() +
-#   theme(panel.border = element_blank())
-#
-# ueli %>%
-#   ggplot(aes(E, N)) +
-#   geom_path(alpha = 0.5) +
-#   geom_point(alpha = 0.5) +
-#   theme_bw() +
-#   theme(panel.border = element_blank())
-#
-# ueli_3 %>%
-#   ggplot(aes(E, N)) +
-#   geom_path(alpha = 0.5) +
-#   geom_point(alpha = 0.5) +
-#   theme_bw() +
-#   theme(panel.border = element_blank())
-#
-# mcp_caro <- caro %>%
-#   group_by(TierID, TierName, CollarID) %>%
-#   summarise() %>%
-#   st_convex_hull()
-#
-# plot convex hull
-#
-# tmap_mode("view") +
-#   tm_shape(mcp_caro) +
-#   tm_fill("TierName", alpha = 0.5) +
-#   tm_borders(col = "red", lwd = 1) +
-#   tm_layout(legend.bg.color = "white")
-
-
-
-# mcp_caro <- caro_filter %>%
-#   group_by(site_type, segment_id) %>%
-#   summarise() %>%
-#   st_convex_hull()
-#
-# tmap_mode("view") +
-#   tm_shape(mcp_caro) +
-#   tm_fill("segment_id", alpha = 0.5) +
-#   tm_borders(col = "red", lwd = 1) +
-#   tm_layout(legend.bg.color = "white")
-
-# step 7 to 8: rasterize data ----------------------------------------------------------
+# rasterize data ----------------------------------------------------------
 
 # Erstellen eines raster-templates mit Aufloesung 30m (Analog zu steplenth threshold)
 raster_100 <- raster(extent(wildboar_lags), resolution = 100, crs = 2056)
@@ -857,7 +608,7 @@ nests <- wildboar_lags %>%
 
 # rasterize data
 
-# Rastern der layer
+# rasterize layers
 
 resting_raster_100 <- raster::rasterize(resting, raster_100, field = 1, fun = "count")
 wallows_raster_100 <- raster::rasterize(wallows, raster_100, field = 1, fun = "count")
@@ -913,25 +664,6 @@ tm_nw_30 <-
 
 tm_nw_30
 
-
-# layer landnutzung: nicht sinnvoll, da unuebersichtlich
-
-# tm +
-# tm_shape(feldnutzung) +
-# tm_polygon(col = "Frucht")
-
-# leaflet plotten
-
-# layer controls funktionieren nicht richtig
-
-# tm %>%
-#   tmap_leaflet() %>%
-#   addLayersControl(
-#     overlayGroups = c("Nests", "Wallows"),
-#     options = layersControlOptions(collapsed = FALSE)
-#   )
-#
-
 ```
 
 # Abstract
@@ -952,9 +684,9 @@ Our research is based on data from the ZHAW research project "Prevention of Wild
 
 ## Data
 
-The provided data contains spatio-temporal datasets of 39 wildboars which were equipped with the GPS collar VERTEX PLUS [@vectronicaerospace2021]. Some wildboars were equipped multiple times which results in 46 sampling sets. The data was taken between 2014-05-28 and 2016-10-18 around the conservation zone Fanel which belongs to the cantons Bern and Neuenburg. The sampling regime varies widely in duration and interval. The vast majority of the recorded wild boar data has a timelag of 15 minutes (≙ 900 seconds) between two points.
+The provided data contains spatio-temporal datasets of 39 wildboars which were equipped with the GPS collar VERTEX PLUS [@vectronicaerospace2021]. Some wildboars were equipped multiple times which results in 46 sampling sets. The data was taken between 2014-05-28 and 2016-10-18 around the conservation zone Fanel which belongs to the cantons Bern and Neuenburg. The sampling regime varies widely in duration and interval (Figure \@ref(fig:sampling-regime)). The vast majority of the recorded wild boar data has a timelag of 15 minutes (≙ 900 seconds) between two points.
 
-```{r sampling regime, fig.cap="Sampling regime for all individuals in minutes", fig.width=9, fig.height=7, appendix=TRUE}
+```{r sampling-regime, fig.width=9, fig.height=7.5, appendix=TRUE, fig.cap="Sampling regime for all individuals in minutes"}
 
 limits <- c(0,200)
 breaks = seq(0,200,50)
@@ -1009,7 +741,7 @@ The analysis, visualisation and documentation was conducted in the open-source s
 
 The wildboar data from the ZHAW research project [@suter2018] is provided in form of the seperate R package ComputationalMovementAnalysis, version 0.1.14 [@ratnaweera2021a].
 
-### Calculation of Movement Parameters
+### Calculating Movement Parameters
 
 In a prelimary phase we enrich the given data with important parameters for *Computational Movement Analysis*. For every data point we calculate *speed*, *steplength* and *timelag* to the next point.
 
@@ -1046,19 +778,17 @@ calc_movement_param <- function(boar_dt) {
 }
 ```
 
-### Filtering and Segmentation
+### Filtering and Segmentation {.tabset}
 
-As mentioned above, the majority of the recorded wild boar data has a rounded *timelag* of 900 seconds (≙ 15 minutes) between two points:
+As mentioned above, the majority of the recorded wild boar data has a rounded *timelag* of 900 seconds (≙ 15 minutes) between two points (Figure \@ref(fig:timelag)).
 
-```{r timelag, message=TRUE, warning=FALSE, fig.cap="Time lag distribution", appendix=TRUE}
+```{r timelag, message=TRUE, warning=FALSE, fig.cap="Distribution of timelag between two data points. A clear majority is sampled with a timelag of 900 seconds.", appendix=TRUE, fig.align = 'center'}
 
 hist_lag_cat <- ggplot(wildboar_lag_cat)
 hist_lag_cat + geom_col(aes(x = timelag_rounded, y = count)) +
   coord_cartesian(ylim=c(0,200000), xlim=c(0,4000)) +
   labs(x = "rounded timelag [seconds]",
-     y = "number of counts", 
-     title = "Distribution of timelag between two data points",
-     subtitle = "a clear majority is sampled with a timelag of 900 seconds") + 
+     y = "number of counts") + 
   theme_bw() +
   theme(panel.border = element_blank())
 ```
@@ -1067,44 +797,68 @@ Therefore, we only process observations with a rounded *timelag* of 900 seconds 
 
 A clear distinction between *resting* and *moving* is done by the introduction of the variable *segment_trigger*. The appropriate level for this threshold is evaluated in a critical manner. We generate sample data sets from three different wild boars and evaluate them in a histogram. With a binwidth of 5, we are able to see a clear decline in the first bins of stepmean. This leads to our interpretation that wild boars rest on the left side of the histogram and move on the right side.
 
-```{r stepmean_threshold}
+#### Ueli {.unnumbered}
+
+```{r stepmean-ueli, appendix=TRUE, fig.cap="Mean steplength if wildboar Ueli. Sample dataset from May 2016. Threshold set to 40 meter.", fig.align='center'}
+
 stepmean_ueli <- ggplot(ueli_6, aes(x = stepmean, fill = mov_status))
-stepmean_ueli + geom_histogram(binwidth = 5 ) +
+stepmean_ueli <- stepmean_ueli + geom_histogram(binwidth = 5 ) +
   scale_x_continuous(limits = c(0, 500)) +
   geom_vline(xintercept = 0, lty = 2, alpha = 0.5) +
   theme_bw() +
   theme(panel.border = element_blank()) +
-  labs(x = "Mean steplength [meter]",
-   y = "Number of counts", 
-   title = "Mean steplength of wildboar Ueli",
-   subtitle = "Sample dataset from May 2016 (segment_trigger = 40)")
+  labs(
+    x = "Mean steplength [m]",
+    y = "Number of counts"
+    )
 
-stepmean_caro <- ggplot(caro_6, aes(x = stepmean, fill = mov_status))
-stepmean_caro + geom_histogram(binwidth = 5 ) +
-  scale_x_continuous(limits = c(0, 500)) +
-  geom_vline(xintercept = 0, lty = 2, alpha = 0.5) +
-  theme_bw() +
-  theme(panel.border = element_blank()) +
-  labs(x = "Mean steplength [meter]",
-   y = "Number of counts", 
-   title = "Mean steplength of wildboar Caroline",
-   subtitle = "Sample dataset from May 2015 (segment_trigger = 40)")
+stepmean_ueli
 
-stepmean_frida <- ggplot(frida_6, aes(x = stepmean, fill = mov_status))
-stepmean_frida + geom_histogram(binwidth = 5 ) +
-  scale_x_continuous(limits = c(0, 500)) +
-  geom_vline(xintercept = 0, lty = 2, alpha = 0.5) +
-  theme_bw() +
-  theme(panel.border = element_blank()) +
-  labs(x = "Mean steplength [meter]",
-   y = "Number of counts", 
-   title = "Mean steplength of wildboar Frida",
-   subtitle = "Sample dataset from May 2016 (segment_trigger = 40)")
 ```
 
-Setting the threshold seems reasonable at the point where stepmean flattens in a distinct manner (see histograms). In our samples this threshold can be anywhere between 30 to 50 meter. The *segment_trigger* is therfore set to 40. This leads to a division of the *movment status* into approximately 32 % resting and 68 % moving at the level of individual observations.
+#### Caroline {.unnumbered}
 
-```{r movement status}
+```{r stepmean-caro, appendix=TRUE, fig.cap="Mean steplength if wildboar Ueli. Sample dataset from May 2016. Threshold set to 40 meter.", fig.align='center'}
+
+stepmean_caro <- ggplot(caro_6, aes(x = stepmean, fill = mov_status))
+stepmean_caro <- stepmean_caro + geom_histogram(binwidth = 5 ) +
+  scale_x_continuous(limits = c(0, 500)) +
+  geom_vline(xintercept = 0, lty = 2, alpha = 0.5) +
+  theme_bw() +
+  theme(panel.border = element_blank()) +
+  labs(
+    x = "Mean steplength [m]",
+    y = "Number of counts"
+    )
+
+stepmean_caro
+
+```
+
+#### Frida {.unnumbered}
+
+```{r stepmean-frida, appendix=TRUE, fig.cap="Mean steplength if wildboar Ueli. Sample dataset from May 2016. Threshold set to 40 meter.", fig.align='center'}
+
+stepmean_frida <- ggplot(frida_6, aes(x = stepmean, fill = mov_status))
+stepmean_frida <- stepmean_frida + geom_histogram(binwidth = 5 ) +
+  scale_x_continuous(limits = c(0, 500)) +
+  geom_vline(xintercept = 0, lty = 2, alpha = 0.5) +
+  theme_bw() +
+  theme(panel.border = element_blank()) +
+  labs(
+    x = "Mean steplength [m]",
+    y = "Number of counts"
+  )
+
+stepmean_frida
+
+```
+
+### {-}
+
+Setting the threshold seems reasonable at the point where stepmean flattens in a distinct manner (see histograms). In our samples this threshold can be anywhere between 30 to 50 meter. The *segment_trigger* is therfore set to 40. This leads to a division of the *movment status* into approximately 32 % resting and 68 % moving at the level of individual observations (Figure \@ref(fig:movement-status).
+
+```{r movement-status, fig.cap="Pie chart of movement status at the level of individual observations", fig.align='center'}
 
 pie <- ggplot(mov_status, aes(x = "", y = prop, fill = status)) +
   geom_bar(width = 1, stat = "identity", color = "white") +
@@ -1117,11 +871,11 @@ pie
 
 ```
 
-### Adding Context
+### Adding Context {#adding-context}
 
 The vegetational information is joined with the wild boar observation to add spatial context which can then be used to further differentiate between potential nests and wallows based on literature informations about circadian activity and preferred crop types.
 
-```{r adding context, echo=TRUE, eval=F}
+```{r adding-context, eval=F, echo=TRUE}
 
 wildboar_lags <- wildboar_lags %>%
   # add wallow and nest criterias according to literature
@@ -1282,7 +1036,7 @@ wildboar_lags <- wildboar_lags %>%
 
 After adding all the necessary convenience and context variables we are now able to apply the definied criterias to identify potential nests and wallows. In addition, we reduce the observations to one point per segment, while keeping the segment duration in a different viarbale (*segment_dur*) for further processing. The reason for this is that we only want to consider one count per segment in the final results, as the different lengths of the segments would otherwise lead to distorted representations. For example, according to literature and our applied definition, stays at wallows are much shorter than at nests, while the latter can vary greatly in duration.
 
-```{r applying criteria, echo=TRUE, eval=FALSE, class.source = "fold-show"}
+```{r applying-criteria, echo=TRUE, eval=FALSE, class.source = "fold-show"}
 
 wildboar_lags <- wildboar_lags %>%
   group_by(segment_id) %>%
@@ -1311,42 +1065,23 @@ wildboar_lags <- wildboar_lags %>%
 
 ```
 
-### Visualizing Sample Data
+### Visualizing Sample Data {.tabset}
 
-To generate a visual representation of the newly filtered data, we create a sample subset with only three individuals (Carlone, Frida and Ueli) for the year 2016. The layers show potential nests and wallows, color-coded by the individuals. Each point represents one segment while the size of the points corresponds to the segment duration. The two layers can be toggled on and off via the interactive map menu in the top right corner.
+To generate a visual representation of the newly filtered data, we create a sample subset with only three individuals (Carlone, Frida and Ueli) for the year 2016. The layers show potential nests and wallows, color-coded by the individuals. The two layers can be toggled on and off via the interactive map menu in the top right corner. Each point represents one segment while the size of the points corresponds to the segment duration. The map shows that there is some overlap between Caroline and Frida, while Ueli seems to prefer other areas.
 
-The map shows that there is some overlap between Caroline and Frida, while Ueli seems to prefer other areas.
+The second tab shows a map of the the same data but without color-coding for the individuals. Here it is clearly visible that (for the chosen sample) potential nests and wallows are not found in clearly distinc areas.
 
-```{r sample subset areas}
+#### Nests and Wallows {.unnumbered}
 
-tm_sample <- 
-  tmap_mode("view") +
-  tm_shape(nests_sample) +
-  tm_symbols(col = "TierName", size = "segment_dur", alpha = 0.5, title.col = "Nests", 
-             palette = magma, size.lim = c(1, 10)) +
-  tm_shape(wallows_sample) +
-  tm_symbols(col = "TierName", size = "segment_dur", alpha = 0.5, title.col = "Wallows", 
-             palette = viridis, size.lim = c(1, 10))
+```{r sample-areas, out.width = '100%'}
 
 tm_sample
 
 ```
 
-A second map shows the same data but without color-coding for the individuals. Here it is clearly visible that (for the chosen sample) potential nests and wallows are not found in clearly distinc areas.
+#### Individuals {.unnumbered}
 
-```{r sample subset animals}
-
-tm_animals <- 
-  tmap_mode("view") +
-  tm_shape(ueli_filter) +
-  tm_symbols(col = "site_type", size = "segment_dur", alpha = 0.5, title.col = "Ueli", 
-             palette = c("orange", "purple"), size.lim = c(1, 10)) +
-  tm_shape(frida_filter) +
-  tm_symbols(col = "site_type", size = "segment_dur", alpha = 0.5, title.col = "Frida", 
-             palette = c("orange", "purple"), size.lim = c(1, 10)) +
-    tm_shape(caro_filter) +
-  tm_symbols(col = "site_type", size = "segment_dur", alpha = 0.5, title.col = "Caroline", 
-             palette = c("orange", "purple"), size.lim = c(1, 10))
+```{r sample-animals, out.width = '100%'}
 
 tm_animals
 
@@ -1376,11 +1111,11 @@ The table below shows the applied criteria to differnetiate between nests and wa
 | **Resting duration** | \> 45 minutes                             | \<= 45 minutes     |
 +----------------------+-------------------------------------------+--------------------+
 
-: Applied criteria for nests and wallows
+: Table 4.1: Applied criteria for nests and wallows
 
-The application of these criteria on a segment level results in a division into approx. 16 % nests and 4 % wallows. 75 % of the segments do not fall into either category, 3.9 % are NA values.
+The application of these criteria on a segment level results in a division into approx. 16 % nests and 4 % wallows. 75 % of the segments do not fall into either category, 3.9 % are NA values (Figure \@ref(fig:pie-site-type)).
 
-```{r pie site_type}
+```{r pie-site-type, fig.cap="Pie chart of segment type by identity.", fig.align='center'}
 
 pie <- ggplot(site_type, aes(x = "", y = prop, fill = type)) +
   geom_bar(width = 1, stat = "identity", color = "white") +
@@ -1395,31 +1130,43 @@ pie
 
 All generated raster maps are produced in two resolutions each: 100 m and 30 m. The reason for this is that 100 m corresponds to the area statistics of the federal government [@bundesamtfürstatistikbfs2017] and thus to the publicly available data on land use (and thus vegetation). However, since the vegetation data from the ZHAW research project used here are of higher resolution, an additional representation with a 30 m grid is shown as well. All maps are interactive and can be enlarged and reduced using the plus and minus buttons in the top left corner.
 
-A map of all the resting sites, meaning nests and wallows, shows that most raster cells are part of the lowest count category (0 to 50) segments. The highest concentration seems to be in the nort-western part of the observed area near the lake in a wetland-area. This image becomes even clearer in the 30 m raster map.
+## Resting Sites {.tabset}
 
-```{r resting-sites-100}
+A map of all the resting sites, meaning nests and wallows, shows that most raster cells are part of the lowest count category (0 to 50) segments. The highest concentration seems to be in the north-western part of the observed area near the lake in a wetland-area. This image becomes even clearer in the 30 m raster map (see second tab.
+
+### 100 m Raster {.unnumbered}
+
+```{r resting-sites-100, fig.align='center'}
 
 tm_r_100
 
 ```
 
-```{r resting-sites-30}
+### 30 m Raster {.unnumbered}
+
+```{r resting-sites-30, fig.align='center'}
 
 tm_r_30
 
 ```
 
+## Nests and Wallows {.tabset}
+
 The maps differentiated by nests and wallows confirm this concentration in the wetland for both types of use, although for wallows there appears to be another hotspot to the north in a wooded area. The overlapping, which has already been shown in the sample, is also recognisable here. To display only nests or wallows, the other layer can be hidden in the menu at the top right.
 
 The higher resolution map shows a somewhat clearer differentiation between nests and wallows, although the picture of hotspots is also confirmed here and the most frequently visited sites are very close to each other. It should also be noted that the density of nests is much higher than that of wallows.
 
-```{r nest-wallows-100}
+### 100 m Raster {.unnumbered}
+
+```{r nest-wallows-100, fig.align='center'}
 
 tm_nw_100
 
 ```
 
-```{r nest-wallows-30}
+### 30 m Raster {.unnumbered}
+
+```{r nest-wallows-30, fig.align='center'}
 
 tm_nw_30
 
@@ -1461,14 +1208,12 @@ Text
 
 # References
 
-Tobias
-
 ::: {#refs}
 :::
 
 # Appendix
 
-Complete R Script
+## Complete R Script {.unnumbered}
 
 ```{r ref.label = knitr::all_labels(appendix == TRUE), echo=TRUE, eval=FALSE, class.source = "fold-show"}
 
