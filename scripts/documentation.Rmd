@@ -668,7 +668,7 @@ tm_nw_30
 
 # Abstract
 
-Tobias
+Due to the ongoing optimization of harvesting methods in agriculture, the prevention of wild boar damages has become increasingly popular in recent years. Understanding the selection of resting places like nests and wallows build the basis for effective management measures. Based on spatiotemporal data of wild boars we try to determine such resting places and allocate them to surrounding crops.
 
 # Research Questions
 
@@ -715,7 +715,9 @@ In order to analyse the behavior of wild boars and to be able to distinguish bet
 
 The *steplength* is calculated based on the Euclidean distance, using the following formula:
 
-$$\text{distance} = \sqrt{(\text{E1} - \text{E2})^{2}+(\text{N1} - \text{N2})^{2}}$$Based on the calculated *steplength*, additional parameters such as *speed* and *timelag* are calculated. In a further step, the average distance within a given temporal window is calculated (*stepmean*) and then used to segment the wildboar data and to differentiate between resting and moving (*movement status*).
+$$\text{distance} = \sqrt{(\text{E1} - \text{E2})^{2}+(\text{N1} - \text{N2})^{2}}$$
+
+Based on the calculated *steplength*, additional parameters such as *speed* and *timelag* are calculated. In a further step, the average distance within a given temporal window is calculated (*stepmean*) and then used to segment the wildboar data and to differentiate between resting and moving (*movement status*).
 
 Since wild boars usually rest at nests and wallows the parameter movement status builds the basement for further analysis.
 
@@ -780,7 +782,7 @@ calc_movement_param <- function(boar_dt) {
 
 ### Filtering and Segmentation {.tabset}
 
-As mentioned above, the majority of the recorded wild boar data has a rounded *timelag* of 900 seconds (≙ 15 minutes) between two points (Figure \@ref(fig:timelag)).
+As mentioned above, the majority of the recorded wild boar data has a rounded *timelag* of 900 seconds (≙ 15 minutes) between two points (Figure \@ref(fig:timelag)). Therefore, we only process observations with a rounded *timelag* of 900 seconds further while we exluce the others.
 
 ```{r timelag, message=TRUE, warning=FALSE, fig.cap="Distribution of timelag between two data points. A clear majority is sampled with a timelag of 900 seconds.", appendix=TRUE, fig.align = 'center'}
 
@@ -793,13 +795,11 @@ hist_lag_cat + geom_col(aes(x = timelag_rounded, y = count)) +
   theme(panel.border = element_blank())
 ```
 
-Therefore, we only process observations with a rounded *timelag* of 900 seconds further while we exluce the others.
-
 A clear distinction between *resting* and *moving* is done by the introduction of the variable *segment_trigger*. The appropriate level for this threshold is evaluated in a critical manner. We generate sample data sets from three different wild boars and evaluate them in a histogram. With a binwidth of 5, we are able to see a clear decline in the first bins of stepmean. This leads to our interpretation that wild boars rest on the left side of the histogram and move on the right side.
 
 #### Ueli {.unnumbered}
 
-```{r stepmean-ueli, appendix=TRUE, fig.cap="Mean steplength if wildboar Ueli. Sample dataset from May 2016. Threshold set to 40 meter.", fig.align='center'}
+```{r stepmean-ueli, appendix=FALSE, fig.cap="Mean steplength if wildboar Ueli. Sample dataset from May 2016. Threshold set to 40 meter.", fig.align='center'}
 
 stepmean_ueli <- ggplot(ueli_6, aes(x = stepmean, fill = mov_status))
 stepmean_ueli <- stepmean_ueli + geom_histogram(binwidth = 5 ) +
@@ -818,7 +818,7 @@ stepmean_ueli
 
 #### Caroline {.unnumbered}
 
-```{r stepmean-caro, appendix=TRUE, fig.cap="Mean steplength if wildboar Ueli. Sample dataset from May 2016. Threshold set to 40 meter.", fig.align='center'}
+```{r stepmean-caro, appendix=FALSE, fig.cap="Mean steplength if wildboar Ueli. Sample dataset from May 2016. Threshold set to 40 meter.", fig.align='center'}
 
 stepmean_caro <- ggplot(caro_6, aes(x = stepmean, fill = mov_status))
 stepmean_caro <- stepmean_caro + geom_histogram(binwidth = 5 ) +
@@ -837,7 +837,7 @@ stepmean_caro
 
 #### Frida {.unnumbered}
 
-```{r stepmean-frida, appendix=TRUE, fig.cap="Mean steplength if wildboar Ueli. Sample dataset from May 2016. Threshold set to 40 meter.", fig.align='center'}
+```{r stepmean-frida, appendix=FALSE, fig.cap="Mean steplength if wildboar Ueli. Sample dataset from May 2016. Threshold set to 40 meter.", fig.align='center'}
 
 stepmean_frida <- ggplot(frida_6, aes(x = stepmean, fill = mov_status))
 stepmean_frida <- stepmean_frida + geom_histogram(binwidth = 5 ) +
@@ -1166,7 +1166,7 @@ tm_nw_100
 
 ### 30 m Raster {.unnumbered}
 
-```{r nest-wallows-30, fig.align='center'}
+```{r nest-wallows-30, out.width = '100%'}
 
 tm_nw_30
 
