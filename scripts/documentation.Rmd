@@ -1324,6 +1324,49 @@ The applied criteria are summarized in the following table:
 
 : Applied criteria for nests and wallows
 
+### Visualizing Sample Data
+
+To generate a visual representation of the newly filtered data, we create a sample subset with only three individuals (Carlone, Frida and Ueli) for the year 2016. The layers show potential nests and wallows, color-coded by the individuals. Each point represents one segment while the size of the points corresponds to the segment duration. The two layers can be hidden via the interactive map menu in the top left corner.
+
+The map shows that there is some overlap between Caroline and Frida, while Ueli seems to prefer other areas.
+
+```{r sample subset areas}
+
+tm_sample <- 
+  tmap_mode("view") +
+  tm_shape(nests_sample) +
+  tm_symbols(col = "TierName", size = "segment_dur", alpha = 0.5, title.col = "Nests", 
+             palette = magma, size.lim = c(1, 10)) +
+  tm_shape(wallows_sample) +
+  tm_symbols(col = "TierName", size = "segment_dur", alpha = 0.5, title.col = "Wallows", 
+             palette = viridis, size.lim = c(1, 10))
+
+tm_sample
+
+```
+
+A second map shows the same data but without color-coding for the individuals. Here it is clearly visible that (for the chosen sample) potential nests and wallows are not found in clearly distinc areas.
+
+```{r sample subset animals}
+
+tm_animals <- 
+  tmap_mode("view") +
+  tm_shape(ueli_filter) +
+  tm_symbols(col = "site_type", size = "segment_dur", alpha = 0.5, title.col = "Ueli", 
+             palette = c("orange", "purple"), size.lim = c(1, 10)) +
+  tm_shape(frida_filter) +
+  tm_symbols(col = "site_type", size = "segment_dur", alpha = 0.5, title.col = "Frida", 
+             palette = c("orange", "purple"), size.lim = c(1, 10)) +
+    tm_shape(caro_filter) +
+  tm_symbols(col = "site_type", size = "segment_dur", alpha = 0.5, title.col = "Caroline", 
+             palette = c("orange", "purple"), size.lim = c(1, 10))
+
+tm_animals
+
+```
+
+### **Rasterizing Data**
+
 # Results / Products
 
 Tobias
