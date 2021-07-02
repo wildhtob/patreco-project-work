@@ -854,7 +854,7 @@ stepmean_frida
 
 ```
 
-### {-}
+###  {.unnumbered}
 
 Setting the threshold seems reasonable at the point where stepmean flattens in a distinct manner (see histograms). In our samples this threshold can be anywhere between 30 to 50 meter. The *segment_trigger* is therfore set to 40. This leads to a division of the *movment status* into approximately 32 % resting and 68 % moving at the level of individual observations (Figure \@ref(fig:movement-status).
 
@@ -1136,7 +1136,7 @@ A map of all the resting sites, meaning nests and wallows, shows that most raste
 
 ### 100 m Raster {.unnumbered}
 
-```{r resting-sites-100, fig.align='center'}
+```{r resting-sites-100, out.width = '100%'}
 
 tm_r_100
 
@@ -1144,7 +1144,7 @@ tm_r_100
 
 ### 30 m Raster {.unnumbered}
 
-```{r resting-sites-30, fig.align='center'}
+```{r resting-sites-30, out.width = '100%'}
 
 tm_r_30
 
@@ -1158,7 +1158,7 @@ The higher resolution map shows a somewhat clearer differentiation between nests
 
 ### 100 m Raster {.unnumbered}
 
-```{r nest-wallows-100, fig.align='center'}
+```{r nest-wallows-100, out.width = '100%'}
 
 tm_nw_100
 
@@ -1176,7 +1176,7 @@ tm_nw_30
 
 The present project work shows one possible approach to modell resting sites based on spatiotemporal movement data. With the calculation of a movement status we are able to distinguish between resting phases and moving phases. The threshold of this classification is based on sample datasets which we use for an simple assessment. Due to missing field data, this assessment method clearly lacks of validation and introduces uncertainty in the following analysis.
 
-The given research data provides a unique sampling regime with different timelags. With the aim to reduce complexity we only used trajectories with a timelag of 900 seconds. This results in a loss of 42.1 % of the provided dataset. On a first glance, a loss of 42.1 % seems like a problematic amount. At a second look this can be justified since 31.2 % has an invalid timelag of zero seconds. If one subtracts this portion, our analysis is able to assess roughly 84 % of all given trajectories which can be considered as effective. According to our research question the effectiveness is only considered for resting sites. Nonetheless it is worth mentioning that the effectiveness decreases rapidly when one looks at the final results of assigned nests and wallows. Only 20.7 % could be assigned to a nest or a wallow. 
+The given research data provides a unique sampling regime with different timelags. With the aim to reduce complexity we only used trajectories with a timelag of 900 seconds. This results in a loss of 42.1 % of the provided dataset. On a first glance, a loss of 42.1 % seems like a problematic amount. At a second look this can be justified since 31.2 % has an invalid timelag of zero seconds. If one subtracts this portion, our analysis is able to assess roughly 84 % of all given trajectories which can be considered as effective. According to our research question the effectiveness is only considered for resting sites. Nonetheless it is worth mentioning that the effectiveness decreases rapidly when one looks at the final results of assigned nests and wallows. Only 20.7 % could be assigned to a nest or a wallow.
 
 ```{r echo=FALSE, results='asis'}
 wildboar_lag_cat <- wildboar_lag_cat %>% 
@@ -1189,12 +1189,11 @@ The clear assignment of nests and wallows is the most challenging task. In our w
 
 Since we stick to these criterias in a conservative manner
 
-- konservative wahl der Kriterien
-- NAs beschreiben
-- Forschungsfragen beantwortet?
+-   konservative wahl der Kriterien
+-   NAs beschreiben
+-   Forschungsfragen beantwortet?
 
-
-Apart from this uncertainty  we are confident that we have developed a robust method for the assignment of resting sites. Nevertheless, the developed method requires fine tuning and a validation of the results.
+Apart from this uncertainty we are confident that we have developed a robust method for the assignment of resting sites. Nevertheless, the developed method requires fine tuning and a validation of the results.
 
 Schwellenwerte und Rastergrössen diskutieren
 
