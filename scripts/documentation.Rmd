@@ -15,7 +15,7 @@ bibliography: references.bib
 csl: apa.csl
 ---
 
-```{r chunk settings, echo = TRUE, warning=FALSE, message=FALSE}
+```{r chunk settings, echo = FALSE, warning=FALSE, message=FALSE}
 
 # You can set chunk options individually per code chunk, as was done with this
 # code chunk.
@@ -734,7 +734,8 @@ tm_animals <-
              palette = c("orange", "purple"), size.lim = c(1, 10)) +
     tm_shape(caro_filter) +
   tm_symbols(col = "site_type", size = "segment_dur", alpha = 0.5, title.col = "Caroline", 
-             palette = c("orange", "purple"), size.lim = c(1, 10))
+             palette = c("orange", "purple"), size.lim = c(1, 10)) +
+  tm_view(control.position = c("right", "top"))
 
 tm_animals
 
@@ -747,7 +748,8 @@ tm_sample <-
              palette = magma, size.lim = c(1, 10)) +
   tm_shape(wallows_sample) +
   tm_symbols(col = "TierName", size = "segment_dur", alpha = 0.5, title.col = "Wallows", 
-             palette = viridis, size.lim = c(1, 10))
+             palette = viridis, size.lim = c(1, 10)) +
+  tm_view(control.position = c("right", "top"))
 
 tm_sample
 
@@ -832,20 +834,20 @@ raster_30 <- raster(extent(wildboar_lags), resolution = 30, crs = 2056)
 
 # resting filtern, jeweils ersten datenpunk pro segment id 
 
-resting <- wildboar_lags %>% 
-  group_by(segment_id) %>% 
-  filter(row_number(segment_id) == 1)
+resting <- wildboar_lags #%>% 
+#  group_by(segment_id) %>% 
+#  filter(row_number(segment_id) == 1)
 
 # Wallows und Nests filtern fuer separate Layers, jeweils ersten Datenpunk pro segment id
 wallows <- wildboar_lags %>%
-  filter(wallow == "TRUE") %>% 
-  group_by(segment_id) %>% 
-  filter(row_number(segment_id) == 1)
+  filter(wallow == "TRUE") #%>% 
+#  group_by(segment_id) %>% 
+#  filter(row_number(segment_id) == 1)
 
 nests <- wildboar_lags %>%
-  filter(nest == "TRUE") %>% 
-  group_by(segment_id) %>% 
-  filter(row_number(segment_id) == 1)
+  filter(nest == "TRUE") # %>% 
+#  group_by(segment_id) %>% 
+#  filter(row_number(segment_id) == 1)
 
 
 # rasterize data
@@ -871,7 +873,8 @@ purples <- tmaptools::get_brewer_pal("Purples", n = 5, contrast = c(0.3, 0.9))
 tm_r_100 <- 
   tmap_mode("view") +
   tm_shape(resting_raster_100) +
-  tm_raster(palette = greens, title = "Resting sites", alpha = 1)
+  tm_raster(palette = greens, title = "Resting sites", alpha = 1) +
+  tm_view(control.position = c("right", "top"))
   
 tm_r_100
 
@@ -890,7 +893,8 @@ tm_nw_100
 tm_r_30 <- 
   tmap_mode("view") +
   tm_shape(resting_raster_30) +
-  tm_raster(palette = greens, title = "Resting sites", alpha = 1)
+  tm_raster(palette = greens, title = "Resting sites", alpha = 1) +
+  tm_view(control.position = c("right", "top"))
 
 tm_r_30
 
@@ -931,7 +935,7 @@ Tobias
 
 # Research Questions
 
-(yves) Our research is based on data from the ZHAW research project "Prevention of Wild Boar Damage in Agriculture"[@suter2018]. With this dataset as a basis, we want to answer the following research questions:
+Our research is based on data from the ZHAW research project "Prevention of Wild Boar Damage in Agriculture"[@suter2018]. With this dataset as a basis, we want to answer the following research questions:
 
 -   How can resting sites be modelled based on spatiotemporal movement data?
 
@@ -943,7 +947,7 @@ Tobias
 
 ## Data
 
-(yves) The provided data contains spatio-temporal datasets of 39 wildboars which were equipped with the GPS collar VERTEX PLUS [@vectronicaerospace2021]. Some wildboars were equipped multiple times which results in 46 sampling sets. The data was taken between 2014-05-28 and 2016-10-18 around the conservation zone Fanel which belongs to the cantons Bern and Neuenburg. The sampling regime varies widely in duration and interval. The vast majority of the recorded wild boar data has a timelag of 15 minutes (≙ 900 seconds) between two points.
+The provided data contains spatio-temporal datasets of 39 wildboars which were equipped with the GPS collar VERTEX PLUS [@vectronicaerospace2021]. Some wildboars were equipped multiple times which results in 46 sampling sets. The data was taken between 2014-05-28 and 2016-10-18 around the conservation zone Fanel which belongs to the cantons Bern and Neuenburg. The sampling regime varies widely in duration and interval. The vast majority of the recorded wild boar data has a timelag of 15 minutes (≙ 900 seconds) between two points.
 
 ```{r sampling regime, fig.cap="Sampling regime for all individuals in minutes", fig.width=9, fig.height=7, appendix=TRUE}
 
@@ -996,11 +1000,9 @@ According to literature wild boar show some behavioral patterns at nests and wal
 
 ## R Concepts
 
-Tobias
-
 The analysis, visualisation and documentation was conducted in the open-source software R, version 4.0.5 [@rcoreteam2021]. The handling of spatiotemporal data was managed with the packages sf [@pebesma2018], terra [@hijmans2021] and raster [@hijmans2020]. The graphical representations were created with ggplot2 [@wickham2016] as part of tidyverse [@wickham2019], which was also used for general data wrangling, alongside forcats [@wickham2021] to handle factor levels and janitor [@firke2021] for clean and consistent naming. Maps were generated using tmap [@tennekes2018] and leaflet [@cheng2021].
 
-The wildboar data from the ZHAW research project [@suter2010a] is provided in form of the seperate R package ComputationalMovementAnalysis, version 0.1.14 [@ratnaweera2021a].
+The wildboar data from the ZHAW research project [@suter2018] is provided in form of the seperate R package ComputationalMovementAnalysis, version 0.1.14 [@ratnaweera2021a].
 
 ### Calculation of Movement Parameters
 
@@ -1043,7 +1045,7 @@ calc_movement_param <- function(boar_dt) {
 
 As mentioned above, the majority of the recorded wild boar data has a rounded *timelag* of 900 seconds (≙ 15 minutes) between two points:
 
-```{r time lag hist, message=TRUE, warning=FALSE, fig.cap="Time lag distribution", appendix=TRUE}
+```{r timelag, message=TRUE, warning=FALSE, fig.cap="Time lag distribution", appendix=TRUE}
 
 hist_lag_cat <- ggplot(wildboar_lag_cat)
 hist_lag_cat + geom_col(aes(x = timelag_rounded, y = count)) +
@@ -1304,29 +1306,9 @@ wildboar_lags <- wildboar_lags %>%
 
 ```
 
-The applied criteria are summarized in the following table:
-
-+----------------------+-------------------------------------------+--------------------+
-|                      | Nests                                     | Wallows            |
-+======================+===========================================+====================+
-| **Movement**         | resting                                   | resting            |
-+----------------------+-------------------------------------------+--------------------+
-| **Month**            | January to December                       | April to September |
-+----------------------+-------------------------------------------+--------------------+
-| **Time of day**      | day                                       | day & dawn         |
-+----------------------+-------------------------------------------+--------------------+
-| **Vegetation**       | forests & wetlands (winter)               | forests & wetlands |
-|                      |                                           |                    |
-|                      | forests, cereal, corn & rapeseed (summer) |                    |
-+----------------------+-------------------------------------------+--------------------+
-| **Resting duration** | \> 45 minutes                             | \<= 45 minutes     |
-+----------------------+-------------------------------------------+--------------------+
-
-: Applied criteria for nests and wallows
-
 ### Visualizing Sample Data
 
-To generate a visual representation of the newly filtered data, we create a sample subset with only three individuals (Carlone, Frida and Ueli) for the year 2016. The layers show potential nests and wallows, color-coded by the individuals. Each point represents one segment while the size of the points corresponds to the segment duration. The two layers can be hidden via the interactive map menu in the top left corner.
+To generate a visual representation of the newly filtered data, we create a sample subset with only three individuals (Carlone, Frida and Ueli) for the year 2016. The layers show potential nests and wallows, color-coded by the individuals. Each point represents one segment while the size of the points corresponds to the segment duration. The two layers can be toggled on and off via the interactive map menu in the top right corner.
 
 The map shows that there is some overlap between Caroline and Frida, while Ueli seems to prefer other areas.
 
@@ -1367,13 +1349,76 @@ tm_animals
 
 ### **Rasterizing Data**
 
-# Results / Products
+The last step to create a map of potential nests and wallows is to visualize the complete data. Since a vector-based map with around 6000 segments would be very confusing, a rasterised map is created instead. To do this, an empty grid is created with the raster package [@hijmans2020a] and then placed over the filtered data with the `raster::rasterize` command while applying the `count` function.
 
-Tobias
+# Results
 
-Boxplot mit Stepmean, Exemplarische Plots nach Tieren, Raster graphs, Anteile Site Types & Moving / Resting,
+The table below shows the applied criteria to differnetiate between nests and wallows. Based on this selection, it is obvious that there is some overlap. Especially the vegetation as well as the time of day are in large parts identical. Differentiation takes place in particular on the basis of the duration of rest, with the threshold value being 45 minutes (which corresponds to a segment duration of 3).
 
-Text
++----------------------+-------------------------------------------+--------------------+
+|                      | Nests                                     | Wallows            |
++======================+===========================================+====================+
+| **Movement**         | resting                                   | resting            |
++----------------------+-------------------------------------------+--------------------+
+| **Month**            | January to December                       | April to September |
++----------------------+-------------------------------------------+--------------------+
+| **Time of day**      | day                                       | day & dawn         |
++----------------------+-------------------------------------------+--------------------+
+| **Vegetation**       | forests & wetlands (winter)               | forests & wetlands |
+|                      |                                           |                    |
+|                      | forests, cereal, corn & rapeseed (summer) |                    |
++----------------------+-------------------------------------------+--------------------+
+| **Resting duration** | \> 45 minutes                             | \<= 45 minutes     |
++----------------------+-------------------------------------------+--------------------+
+
+: Applied criteria for nests and wallows
+
+The application of these criteria on a segment level results in a division into approx. 16 % nests and 4 % wallows. 75 % of the segments do not fall into either category, 3.9 % are NA values.
+
+```{r pie site_type}
+
+pie <- ggplot(site_type, aes(x = "", y = prop, fill = type)) +
+  geom_bar(width = 1, stat = "identity", color = "white") +
+  coord_polar("y", start = 0) +
+  geom_text(aes(y = lab.ypos, label = prop), color = "white") +
+  scale_fill_discrete(name = "Type", labels = c("NA", "Nest", "None", "Wallow")) +
+  theme_void()
+
+pie
+
+```
+
+All generated raster maps are produced in two resolutions each: 100 m and 30 m. The reason for this is that 100 m corresponds to the area statistics of the federal government [@bundesamtfürstatistikbfs2017] and thus to the publicly available data on land use (and thus vegetation). However, since the vegetation data from the ZHAW research project used here are of higher resolution, an additional representation with a 30 m grid is shown as well. All maps are interactive and can be enlarged and reduced using the plus and minus buttons in the top left corner.
+
+A map of all the resting sites, meaning nests and wallows, shows that most raster cells are part of the lowest count category (0 to 50) segments. The highest concentration seems to be in the nort-western part of the observed area near the lake in a wetland-area. This image becomes even clearer in the 30 m raster map.
+
+```{r resting-sites-100}
+
+tm_r_100
+
+```
+
+```{r resting-sites-30}
+
+tm_r_30
+
+```
+
+The maps differentiated by nests and wallows confirm this concentration in the wetland for both types of use, although for wallows there appears to be another hotspot to the north in a wooded area. The overlapping, which has already been shown in the sample, is also recognisable here. To display only nests or wallows, the other layer can be hidden in the menu at the top right.
+
+The higher resolution map shows a somewhat clearer differentiation between nests and wallows, although the picture of hotspots is also confirmed here and the most frequently visited sites are very close to each other. It should also be noted that the density of nests is much higher than that of wallows.
+
+```{r nest-wallows-100}
+
+tm_nw_100
+
+```
+
+```{r nest-wallows-30}
+
+tm_nw_30
+
+```
 
 # Discussion
 
