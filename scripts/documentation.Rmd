@@ -960,6 +960,30 @@ Furthermore we added spatial information about the vegetation to the spatio-temp
 
 ## Analytical Concepts
 
+### Wild Boar Behavior
+
+Wild boars share a common movement pattern when spending time at wallows and nests: they stick to a location for a certain while and do not undertake wide distances during this time. Distinguishing this behavior from others builds the basement of our analytical concept. Wild boar biologists differentiate between the following wild boar behaviour [@keuling2009]:
+
+-   Feeding
+-   protective behavior
+-   aggressive behavior
+-   comfort behavior
+-   other behavior (sleeping, resting, fleeing, strolling)
+
+According to literature wild boar show some behavioral patterns at nests and wallows:
+
+-   **Nests:** Multiple wild boars gather in close distance and stay there for an undefined while [@keuling2009]. Since wild boars are nocturnal animals, they preferably rest in covered areas like forests or wetlands with high reeds. During summertime agricultural Fields with high crops like barley, rapeseed or wheat can also provide a suitable nesting habitat. Surveys in this area showed that wild boars normally rest between 8:00 and 17:00 and revisit its nests up to eight times [@suter2010].
+
+-   **Wallows:** Wild boars use wallows for hygiene purposes [@keuling2009]. In a wallow the boar is able to regulate their body temperature since wild boars cannot sweat. This leads to fact that wallowing happens mainly during summer season and are not observed before April [@fernández-llario2005]. On a daily view, wild boars wallow during nighttime and early morning [@meynhardt1990]. In comparison to the behavior at nests, wild boars spend less time at wallows since it is clearly a comfort behavior and does not serve a basic need[@keuling2009].
+
+## R Concecpts
+
+Tobias
+
+The analysis, visualisation and documentation was conducted in the open-source software R, version 4.0.5 [@rcoreteam2021]. The handling of spatiotemporal data was managed with the packages sf [@pebesma2018], terra [@hijmans2021] and raster [@hijmans2020]. The graphical representations were created with ggplot2 [@wickham2016] as part of tidyverse [@wickham2019], which was also used for general data wrangling, alongside forcats [@wickham2021] to handle factor levels and janitor [@firke2021] for clean and consistent naming. Maps were generated using tmap [@tennekes2018] and leaflet [@cheng2021].
+
+Umsetzungskonzepte in R
+
 ### Calculation of Movement Parameter
 
 In a prelimary phase we enriched the given data with important parameter for *Computational Movement Analysis*. For every data point we calculated *speed*, *steplength* and *timelag* to the next point.
@@ -1007,7 +1031,7 @@ Setting the threshold seems reasonable at the point where stepmean flattens in a
 
 The mentioned movement parameter were implemented in the function *calc_movement_param*.
 
-```{r calc_movement_param, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
+```{r calc_movement_param, echo=TRUE, eval=FALSE, class.source = "fold-show"}
 # functions ---------------------------------------------------------------
 
 calc_movement_param <- function(boar_dt) {
@@ -1041,22 +1065,6 @@ calc_movement_param <- function(boar_dt) {
 
 The generated stops and moves will then be annotated with a status and joined with land use type to provide further context. Finally, for each resting trajectory a convex hull will be calculated to visualize the results.
 
-### Wild Boar Behavior
-
-Wild boars share a common movement pattern when spending time at wallows and nests: they stick to a location for a certain while and do not undertake wide distances during this time. Distinguishing this behavior from others builds the basement of our analytical concept. Wild boar biologists differentiate between the following wild boar behaviour [@keuling2009]:
-
--   Feeding
--   protective behavior
--   aggressive behavior
--   comfort behavior
--   other behavior (sleeping, resting, fleeing, strolling)
-
-According to literature wild boar show some behavioral patterns at nests and wallows:
-
--   **Nests:** Multiple wild boars gather in close distance and stay there for an undefined while [@keuling2009]. Since wild boars are nocturnal animals, they preferably rest in covered areas like forests or wetlands with high reeds. During summertime agricultural Fields with high crops like barley, rapeseed or wheat can also provide a suitable nesting habitat. Surveys in this area showed that wild boars normally rest between 8:00 and 17:00 and revisit its nests up to eight times [@suter2010].
-
--   **Wallows:** Wild boars use wallows for hygiene purposes [@keuling2009]. In a wallow the boar is able to regulate their body temperature since wild boars cannot sweat. This leads to fact that wallowing happens mainly during summer season and are not observed before April [@fernández-llario2005]. On a daily view, wild boars wallow during nighttime and early morning [@meynhardt1990]. In comparison to the behavior at nests, wild boars spend less time at wallows since it is clearly a comfort behavior and does not serve a basic need[@keuling2009].
-
 ### Adding Context
 
 Stepmean, Segmentation,
@@ -1064,14 +1072,6 @@ Stepmean, Segmentation,
 Anhand von Literatur Kriterien festgelegt für Nester und Suhlen
 
 Sampling Regime (nur 15 Minuten Intervalle)
-
-## R Concecpts
-
-Tobias
-
-The analysis, visualisation and documentation was conducted in the open-source software R, version 4.0.5 [@rcoreteam2021]. The handling of spatiotemporal data was managed with the packages sf [@pebesma2018], terra [@hijmans2021] and raster [@hijmans2020]. The graphical representations were created with ggplot2 [@wickham2016] as part of tidyverse [@wickham2019], which was also used for general data wrangling, alongside forcats [@wickham2021] to handle factor levels and janitor [@firke2021] for clean and consistent naming. Maps were generated using tmap [@tennekes2018] and leaflet [@cheng2021].
-
-Umsetzungskonzepte in R
 
 # Results / Products
 
