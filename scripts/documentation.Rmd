@@ -960,15 +960,23 @@ Furthermore we added spatial information about the vegetation to the spatio-temp
 
 ## Analytical Concepts
 
+In order to analyse the behavior of wild boars and to be able to distinguish between nests and wallows, the first step is to take a closer look at the trajectories, to filter and segment them [@laube2011].
+
+The *steplength* is calculated based on the Euclidean distance, using the following formula:
+
+$$\text{distance} = \sqrt{(\text{E1} - \text{E2})^{2}+(\text{N1} - \text{N2})^{2}}$$Based on the calculated *steplength*, additional parameters such as *speed* and *timelag* are calculated. In a further step, the average distance within a given temporal window is calculated (*stepmean*) and then used to segment the wildboar data and to differentiate between resting and moving (*movement status*).
+
+Since wild boars usually rest at nests and wallows the parameter movement status builds the basement for further analysis. A clear distinction between *resting* and *moving* is made by the introduction of the variable *segment_trigger*. The apropriate level of this threshold is evaluated in a critical manner. Sample data sets from three different wild boar movements are generated and evaluated.
+
 ### Wild Boar Behavior
 
 Wild boars share a common movement pattern when spending time at wallows and nests: they stick to a location for a certain while and do not undertake wide distances during this time. Distinguishing this behavior from others builds the basement of our analytical concept. Wild boar biologists differentiate between the following wild boar behaviour [@keuling2009]:
 
--   Feeding
+-   feeding
 -   protective behavior
 -   aggressive behavior
 -   comfort behavior
--   other behavior (sleeping, resting, fleeing, strolling)
+-   other behaviour (sleeping, resting, fleeing, strolling)
 
 According to literature wild boar show some behavioral patterns at nests and wallows:
 
@@ -982,7 +990,7 @@ Tobias
 
 The analysis, visualisation and documentation was conducted in the open-source software R, version 4.0.5 [@rcoreteam2021]. The handling of spatiotemporal data was managed with the packages sf [@pebesma2018], terra [@hijmans2021] and raster [@hijmans2020]. The graphical representations were created with ggplot2 [@wickham2016] as part of tidyverse [@wickham2019], which was also used for general data wrangling, alongside forcats [@wickham2021] to handle factor levels and janitor [@firke2021] for clean and consistent naming. Maps were generated using tmap [@tennekes2018] and leaflet [@cheng2021].
 
-Umsetzungskonzepte in R
+The wildboar data from the ZHAW research project [@suter2010a] is provided in form of the seperate R package ComputationalMovementAnalysis, version 0.1.14 [@ratnaweera2021a].
 
 ### Calculation of Movement Parameter
 
