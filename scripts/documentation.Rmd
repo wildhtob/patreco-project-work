@@ -964,7 +964,7 @@ Furthermore we added spatial information about the vegetation to the spatio-temp
 
 In a prelimary phase we enriched the given data with important parameter for *Computational Movement Analysis*. For every data point we calculated *speed*, *steplength* and *timelag* to the next point.
 
-Another movement parameter we added for our analysis is *stepmean*. It calculates the mean distance within a moving window of six data points. This variable allowed us to apply segmentation on our wild boar data and define stops and moves. In our work we call it *movement status* (Variable *mov_status* with a two factors: "resting" or "moving"). 
+Another movement parameter we added for our analysis is *stepmean*. It calculates the mean distance within a moving window of six data points. This variable allowed us to apply segmentation on our wild boar data and define stops and moves. In our work we call it *movement status* (Variable *mov_status* with a two factors: "resting" or "moving").
 
 Since wild boars usually rest at nests and wallows the parameter movement status builds the basement for further analysis. A clear distinction between *resting* and *moving* was done by the introduction of the variable *segment_trigger*. The apropriate level of this threshold was evaluated in a critical manner. Sample data sets from three different wild boar movements were generated and evaluated in a histogram. With a binwidth of 5, we were able to see a clear decline in the first bins of stepmean. This lead to our interpretation that wild boars rest on the left side of the histogram and move on the right side.
 
@@ -1057,9 +1057,7 @@ According to literature wild boar show some behavioral patterns at nests and wal
 
 -   **Wallows:** Wild boars use wallows for hygiene purposes [@keuling2009]. In a wallow the boar is able to regulate their body temperature since wild boars cannot sweat. This leads to fact that wallowing happens mainly during summer season and are not observed before April [@fernández-llario2005]. On a daily view, wild boars wallow during nighttime and early morning [@meynhardt1990]. In comparison to the behavior at nests, wild boars spend less time at wallows since it is clearly a comfort behavior and does not serve a basic need[@keuling2009].
 
-
 ### Adding Context
-
 
 Stepmean, Segmentation,
 
@@ -1088,6 +1086,10 @@ Text
 Yves
 
 Warum so viele none und auch both? Evtl. Tabelle der Anteile hier bringen.
+
+Forschungsfragen beantworten
+
+Schwellenwerte und Rastergrössen diskutieren
 
 ## Risk analysis / Problems
 
