@@ -93,11 +93,11 @@ head(wildboar_raw)
 
 wildboar_meta <- wildschwein_metadata
 head(wildboar_meta)
-#?wildschwein_metadata
+# ?wildschwein_metadata
 
 wildboar_overlap <- wildschwein_overlap_temp
 head(wildboar_overlap)
-#?wildschwein_overlap_temp
+# ?wildschwein_overlap_temp
 
 # import feldaufnahmen
 feldaufnahmen <- read_sf("data/Feldaufnahmen_Fanel.gpkg")
@@ -129,9 +129,11 @@ wildboar_lags$timelag_rounded <- round(wildboar_lags$timelag, -2)
 wildboar_lag_cat <- wildboar_lags %>%
   st_drop_geometry() %>%
   group_by(timelag_rounded) %>%
-  summarise(count = n()) %>% 
-  mutate(proportion = count/sum(count) * 100,
-       proportion = round(proportion, 1)) %>% 
+  summarise(count = n()) %>%
+  mutate(
+    proportion = count / sum(count) * 100,
+    proportion = round(proportion, 1)
+  ) %>%
   arrange(desc(proportion))
 
 wildboar_lag_cat
@@ -303,19 +305,20 @@ wildboar_lags <- wildboar_lags %>%
   mutate(segment_id = rle_id(mov_static)) %>%
   # select only rows with an certain timelag
   # if no filter is applied, sequencing creates misleading results
-  # fraglich, ob der filter hier angewendet werden soll oder nach Sample data
   filter(timelag_rounded == 900)
 
 # visualize movement status --------------------------------------------------
 
 summary(as.factor(wildboar_lags$mov_status))
 
-mov_status <- data.frame(summary(as.factor(wildboar_lags$mov_status))) %>% 
-  rename(count = 1) %>% 
-  slice(-3) %>% 
-  rownames_to_column(var = "status") %>% 
-  mutate(prop = count/sum(count) * 100,
-         prop = round(prop, 1)) %>% 
+mov_status <- data.frame(summary(as.factor(wildboar_lags$mov_status))) %>%
+  rename(count = 1) %>%
+  slice(-3) %>%
+  rownames_to_column(var = "status") %>%
+  mutate(
+    prop = count / sum(count) * 100,
+    prop = round(prop, 1)
+  ) %>%
   arrange(desc(status)) %>%
   mutate(lab.ypos = cumsum(prop) - 0.5 * prop)
 
@@ -391,21 +394,7 @@ ueli_6 <- calc_movement_param(ueli_6)
 # plot mean steplength for sample data ####
 
 stepmean_ueli <- ggplot(ueli_6, aes(x = stepmean, fill = mov_status))
-stepmean_ueli <- stepmean_ueli + geom_histogram(binwidth = 5 ) +
-  scale_x_continuous(limits = c(0, 500)) +
-  scale_y_continuous(limits = c(0, 40)) +
-    geom_vline(xintercept = 0, lty = 2, alpha = 0.5) +
-  theme_bw() +
-  theme(panel.border = element_blank()) +
-  labs(
-    x = "Mean steplength [m]",
-    y = "Number of counts"
-    )
-
-stepmean_ueli
-
-stepmean_caro <- ggplot(caro_6, aes(x = stepmean, fill = mov_status))
-stepmean_caro <- stepmean_caro + geom_histogram(binwidth = 5 ) +
+stepmean_ueli <- stepmean_ueli + geom_histogram(binwidth = 5) +
   scale_x_continuous(limits = c(0, 500)) +
   scale_y_continuous(limits = c(0, 40)) +
   geom_vline(xintercept = 0, lty = 2, alpha = 0.5) +
@@ -414,12 +403,26 @@ stepmean_caro <- stepmean_caro + geom_histogram(binwidth = 5 ) +
   labs(
     x = "Mean steplength [m]",
     y = "Number of counts"
-    )
+  )
+
+stepmean_ueli
+
+stepmean_caro <- ggplot(caro_6, aes(x = stepmean, fill = mov_status))
+stepmean_caro <- stepmean_caro + geom_histogram(binwidth = 5) +
+  scale_x_continuous(limits = c(0, 500)) +
+  scale_y_continuous(limits = c(0, 40)) +
+  geom_vline(xintercept = 0, lty = 2, alpha = 0.5) +
+  theme_bw() +
+  theme(panel.border = element_blank()) +
+  labs(
+    x = "Mean steplength [m]",
+    y = "Number of counts"
+  )
 
 stepmean_caro
 
 stepmean_frida <- ggplot(frida_6, aes(x = stepmean, fill = mov_status))
-stepmean_frida <- stepmean_frida + geom_histogram(binwidth = 5 ) +
+stepmean_frida <- stepmean_frida + geom_histogram(binwidth = 5) +
   scale_x_continuous(limits = c(0, 500)) +
   scale_y_continuous(limits = c(0, 40)) +
   geom_vline(xintercept = 0, lty = 2, alpha = 0.5) +
@@ -440,7 +443,8 @@ stepmean_frida
 wildboar_lags <- wildboar_lags %>%
   group_by(segment_id) %>%
   mutate(segment_dur = n()) %>%
-  filter(row_number(segment_id) == 1) %>% # keep only the first data point per segment
+  filter(row_number(segment_id) == 1) %>%
+  # keep only the first data point per segment
   ungroup() %>%
   mutate(wallow_dur = if_else(segment_dur <= 3, TRUE, FALSE)) %>%
   filter(mov_status == "resting") %>%
@@ -461,7 +465,7 @@ wildboar_lags <- wildboar_lags %>%
       TRUE ~ "NA" # Default case
     ))
   )
-  
+
 
 # check the dataset (number of wallows, nests, NAs etc)
 
@@ -469,11 +473,13 @@ summary(wildboar_lags)
 
 # create pie chart for site_type ####
 
-site_type <- data.frame(summary(wildboar_lags$site_type)) %>% 
-  rename(count = 1) %>% 
-  rownames_to_column(var = "type") %>% 
-  mutate(prop = count/sum(count) * 100,
-         prop = round(prop, 1)) %>% 
+site_type <- data.frame(summary(wildboar_lags$site_type)) %>%
+  rename(count = 1) %>%
+  rownames_to_column(var = "type") %>%
+  mutate(
+    prop = count / sum(count) * 100,
+    prop = round(prop, 1)
+  ) %>%
   arrange(desc(type)) %>%
   mutate(lab.ypos = cumsum(prop) - 0.5 * prop)
 
@@ -498,7 +504,7 @@ ueli_filter <- wildboar_lags %>%
     # month == 5,
     site_type == "wallow" | site_type == "nest",
     TierName == "Ueli"
-  ) %>% 
+  ) %>%
   mutate(site_type = droplevels(site_type))
 
 frida_filter <- wildboar_lags %>%
@@ -507,7 +513,7 @@ frida_filter <- wildboar_lags %>%
     # month == 5,
     site_type == "wallow" | site_type == "nest",
     TierName == "Frida"
-  ) %>% 
+  ) %>%
   mutate(site_type = droplevels(site_type))
 
 caro_filter <- wildboar_lags %>%
@@ -516,25 +522,25 @@ caro_filter <- wildboar_lags %>%
     # month == 5,
     site_type == "wallow" | site_type == "nest",
     TierName == "Caroline"
-  ) %>% 
+  ) %>%
   mutate(site_type = droplevels(site_type))
 
 wallows_sample <- wildboar_lags %>%
   filter(
     year == 2016,
     # month == 5,
-    site_type == "wallow", 
+    site_type == "wallow",
     TierName == "Caroline" | TierName == "Ueli" | TierName == "Frida"
-  ) %>% 
+  ) %>%
   mutate(site_type = droplevels(site_type))
 
 nests_sample <- wildboar_lags %>%
   filter(
     year == 2016,
     # month == 5,
-    site_type == "nest", 
+    site_type == "nest",
     TierName == "Caroline" | TierName == "Ueli" | TierName == "Frida"
-  ) %>% 
+  ) %>%
   mutate(site_type = droplevels(site_type))
 
 
@@ -548,38 +554,48 @@ oranges <- tmaptools::get_brewer_pal("Oranges", n = 3, contrast = c(0.1, 0.9))
 purples <- tmaptools::get_brewer_pal("Purples", n = 3, contrast = c(0.1, 0.9))
 
 viridis <- viridisLite::viridis(3, begin = 0.23, end = 0.78)
-magma   <- viridisLite::magma  (3, begin = 0.23, end = 0.78)
+magma <- viridisLite::magma(3, begin = 0.23, end = 0.78)
 
 dark2 <- tmaptools::get_brewer_pal("Dark2", n = 6)
 dark_n <- dark2[1:3]
 dark_w <- dark2[4:6]
 
 
-tm_animals <- 
+tm_animals <-
   tmap_mode("view") +
   tm_shape(ueli_filter) +
-  tm_symbols(col = "site_type", size = "segment_dur", alpha = 0.5, title.col = "Ueli", 
-             palette = c("orange", "purple"), size.lim = c(1, 10)) +
+  tm_symbols(
+    col = "site_type", size = "segment_dur", alpha = 0.5, title.col = "Ueli",
+    palette = c("orange", "purple"), size.lim = c(1, 10)
+  ) +
   tm_shape(frida_filter) +
-  tm_symbols(col = "site_type", size = "segment_dur", alpha = 0.5, title.col = "Frida", 
-             palette = c("orange", "purple"), size.lim = c(1, 10)) +
-    tm_shape(caro_filter) +
-  tm_symbols(col = "site_type", size = "segment_dur", alpha = 0.5, title.col = "Caroline", 
-             palette = c("orange", "purple"), size.lim = c(1, 10)) +
+  tm_symbols(
+    col = "site_type", size = "segment_dur", alpha = 0.5, title.col = "Frida",
+    palette = c("orange", "purple"), size.lim = c(1, 10)
+  ) +
+  tm_shape(caro_filter) +
+  tm_symbols(
+    col = "site_type", size = "segment_dur", alpha = 0.5, title.col = "Caroline",
+    palette = c("orange", "purple"), size.lim = c(1, 10)
+  ) +
   tm_view(control.position = c("right", "top"))
 
 tm_animals
 
 # one layer per field type (nests and wallos only)
 
-tm_sample <- 
+tm_sample <-
   tmap_mode("view") +
   tm_shape(nests_sample) +
-  tm_symbols(col = "TierName", size = "segment_dur", alpha = 0.5, title.col = "Nests", 
-             palette = magma, size.lim = c(1, 10)) +
+  tm_symbols(
+    col = "TierName", size = "segment_dur", alpha = 0.5, title.col = "Nests",
+    palette = magma, size.lim = c(1, 10)
+  ) +
   tm_shape(wallows_sample) +
-  tm_symbols(col = "TierName", size = "segment_dur", alpha = 0.5, title.col = "Wallows", 
-             palette = viridis, size.lim = c(1, 10)) +
+  tm_symbols(
+    col = "TierName", size = "segment_dur", alpha = 0.5, title.col = "Wallows",
+    palette = viridis, size.lim = c(1, 10)
+  ) +
   tm_view(control.position = c("right", "top"))
 
 tm_sample
@@ -593,21 +609,22 @@ tm_sample
 raster_100 <- raster(extent(wildboar_lags), resolution = 100, crs = 2056)
 raster_30 <- raster(extent(wildboar_lags), resolution = 30, crs = 2056)
 
-# resting filtern, jeweils ersten datenpunk pro segment id 
+# resting filtern, jeweils ersten datenpunk pro segment id
 
-resting <- wildboar_lags #%>% 
-#  group_by(segment_id) %>% 
+resting <- wildboar_lags # %>%
+#  group_by(segment_id) %>%
 #  filter(row_number(segment_id) == 1)
 
-# Wallows und Nests filtern fuer separate Layers, jeweils ersten Datenpunk pro segment id
+# filter wallows and Nests filtern for seperate layers
+
 wallows <- wildboar_lags %>%
-  filter(wallow == "TRUE") #%>% 
-#  group_by(segment_id) %>% 
+  filter(wallow == "TRUE") # %>%
+#  group_by(segment_id) %>%
 #  filter(row_number(segment_id) == 1)
 
 nests <- wildboar_lags %>%
-  filter(nest == "TRUE") # %>% 
-#  group_by(segment_id) %>% 
+  filter(nest == "TRUE") # %>%
+#  group_by(segment_id) %>%
 #  filter(row_number(segment_id) == 1)
 
 
@@ -631,12 +648,12 @@ purples <- tmaptools::get_brewer_pal("Purples", n = 5, contrast = c(0.3, 0.9))
 
 # resolution: 100 m
 
-tm_r_100 <- 
+tm_r_100 <-
   tmap_mode("view") +
   tm_shape(resting_raster_100) +
   tm_raster(palette = greens, title = "Resting sites", alpha = 1) +
   tm_view(control.position = c("right", "top"))
-  
+
 tm_r_100
 
 tm_nw_100 <-
@@ -651,7 +668,7 @@ tm_nw_100
 
 # resolution: 30 m
 
-tm_r_30 <- 
+tm_r_30 <-
   tmap_mode("view") +
   tm_shape(resting_raster_30) +
   tm_raster(palette = greens, title = "Resting sites", alpha = 1) +
@@ -744,7 +761,7 @@ According to literature wild boar show some behavioral patterns at nests and wal
 
 ## R Concepts
 
-The analysis, visualisation and documentation was conducted in the open-source software R, version 4.0.5 [@rcoreteam2021]. The handling of spatiotemporal data was managed with the packages sf [@pebesma2018], terra [@hijmans2021] and raster [@hijmans2020]. The graphical representations were created with ggplot2 [@wickham2016] as part of tidyverse [@wickham2019], which was also used for general data wrangling, alongside forcats [@wickham2021] to handle factor levels and janitor [@firke2021] for clean and consistent naming. Maps were generated using tmap [@tennekes2018] and leaflet [@cheng2021]. The reports are generated by using knitr [@xie2021; @xie2015;@xie2014a] and papeR [@hofner2021].
+The analysis, visualisation and documentation was conducted in the open-source software R, version 4.0.5 [@rcoreteam2021]. The handling of spatiotemporal data was managed with the packages sf [@pebesma2018], terra [@hijmans2021] and raster [@hijmans2020]. The graphical representations were created with ggplot2 [@wickham2016] as part of tidyverse [@wickham2019], which was also used for general data wrangling, alongside forcats [@wickham2021] to handle factor levels and janitor [@firke2021] for clean and consistent naming. Maps were generated using tmap [@tennekes2018] and leaflet [@cheng2021]. The reports are generated by using knitr [@xie2021; @xie2015; @xie2014a] and papeR [@hofner2021].
 
 The wildboar data from the ZHAW research project [@suter2018] is provided in form of the seperate R package ComputationalMovementAnalysis, version 0.1.14 [@ratnaweera2021a].
 
@@ -1013,7 +1030,8 @@ After adding all the necessary convenience and context variables we are now able
 wildboar_lags <- wildboar_lags %>%
   group_by(segment_id) %>%
   mutate(segment_dur = n()) %>%
-  filter(row_number(segment_id) == 1) %>% # keep first data point per segment only
+  filter(row_number(segment_id) == 1) %>%
+  # keep first data point per segment only
   ungroup() %>%
   mutate(wallow_dur = if_else(segment_dur <= 3, TRUE, FALSE)) %>%
   filter(mov_status == "resting") %>%
@@ -1166,22 +1184,20 @@ Furthermore it seems valid that about 75 % is not assigned to a nest or wallow s
 
 ```{r echo=FALSE, appendix=TRUE}
 
-wildboar_lags <- wildboar_lags %>% 
+wildboar_lags <- wildboar_lags %>%
   mutate(
     nest_day = factor(nest_day),
     wallow_day = factor(wallow_day),
     wallow_area = as.character(wallow_area),
-#    wallow_area = droplevels(wallow_area),
     wallow_area = replace_na(wallow_area, "NA"),
     wallow_area = factor(wallow_area)
-    ) 
-
-wildboar_lags$wallow_area <- wildboar_lags$wallow_area %>% replace_na("NA")
+  )
 
 knitr::kable(
   papeR::summarize(wildboar_lags, 
-                              variables = c("nest_day", "wallow_day", "wallow_area"),                               type = "factor"), caption = "Summary table for the daytime variables for nests and wallows and the area variable for wallows."
-  )
+                   variables = c("nest_day", "wallow_day", "wallow_area"),                            type = "factor"), 
+                   caption = "Summary table for the daytime variables for nests and wallows and the area variable for wallows."
+            )
 
 
 # summary(wildboar_lags$nest_day)
