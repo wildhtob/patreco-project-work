@@ -4,7 +4,7 @@ subtitle: "Project Works Patterns and Trends in Environmental Data"
 author: "Yves Gubelmann and Tobias Wildhaber"
 date: "4 July, 2021"
 output: 
-  bookdown::html_document2: default
+  bookdown::html_document2:
     toc: true
     toc_float: true
     number_sections: true
@@ -945,7 +945,7 @@ Tobias
 
 (yves) The provided data contains spatio-temporal datasets of 39 wildboars which were equipped with the GPS collar VERTEX PLUS [@vectronicaerospace2021]. Some wildboars were equipped multiple times which results in 46 sampling sets. The data was taken between 2014-05-28 and 2016-10-18 around the conservation zone Fanel which belongs to the cantons Bern and Neuenburg. The sampling regime varies widely in duration and interval. The vast majority of the recorded wild boar data has a timelag of 15 minutes (≙ 900 seconds) between two points.
 
-```{r sampling regime, fig.cap="Sampling regime for all individuals in minutes", fig.width=9, appendix=TRUE}
+```{r sampling regime, fig.cap="Sampling regime for all individuals in minutes", fig.width=9, fig.height=7, appendix=TRUE}
 
 limits <- c(0,200)
 breaks = seq(0,200,50)
@@ -1112,9 +1112,9 @@ pie
 
 ### Adding Context
 
-The vegetational information is joined with the wild boar observation to add spatial context which can then be used to further differentiate between potential nests and wallows based on literature informations about circadian activity and preferred crop types..
+The vegetational information is joined with the wild boar observation to add spatial context which can then be used to further differentiate between potential nests and wallows based on literature informations about circadian activity and preferred crop types.
 
-```{r adding context}
+```{r adding context, echo=TRUE, eval=F}
 
 wildboar_lags <- wildboar_lags %>%
   # add wallow and nest criterias according to literature
@@ -1271,7 +1271,7 @@ wildboar_lags <- wildboar_lags %>%
 
 ```
 
-### Applying criteria for nests ans wallows
+### Applying criteria for nests and wallows
 
 After adding all the necessary convenience and context variables we are now able to apply the definied criterias to identify potential nests and wallows. In addition, we reduce the observations to one point per segment, while keeping the segment duration in a different viarbale (*segment_dur*) for further processing. The reason for this is that we only want to consider one count per segment in the final results, as the different lengths of the segments would otherwise lead to distorted representations. For example, according to literature and our applied definition, stays at wallows are much shorter than at nests, while the latter can vary greatly in duration.
 
