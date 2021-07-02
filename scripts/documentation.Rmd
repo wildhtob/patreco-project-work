@@ -97,11 +97,11 @@ head(wildboar_raw)
 
 wildboar_meta <- wildschwein_metadata
 head(wildboar_meta)
-?wildschwein_metadata
+#?wildschwein_metadata
 
 wildboar_overlap <- wildschwein_overlap_temp
 head(wildboar_overlap)
-?wildschwein_overlap_temp
+#?wildschwein_overlap_temp
 
 # import feldaufnahmen
 feldaufnahmen <- read_sf("data/Feldaufnahmen_Fanel.gpkg")
