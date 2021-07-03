@@ -702,7 +702,7 @@ Our research is based on data from the ZHAW research project "Prevention of Wild
 
 ## Data
 
-The provided data contains spatiotemporal datasets of 39 wild boars which were equipped with the GPS collar VERTEX PLUS [@vectronicaerospace2021]. Some wild boars were equipped multiple times which results in 46 sampling sets. The data was taken between 2014-05-28 and 2016-10-18 around the conservation zone Fanel which belongs to the cantons Bern and Neuenburg. The sampling regime varies widely in duration and interval (fig. \@ref(fig:sampling-regime)). The vast majority of the recorded wild boar data has a timelag of 15 minutes (≙ 900 seconds) between two points.
+The provided data contains spatiotemporal datasets of 39 wild boars which were equipped with the GPS collar VERTEX PLUS [@vectronicaerospace2021]. Some wild boars were equipped multiple times which results in 46 sampling sets. The data was taken between 2014-05-28 and 2016-10-18 around the conservation zone Fanel which belongs to the cantons Bern and Neuenburg. The sampling regime varies widely in duration and interval (Fig. \@ref(fig:sampling-regime)). The vast majority of the recorded wild boar data has a timelag of 15 minutes (≙ 900 seconds) between two points.
 
 ```{r sampling-regime, fig.width=9, fig.height=7.5, appendix=TRUE, fig.cap="Sampling regime for all individuals in minutes"}
 
@@ -773,9 +773,9 @@ The wild boar data from the ZHAW research project [@suter2018] is provided in fo
 
 In a preliminary phase we enrich the given data with important parameters for *Computational Movement Analysis*. For every data point we calculate *speed*, *steplength* and *timelag* to the next point.
 
-Another movement parameter we add for our analysis is *stepmean*. It calculates the mean distance within a moving window of six data points. This variable allows us to apply segmentation on our wild boar data and define stops and moves (Variable *mov_status* with a two factors: *resting* or *moving*).
+Another movement parameter we add for our analysis is *stepmean*. It calculates the mean distance within a moving window of six data points. This variable allows us to apply segmentation on our wild boar data and define stops and moves (variable *mov_status* with a two factors: *resting* or *moving*).
 
-The mentioned movement parameter are implemented via the function *calc_movement_param*.
+The mentioned movement parameter are implemented via the function `calc_movement_param`.
 
 ```{r calc_movement_param, echo=TRUE, eval=FALSE, class.source = "fold-show"}
 
@@ -808,7 +808,7 @@ calc_movement_param <- function(boar_dt) {
 
 ### Filtering and Segmentation {.tabset}
 
-As mentioned above, the majority of the recorded wild boar data has a rounded *timelag* of 900 seconds (≙ 15 minutes) between two points (fig. \@ref(fig:timelag)). Therefore, we only process observations with a rounded *timelag* of 900 seconds further while we exluce the others.
+As mentioned above, the majority of the recorded wild boar data has a rounded *timelag* of 900 seconds (≙ 15 minutes) between two points (Fig. \@ref(fig:timelag)). Therefore, we only process observations with a rounded *timelag* of 900 seconds further while we exluce the others.
 
 ```{r timelag, message=TRUE, warning=FALSE, fig.cap="Distribution of timelag between two data points. A clear majority is sampled with a timelag of 900 seconds.", appendix=TRUE, fig.align = 'center'}
 
@@ -821,7 +821,7 @@ hist_lag_cat + geom_col(aes(x = timelag_rounded, y = count)) +
   theme(panel.border = element_blank())
 ```
 
-A clear distinction between *resting* and *moving* is done by the introduction of the variable *segment_trigger*. The appropriate level for this threshold is evaluated in a critical manner. We generate sample data sets from three different wild boars and evaluate them in a histogram. With a binwidth of 5, we are able to see a clear decline in the first bins of stepmean. This leads to our interpretation that wild boars rest on the left side of the histogram and move on the right side.
+A clear distinction between *resting* and *moving* is done by the introduction of the variable *segment_trigger*. The appropriate level for this threshold is evaluated in a critical manner. We generate sample data sets from three different wild boars and evaluate them in a histogram. With a binwidth of 5, we are able to see a clear decline in the first bins of *stepmean*. This leads to our interpretation that wild boars rest on the left side of the histogram and move on the right side.
 
 #### Ueli {.unnumbered}
 
@@ -849,7 +849,7 @@ stepmean_frida
 
 ###  {.unnumbered}
 
-Setting the threshold seems reasonable at the point where *stepmean* flattens in a distinct manner (see histograms). In our samples this threshold can be anywhere between 30 to 50 meter. The *segment_trigger* is therefore set to 40. This leads to a division of the *movment status* into approximately 32 % resting and 68 % moving at the level of individual observations (fig. \@ref(fig:movement-status)).
+Setting the threshold seems reasonable at the point where *stepmean* flattens in a distinct manner (see histograms). In our samples this threshold can be anywhere between 30 to 50 meter. The *segment_trigger* is therefore set to 40. This leads to a division of the *movment status* into approximately 32 % resting and 68 % moving at the level of individual observations (Fig. \@ref(fig:movement-status)).
 
 ```{r movement-status, fig.cap="Pie chart of movement status at the level of individual observations", fig.align='center'}
 
@@ -1214,9 +1214,9 @@ Apart from the stated uncertainties, we are confident that we have developed a r
 
 ## Risk analysis and Problems
 
-As stated in our proposal, it is difficult to find reliant literature about wild boar behavior at nests and wallows. The literature information we applied in this work helps us to filter potential sites in a fair way. Nonetheless the provided information is often formulated too broad or then overlapping. This means that an assignment of potential sites is possible but a differentiation between nest and wallow remains impossible. Only thanks to an elaborate survey on the same area it is possible to implement a functional assignment [@suter2010].
+As stated in our [proposal](https://github.com/wildhtob/patreco-project-work/blob/e1340f3ac37ac0b6ee6f5fd74cec8371820829f5/proposal/PatTrEnvData_Proposal_gubelyve_wildhtob.pdf "Proposal for ProjectWork on github"), it is difficult to find reliant literature about wild boar behavior at nests and wallows. The literature information we applied in this work helps us to filter potential sites in a fair way. Nonetheless the provided information is often formulated too broad or then overlapping. This means that an assignment of potential sites is possible but a differentiation between nest and wallow remains impossible. Only thanks to an elaborate survey on the same area it is possible to implement a functional assignment [@suter2010].
 
-Another challenge of the developed method is finding an appropriate level for the *segment_trigger*. Due to missing literature information we have chosen to base this decision on sample data. It can be discussed whether histograms of *stepmean* (see fig. \@ref(fig:3.3)) is the right method to evaluate this. Also the chosen level of *stepmean* (40 meter) is questionable and requires validation.
+Another challenge of the developed method is finding an appropriate level for the *segment_trigger*. Due to missing literature information we have chosen to base this decision on sample data. It can be discussed whether histograms of *stepmean* (see Fig. \@ref(fig:stepmean-ueli) are the right method to evaluate this variable. The chosen level of *stepmean* (40 meter) is also to be discussed. further.
 
 A remaining issue is the lack of validation. It is clear that the meaning of a serious validation cannot be underestimated and is essential in environmental research [@rykieljr1996]. Since no validation data is provided, no statement about the validity and effectiveness of our method is possible.
 
