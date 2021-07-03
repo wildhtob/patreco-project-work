@@ -322,14 +322,14 @@ mov_status <- data.frame(summary(as.factor(wildboar_lags$mov_status))) %>%
   arrange(desc(status)) %>%
   mutate(lab.ypos = cumsum(prop) - 0.5 * prop)
 
-pie <- ggplot(mov_status, aes(x = "", y = prop, fill = status)) +
+pie_movement <- ggplot(mov_status, aes(x = "", y = prop, fill = status)) +
   geom_bar(width = 1, stat = "identity", color = "white") +
   coord_polar("y", start = 0) +
   geom_text(aes(y = lab.ypos, label = prop), color = "white") +
-  scale_fill_discrete(name = "Status", labels = c("Resting", "Moving")) +
+  scale_fill_discrete(name = "Status", labels = c("moving", "resting")) +
   theme_void()
 
-pie
+pie_movement
 
 # cross-scale movement analysis ####
 seq3 <- seq(from = 1, to = nrow(wildboar_raw), by = 3)
@@ -397,6 +397,7 @@ stepmean_ueli <- ggplot(ueli, aes(x = stepmean, fill = mov_status))
 stepmean_ueli <- stepmean_ueli + geom_histogram(binwidth = 5) +
   scale_x_continuous(limits = c(0, 500)) +
   scale_y_continuous(limits = c(0, 900)) +
+  scale_fill_manual(values = c("#F8766D", "#00BFC4")) +
   geom_vline(xintercept = 0, lty = 2, alpha = 0.5) +
   theme_bw() +
   theme(panel.border = element_blank()) +
@@ -411,6 +412,7 @@ stepmean_caro <- ggplot(caro, aes(x = stepmean, fill = mov_status))
 stepmean_caro <- stepmean_caro + geom_histogram(binwidth = 5) +
   scale_x_continuous(limits = c(0, 500)) +
   scale_y_continuous(limits = c(0, 900)) +
+  scale_fill_manual(values = c("#F8766D", "#00BFC4")) +
   geom_vline(xintercept = 0, lty = 2, alpha = 0.5) +
   theme_bw() +
   theme(panel.border = element_blank()) +
@@ -425,6 +427,7 @@ stepmean_frida <- ggplot(frida, aes(x = stepmean, fill = mov_status))
 stepmean_frida <- stepmean_frida + geom_histogram(binwidth = 5) +
   scale_x_continuous(limits = c(0, 500)) +
   scale_y_continuous(limits = c(0, 900)) +
+  scale_fill_manual(values = c("#F8766D", "#00BFC4")) +
   geom_vline(xintercept = 0, lty = 2, alpha = 0.5) +
   theme_bw() +
   theme(panel.border = element_blank()) +
@@ -482,14 +485,14 @@ site_type <- data.frame(summary(wildboar_lags$site_type)) %>%
   arrange(desc(type)) %>%
   mutate(lab.ypos = cumsum(prop) - 0.5 * prop)
 
-pie <- ggplot(site_type, aes(x = "", y = prop, fill = type)) +
+pie_identity <- ggplot(site_type, aes(x = "", y = prop, fill = type)) +
   geom_bar(width = 1, stat = "identity", color = "white") +
   coord_polar("y", start = 0) +
   geom_text(aes(y = lab.ypos, label = prop), color = "white") +
-  scale_fill_discrete(name = "Type", labels = c("NA", "Nest", "None", "Wallow")) +
+  scale_fill_discrete(name = "Type", labels = c("NA", "nest", "none", "wallow")) +
   theme_void()
 
-pie
+pie_identity
 
 
 # plot sample data -------------------------------------------------------
@@ -825,7 +828,7 @@ A clear distinction between *resting* and *moving* is done by the introduction o
 
 #### Ueli {.unnumbered}
 
-```{r stepmean-ueli, appendix=FALSE, fig.cap="Mean steplength if wildboar Ueli. Sample dataset from May 2016. Threshold set to 40 meter.", fig.align='center'}
+```{r stepmean-ueli, appendix=FALSE, fig.cap="Mean steplength for wild boar Ueli. Sample dataset from May 2016. Threshold set to 40 meter.", fig.align='center'}
 
 stepmean_ueli
 
@@ -833,7 +836,7 @@ stepmean_ueli
 
 #### Caroline {.unnumbered}
 
-```{r stepmean-caro, appendix=FALSE, fig.cap="Mean steplength if wildboar Ueli. Sample dataset from May 2016. Threshold set to 40 meter.", fig.align='center'}
+```{r stepmean-caro, appendix=FALSE, fig.cap="Mean steplength for wild boar Ueli. Sample dataset from May 2016. Threshold set to 40 meter.", fig.align='center'}
 
 stepmean_caro
 
@@ -841,7 +844,7 @@ stepmean_caro
 
 #### Frida {.unnumbered}
 
-```{r stepmean-frida, appendix=FALSE, fig.cap="Mean steplength if wildboar Ueli. Sample dataset from May 2016. Threshold set to 40 meter.", fig.align='center'}
+```{r stepmean-frida, appendix=FALSE, fig.cap="Mean steplength for wild boar Ueli. Sample dataset from May 2016. Threshold set to 40 meter.", fig.align='center'}
 
 stepmean_frida
 
@@ -849,18 +852,11 @@ stepmean_frida
 
 ###  {.unnumbered}
 
-Setting the threshold seems reasonable at the point where *stepmean* flattens in a distinct manner (see histograms). In our samples this threshold can be anywhere between 30 to 50 meter. The *segment_trigger* is therefore set to 40. This leads to a division of the *movment status* into approximately 32 % resting and 68 % moving at the level of individual observations (Fig. \@ref(fig:movement-status)).
+Setting the threshold seems reasonable at the point where *stepmean* flattens in a distinct manner (see histograms). In our samples this threshold can be anywhere between 30 to 50 meter. The *segment_trigger* is therefore set to 40. This leads to a division of the *movment status* into approximately 32 % moving and 68 % resting at the level of individual observations (Fig. \@ref(fig:movement-status)).
 
 ```{r movement-status, fig.cap="Pie chart of movement status at the level of individual observations", fig.align='center'}
 
-pie <- ggplot(mov_status, aes(x = "", y = prop, fill = status)) +
-  geom_bar(width = 1, stat = "identity", color = "white") +
-  coord_polar("y", start = 0) +
-  geom_text(aes(y = lab.ypos, label = prop), color = "white") +
-  scale_fill_discrete(name = "Status", labels = c("Resting", "Moving")) +
-  theme_void()
-
-pie
+pie_movement
 
 ```
 
@@ -1113,14 +1109,7 @@ The application of these criteria on a segment level results in a division into 
 
 ```{r pie-site-type, fig.cap="Pie chart of segment type by identity.", fig.align='center'}
 
-pie <- ggplot(site_type, aes(x = "", y = prop, fill = type)) +
-  geom_bar(width = 1, stat = "identity", color = "white") +
-  coord_polar("y", start = 0) +
-  geom_text(aes(y = lab.ypos, label = prop), color = "white") +
-  scale_fill_discrete(name = "Type", labels = c("NA", "Nest", "None", "Wallow")) +
-  theme_void()
-
-pie
+pie_identity
 
 ```
 
