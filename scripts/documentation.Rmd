@@ -1,6 +1,6 @@
 ---
-title: "Identifying nests and swallows based on spatiotemporal wild boar data."
-subtitle: "Project Works Patterns and Trends in Environmental Data"
+title: "Identifying nests and swallows based on spatiotemporal wild boar data"
+subtitle: "Project Work Patterns and Trends in Environmental Data"
 author: "Yves Gubelmann and Tobias Wildhaber"
 date: "4 July, 2021"
 output: 
@@ -1170,9 +1170,9 @@ tm_nw_30
 
 # Discussion
 
-The present project work shows one possible approach to model resting sites based on spatiotemporal movement data. With the calculation of a movement status we are able to distinguish between resting phases and moving phases. The threshold of this classification is based on sample datasets which we use for an simple assessment. Due to missing field data, this assessment method clearly lacks validation and introduces uncertainty in the following analysis. Nonetheless setting the threshold anywhere between 30 to 50 meter seems reasonable (see chapter \@ref(filtering-and-segmentation)).
+The present project work shows one possible approach to model resting sites based on spatiotemporal movement data. With the calculation of a movement status we are able to distinguish between resting phases and moving phases. The threshold of this classification is based on sample datasets which we use for an simple assessment. Due to missing field data, this assessment method clearly lacks validation and introduces uncertainty in the following analysis. Nonetheless setting the threshold anywhere between 30 and 50 meter seems reasonable (see \@ref(filtering-and-segmentation)).
 
-The given research data provides a unique sampling regime with different timelags. With the aim to reduce complexity we only use trajectories with a timelag of 900 seconds. This results in a loss of 42.1 % of the provided dataset. On a first glance, a loss of 42.1 % seems like a critical amount. At a second look this can be justified since 31.2 % has an invalid timelag of zero seconds (Table \@ref(tab:lag-categories). If one subtracts this portion, our analysis is able to assess roughly 84 % of all given trajectories which can be considered as effective. According to our research question the effectiveness is only considered for resting sites. Nonetheless it is worth mentioning that the effectiveness decreases rapidly when one looks at the final results of assigned nests and wallows. Only 20.7 % could be assigned to a nest or a wallow.
+The given research data provides a unique sampling regime with different timelags. With the aim to reduce complexity we only use trajectories with a timelag of 900 seconds. This results in a loss of 42.1 % of the provided dataset. On a first glance, a loss of 42.1 % seems like a critical amount. At a second look this can be justified since 31.2 % has an invalid timelag of zero seconds (Table \@ref(tab:lag-categories)). If one subtracts this portion, our analysis is able to assess roughly 84 % of all given trajectories which can be considered as effective. According to our research question the effectiveness is only considered for resting sites. Nonetheless it is worth mentioning that the effectiveness decreases rapidly when one looks at the final results of assigned nests and wallows. Only 20.7 % could be assigned to a nest or a wallow.
 
 ```{r lag-categories, echo=FALSE, results='asis'}
 
@@ -1216,7 +1216,7 @@ Apart from the stated uncertainties, we are confident that we have developed a r
 
 As stated in our [proposal](https://github.com/wildhtob/patreco-project-work/blob/e1340f3ac37ac0b6ee6f5fd74cec8371820829f5/proposal/PatTrEnvData_Proposal_gubelyve_wildhtob.pdf "Proposal for ProjectWork on github"), it is difficult to find reliant literature about wild boar behavior at nests and wallows. The literature information we applied in this work helps us to filter potential sites in a fair way. Nonetheless the provided information is often formulated too broad or then overlapping. This means that an assignment of potential sites is possible but a differentiation between nest and wallow remains impossible. Only thanks to an elaborate survey on the same area it is possible to implement a functional assignment [@suter2010].
 
-Another challenge of the developed method is finding an appropriate level for the *segment_trigger*. Due to missing literature information we have chosen to base this decision on sample data. It can be discussed whether histograms of *stepmean* (see Fig. \@ref(fig:stepmean-ueli) are the right method to evaluate this variable. The chosen level of *stepmean* (40 meter) is also to be discussed. further.
+Another challenge of the developed method is finding an appropriate level for the *segment_trigger*. Due to missing literature information we have chosen to base this decision on sample data. It can be discussed whether histograms of *stepmean* (see Fig. \@ref(fig:stepmean-ueli)) are the right method to evaluate this variable. The chosen level of *stepmean* (40 meter) is also to be discussed. further.
 
 A remaining issue is the lack of validation. It is clear that the meaning of a serious validation cannot be underestimated and is essential in environmental research [@rykieljr1996]. Since no validation data is provided, no statement about the validity and effectiveness of our method is possible.
 
