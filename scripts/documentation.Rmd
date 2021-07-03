@@ -6,6 +6,8 @@ date: "4 July, 2021"
 output: 
   bookdown::html_document2:
     toc: true
+    lof: yes
+    lot: yes
     toc_float: true
     number_sections: true
     fig_caption: yes
