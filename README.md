@@ -2,7 +2,7 @@
 ---
 ---
 
-# Identifying nests and swallows based on spatiotemporal wild boar data
+# Identifying nests and wallows based on spatiotemporal wild boar data
 
 ## Project Work Patterns and Trends in Environmental Data
 

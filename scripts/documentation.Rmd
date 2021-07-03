@@ -1,5 +1,5 @@
 ---
-title: "Identifying nests and swallows based on spatiotemporal wild boar data"
+title: "Identifying nests and wallows based on spatiotemporal wild boar data"
 subtitle: "Project Work Patterns and Trends in Environmental Data"
 author: "Yves Gubelmann and Tobias Wildhaber"
 date: "4 July, 2021"
